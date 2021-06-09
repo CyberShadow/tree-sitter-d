@@ -1,0 +1,6 @@
+# Dub
+/.dub
+/generator
+
+# rdmd / dmd -i / rund
+/source/generator

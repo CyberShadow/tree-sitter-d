@@ -1,0 +1,3 @@
+name "generator"
+targetType "executable"
+dependency "ae" version="==0.0.3058"
