@@ -11,28 +11,6 @@ import ddoc;
 
 struct Grammar
 {
-	// struct Node
-	// {
-	// 	enum Type
-	// 	{
-	// 		literal,
-	// 		reference,
-	// 		choice,
-	// 		seq,
-	// 		optional,
-	// 	}
-	// 	Type type;
-
-	// 	union
-	// 	{
-	// 		string literal;
-	// 		string reference; // name in grammar
-	// 		Node[] choice;
-	// 		Node[] seq;
-	// 		Node* optional;
-	// 	}
-	// }
-
 	struct Placeholder { string description; }
 	struct LiteralChars { string chars; } // Describes contiguous characters (e.g. number syntax)
 	struct LiteralToken { string literal; } // May be surrounded by whitespace/comments
@@ -291,15 +269,3 @@ struct Grammar
 		return newDefs;
 	}
 }
-
-// /// Wraps a pointer into an lvalue.
-// /// Somewhat similar to C++ references.
-// private struct Ref(T)
-// {
-// 	private T* _ref_ptr;
-// 	@property ref T _ref_value() { return *_ref_ptr; }
-// 	alias _ref_value this;
-// 	@disable this();
-// 	this(ref T value) { _ref_ptr = &value; } ///
-// 	bool opEquals(ref const Ref!T other) { return *_ref_ptr == *other._ref_ptr; }
-// }
