@@ -60,8 +60,8 @@ void program()
 	scanTOC(dlangOrgPath.buildPath("spec", "spec.dd").readText.parseDDoc.contents);
 	enforce(files.length, "Failed to parse the table of contents (spec/spec.dd)");
 
-	auto writer = Writer("../grammar.js");
 	Grammar grammar;
+	string[][][string] order;
 
 	foreach (file; files)
 	{
@@ -72,8 +72,6 @@ void program()
 		if (source.indexOf(`$(GRAMMAR`) < 0)
 			continue;
 
-		writer.startFile(file);
-
 		void scan(ref const Node node)
 		{
 			if (node.type != Node.Type.call)
@@ -83,9 +81,7 @@ void program()
 			{
 				auto macros = (globalMacros ~ ddoc.macros).fold!merge((DDoc[string]).init);
 				auto newDefs = grammar.parse(node.call.contents, macros);
-				writer.startSection();
-				foreach (def; newDefs)
-					writer.writeRule(def, grammar.defs[def]);
+				order[file] ~= newDefs;
 			}
 			else
 				foreach (ref childNode; node.call.contents)
@@ -93,6 +89,19 @@ void program()
 		}
 		foreach (ref node; ddoc.contents)
 			scan(node);
+	}
+
+	auto writer = Writer("../grammar.js");
+
+	foreach (file; files)
+	{
+		writer.startFile(file);
+		foreach (section; order.get(file, null))
+		{
+			writer.startSection();
+			foreach (def; section)
+				writer.writeRule(def, grammar.defs[def]);
+		}
 	}
 
 	writer.close();
