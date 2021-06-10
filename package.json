@@ -1,0 +1,38 @@
+{
+  "name": "tree-sitter-d",
+  "version": "0.0.1",
+  "description": "D grammar for tree-sitter",
+  "main": "bindings/node",
+  "keywords": [
+    "parser",
+    "lexer"
+  ],
+  "author": "Vladimir Panteleev and the D Language Foundation",
+  "license": "BSL-1.0",
+  "dependencies": {
+    "nan": "^2.14.2"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.19.5"
+  },
+  "scripts": {
+    "test": "tree-sitter test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CyberShadow/tree-sitter-d.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CyberShadow/tree-sitter-d/issues"
+  },
+  "homepage": "https://github.com/CyberShadow/tree-sitter-d#readme",
+  "tree-sitter": [
+    {
+      "scope": "source.d",
+      "file-types": [
+        "d",
+        "di"
+      ]
+    }
+  ]
+}
