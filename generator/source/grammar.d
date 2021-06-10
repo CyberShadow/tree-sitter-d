@@ -161,7 +161,11 @@ struct Grammar
 			}
 			else
 			if (node.isCallTo("D"))
-				seqNodes ~= Node(NodeValue(LiteralToken(node.call.contents.toString())));
+			{
+				auto text = node.call.contents.toString();
+				foreach (word; text.split)
+					seqNodes ~= Node(NodeValue(LiteralToken(word)));
+			}
 			else
 			if (node.isCallTo("GLINK") || node.isCallTo("GLINK_LEX"))
 			{
