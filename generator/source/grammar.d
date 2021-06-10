@@ -1,5 +1,6 @@
 import std.algorithm.comparison;
 import std.algorithm.iteration;
+import std.algorithm.searching;
 import std.conv;
 import std.exception;
 import std.format;
@@ -162,9 +163,94 @@ struct Grammar
 			else
 			if (node.isCallTo("D"))
 			{
+				// ditto
 				auto text = node.call.contents.toString();
+				enforce(text.length);
 				foreach (word; text.split)
+				{
+					enforce(
+						// keywords
+						(word.length >= 2 && word.representation.all!(c => "abcdefghijklmnopqrstuvwxyz_".representation.canFind(c))) ||
+						// traits
+						(["is", "has", "get"].any!(prefix => word.startsWith(prefix)) && word.representation.all!(c => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".representation.canFind(c))) ||
+						// magic keywords
+						(word.startsWith("__") && word.endsWith("__") && word[2 .. $-2].representation.all!(c => "ABCDEFGHIJKLMNOPQRSTUVWXYZ_".representation.canFind(c))) ||
+						// registers
+						(word.length >= 2 && "ABCDEFGHIJKLMNOPQRSTUVWXYZ".representation.canFind(word[0]) && word.representation.all!(c => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()".representation.canFind(c))) ||
+						// other tokens
+						word.among(
+							"/",
+							"/=",
+							".",
+							"..",
+							"...",
+							"&",
+							"&=",
+							"&&",
+							"|",
+							"|=",
+							"||",
+							"-",
+							"-=",
+							"--",
+							"+",
+							"+=",
+							"++",
+							"<",
+							"<=",
+							"<<",
+							"<<=",
+							">",
+							">=",
+							">>=",
+							">>>=",
+							">>",
+							">>>",
+							"!",
+							"!=",
+							"(",
+							")",
+							"[",
+							"]",
+							"{",
+							"}",
+							"?",
+							",",
+							";",
+							":",
+							"$",
+							"=",
+							"==",
+							"*",
+							"*=",
+							"%",
+							"%=",
+							"^",
+							"^=",
+							"^^",
+							"^^=",
+							"~",
+							"~=",
+							"@",
+							"=>",
+							"#",
+
+							"C",
+							"C++",
+							"D",
+							"Windows",
+							"System",
+							"Objective-C",
+
+							"classInstanceSize", // should have been getClassInstanceSize
+							"allMembers",        // should have been getAllMembers
+							"derivedMembers",    // should have been getDerivedMembers
+							"toType",
+
+							"__LOCAL_SIZE",
+						), "Unknown D: " ~ word);
 					seqNodes ~= Node(NodeValue(LiteralToken(word)));
+				}
 			}
 			else
 			if (node.isCallTo("GLINK") || node.isCallTo("GLINK_LEX"))
