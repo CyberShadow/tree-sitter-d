@@ -277,6 +277,12 @@ struct Grammar
 	/// Pre-process and prepare for writing
 	void analyze()
 	{
+		checkReferences();
+		optimize();
+	}
+
+	private void checkReferences()
+	{
 		void scan(Node node)
 		{
 			node.value.match!(
@@ -291,5 +297,36 @@ struct Grammar
 		}
 		foreach (name, ref def; defs)
 			scan(def.node);
+	}
+
+	private void optimize()
+	{
+		void optimizeNode(ref Node node)
+		{
+			// Optimize children
+			node.value.match!(
+				(ref Placeholder  v) {},
+				(ref LiteralChars v) {},
+				(ref LiteralToken v) {},
+				(ref Reference    v) {},
+				(ref Choice       v) { v.nodes.each!optimizeNode(); },
+				(ref Seq          v) { v.nodes.each!optimizeNode(); },
+				(ref Optional     v) { v.node .each!optimizeNode(); },
+			);
+
+			// Optimize node
+			node = node.value.match!(
+				(ref Placeholder  v) => node,
+				(ref LiteralChars v) => node,
+				(ref LiteralToken v) => node,
+				(ref Reference    v) => node,
+				(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
+				(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
+				(ref Optional     v) => node,
+			);
+		}
+
+		foreach (name, ref def; defs)
+			optimizeNode(def.node);
 	}
 }
