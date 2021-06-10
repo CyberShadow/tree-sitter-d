@@ -44,7 +44,7 @@ EOF");
 			sectionHeaderPending = true;
 	}
 
-	void writeRule(string name, ref Grammar.Node node)
+	void writeRule(string name, ref Grammar.Def def)
 	{
 		if (fileHeaderPending)
 		{
@@ -70,7 +70,7 @@ EOF");
 		f.writef(q"EOF
 
     %s: $ => %s
-EOF", convertRuleName(name), convertRule(node).strip);
+EOF", convertRuleName(name), convertRule(def.node).strip);
 	}
 
 	void close()

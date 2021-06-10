@@ -33,8 +33,12 @@ struct Grammar
 		NodeValue value;
 		alias value this;
 	}
+	struct Def
+	{
+		Node node;
+	}
 
-	Node[string] defs;
+	Def[string] defs;
 
 	// Parsing:
 
@@ -236,8 +240,8 @@ struct Grammar
 
 			auto newNode = Node(NodeValue(Choice(currentDefs)));
 			defs.update(context.currentName,
-				{ newDefs ~= context.currentName; return newNode; },
-				(ref Node node) { enforce(node == newNode, "Definition mismatch for " ~ context.currentName); }
+				{ newDefs ~= context.currentName; return Def(newNode); },
+				(ref Def def) { enforce(def.node == newNode, "Definition mismatch for " ~ context.currentName); }
 			);
 			context.currentName = null;
 			currentDefs = null;
