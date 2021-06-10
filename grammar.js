@@ -1425,7 +1425,6 @@ module.exports = grammar({
       choice(
         $._linkage_attribute,
         $._align_attribute,
-        "deprecated",
         "enum",
         "static",
         "extern",
