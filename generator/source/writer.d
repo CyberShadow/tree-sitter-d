@@ -69,8 +69,9 @@ EOF");
 
 		f.writef(q"EOF
 
-    %s: $ => %s
-EOF", convertRuleName(name), convertRule(def.node).strip);
+    %s: $ =>
+EOF", convertRuleName(name));
+		writeRuleBody(def.node);
 	}
 
 	void close()
@@ -87,28 +88,26 @@ private:
 		return "_" ~ name.splitByCamelCase.map!toLower.join("_");
 	}
 
-	static string convertRule(ref Grammar.Node node)
+	void writeRuleBody(ref Grammar.Node node)
 	{
-		int indent = 4;
+		int indent = 6;
 
-		string convert(ref Grammar.Node node)
+		void writeNode(ref Grammar.Node node)
 		{
-			string line(string s) { return " ".replicate(indent) ~ s ~ "\n"; }
-			string single(string s) { return line(s ~ ","); }
+			void line(string s) { f.writeln(" ".replicate(indent), s); }
+			void single(string s) { line(s ~ ","); }
 
-			string list(string fun, Grammar.Node[] children)
+			void list(string fun, Grammar.Node[] children)
 			{
-				string s;
-				s ~= line(fun ~ "(");
+				line(fun ~ "(");
 				indent += 2;
 				foreach (ref child; children)
-					s ~= convert(child);
+					writeNode(child);
 				indent -= 2;
-				s ~= line("),");
-				return s;
+				line("),");
 			}
 
-			return node.value.match!(
+			node.value.match!(
 				(ref Grammar.Placeholder  v) => single("/* " ~ v.description ~ " */"),
 				(ref Grammar.LiteralChars v) => single(format!"%(%s%)"([v.chars])),
 				(ref Grammar.LiteralToken v) => single(format!"%(%s%)"([v.literal])),
@@ -118,7 +117,7 @@ private:
 				(ref Grammar.Optional     v) => list("optional", v.node),
 			);
 		}
-		return convert(node);
+		writeNode(node);
 	}
 }
 
