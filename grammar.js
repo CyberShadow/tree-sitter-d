@@ -2515,7 +2515,7 @@ module.exports = grammar({
         $._vector,
       ),
       seq(
-        $._traits,
+        $._traits_expression,
       ),
       seq(
         $._mixin_type,
@@ -5461,7 +5461,7 @@ module.exports = grammar({
       ),
       seq(
         "@",
-        $._disable,
+        "disable",
       ),
     ),
 
@@ -6674,178 +6674,178 @@ module.exports = grammar({
 
     _traits_keyword: $ => choice(
       seq(
-        $._is_abstract_class,
+        "isAbstractClass",
       ),
       seq(
-        $._is_arithmetic,
+        "isArithmetic",
       ),
       seq(
-        $._is_associative_array,
+        "isAssociativeArray",
       ),
       seq(
-        $._is_final_class,
+        "isFinalClass",
       ),
       seq(
-        $._is_pod,
+        "isPOD",
       ),
       seq(
-        $._is_nested,
+        "isNested",
       ),
       seq(
-        $._is_future,
+        "isFuture",
       ),
       seq(
-        $._is_deprecated,
+        "isDeprecated",
       ),
       seq(
-        $._is_floating,
+        "isFloating",
       ),
       seq(
-        $._is_integral,
+        "isIntegral",
       ),
       seq(
-        $._is_scalar,
+        "isScalar",
       ),
       seq(
-        $._is_static_array,
+        "isStaticArray",
       ),
       seq(
-        $._is_unsigned,
+        "isUnsigned",
       ),
       seq(
-        $._is_disabled,
+        "isDisabled",
       ),
       seq(
-        $._is_virtual_function,
+        "isVirtualFunction",
       ),
       seq(
-        $._is_virtual_method,
+        "isVirtualMethod",
       ),
       seq(
-        $._is_abstract_function,
+        "isAbstractFunction",
       ),
       seq(
-        $._is_final_function,
+        "isFinalFunction",
       ),
       seq(
-        $._is_static_function,
+        "isStaticFunction",
       ),
       seq(
-        $._is_override_function,
+        "isOverrideFunction",
       ),
       seq(
-        $._is_template,
+        "isTemplate",
       ),
       seq(
-        $._is_ref,
+        "isRef",
       ),
       seq(
-        $._is_out,
+        "isOut",
       ),
       seq(
-        $._is_lazy,
+        "isLazy",
       ),
       seq(
-        $._is_return_on_stack,
+        "isReturnOnStack",
       ),
       seq(
-        $._is_zero_init,
+        "isZeroInit",
       ),
       seq(
-        $._is_module,
+        "isModule",
       ),
       seq(
-        $._is_package,
+        "isPackage",
       ),
       seq(
-        $._has_member,
+        "hasMember",
       ),
       seq(
-        $._has_copy_constructor,
+        "hasCopyConstructor",
       ),
       seq(
-        $._has_postblit,
+        "hasPostblit",
       ),
       seq(
-        $._identifier,
+        "identifier",
       ),
       seq(
-        $._get_alias_this,
+        "getAliasThis",
       ),
       seq(
-        $._get_attributes,
+        "getAttributes",
       ),
       seq(
-        $._get_function_attributes,
+        "getFunctionAttributes",
       ),
       seq(
-        $._get_function_variadic_style,
+        "getFunctionVariadicStyle",
       ),
       seq(
-        $._get_linkage,
+        "getLinkage",
       ),
       seq(
-        $._get_location,
+        "getLocation",
       ),
       seq(
-        $._get_member,
+        "getMember",
       ),
       seq(
-        $._get_overloads,
+        "getOverloads",
       ),
       seq(
-        $._get_parameter_storage_classes,
+        "getParameterStorageClasses",
       ),
       seq(
-        $._get_pointer_bitmap,
+        "getPointerBitmap",
       ),
       seq(
-        $._get_cpp_namespaces,
+        "getCppNamespaces",
       ),
       seq(
-        $._get_visibility,
+        "getVisibility",
       ),
       seq(
-        $._get_protection,
+        "getProtection",
       ),
       seq(
-        $._get_target_info,
+        "getTargetInfo",
       ),
       seq(
-        $._get_virtual_functions,
+        "getVirtualFunctions",
       ),
       seq(
-        $._get_virtual_methods,
+        "getVirtualMethods",
       ),
       seq(
-        $._get_unit_tests,
+        "getUnitTests",
       ),
       seq(
-        $._parent,
+        "parent",
       ),
       seq(
-        $._child,
+        "child",
       ),
       seq(
-        $._class_instance_size,
+        "classInstanceSize",
       ),
       seq(
-        $._get_virtual_index,
+        "getVirtualIndex",
       ),
       seq(
-        $._all_members,
+        "allMembers",
       ),
       seq(
-        $._derived_members,
+        "derivedMembers",
       ),
       seq(
-        $._is_same,
+        "isSame",
       ),
       seq(
-        $._compiles,
+        "compiles",
       ),
       seq(
-        $._to_type,
+        "toType",
       ),
     ),
 

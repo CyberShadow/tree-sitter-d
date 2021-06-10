@@ -1,4 +1,5 @@
 import std.algorithm.comparison;
+import std.algorithm.iteration;
 import std.conv;
 import std.exception;
 import std.format;
@@ -271,5 +272,24 @@ struct Grammar
 		flush();
 
 		return newDefs;
+	}
+
+	/// Pre-process and prepare for writing
+	void analyze()
+	{
+		void scan(Node node)
+		{
+			node.value.match!(
+				(ref Placeholder  v) {},
+				(ref LiteralChars v) {},
+				(ref LiteralToken v) {},
+				(ref Reference    v) { enforce(v.name in defs, "Unknown reference: " ~ v.name); },
+				(ref Choice       v) { v.nodes.each!scan(); },
+				(ref Seq          v) { v.nodes.each!scan(); },
+				(ref Optional     v) { v.node .each!scan(); },
+			);
+		}
+		foreach (name, ref def; defs)
+			scan(def.node);
 	}
 }

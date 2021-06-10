@@ -91,6 +91,8 @@ void program()
 			scan(node);
 	}
 
+	grammar.analyze();
+
 	auto writer = Writer("../grammar.js");
 
 	foreach (file; files)
