@@ -41,12 +41,15 @@ struct Grammar
 	struct Def
 	{
 		Node node;
+
 		enum Kind
 		{
 			tokens,
 			chars,
 		}
 		Kind kind;
+
+		bool used;
 	}
 
 	Def[string] defs;
@@ -388,11 +391,12 @@ struct Grammar
 	}
 
 	/// Pre-process and prepare for writing
-	void analyze()
+	void analyze(string[] roots)
 	{
 		checkReferences();
 		optimize();
 		checkKinds();
+		scanUsed(roots);
 	}
 
 	private void checkReferences()
@@ -576,5 +580,36 @@ struct Grammar
 					break;
 				}
 			}
+	}
+
+	private void scanUsed(string[] roots)
+	{
+		void scanDef(string defName)
+		{
+			auto def = &defs[defName];
+			if (def.used)
+				return;
+			def.used = true;
+			if (def.kind == Def.Kind.chars)
+				return; // Referencees will be inlined
+
+			void scanNode(ref Node node)
+			{
+				node.value.match!(
+					(ref RegExp       v) {},
+					(ref LiteralChars v) {},
+					(ref LiteralToken v) {},
+					(ref Reference    v) { scanDef(v.name); },
+					(ref Choice       v) { v.nodes.each!scanNode(); },
+					(ref Seq          v) { v.nodes.each!scanNode(); },
+					(ref Repeat1      v) { v.node .each!scanNode(); },
+					(ref Optional     v) { v.node .each!scanNode(); },
+				);
+			}
+			scanNode(def.node);
+		}
+
+		foreach (root; roots)
+			scanDef(root);
 	}
 }

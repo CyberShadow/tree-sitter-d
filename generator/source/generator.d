@@ -92,7 +92,7 @@ void program()
 			scan(node);
 	}
 
-	grammar.analyze();
+	grammar.analyze(["Module"]);
 
 	auto writer = Writer("../grammar.js", grammar);
 

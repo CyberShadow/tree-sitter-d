@@ -48,9 +48,14 @@ EOF");
 			sectionHeaderPending = true;
 	}
 
-	void writeRule(string name)
+	void writeRule(string defName)
 	{
-		scope(failure) { import std.stdio : stderr; stderr.writeln("Error while writing rule ", name); }
+		scope(failure) { import std.stdio : stderr; stderr.writeln("Error while writing rule ", defName); }
+
+		auto def = &grammar.defs[defName];
+		if (!def.used)
+			return;
+
 		if (fileHeaderPending)
 		{
 			f.writef(q"EOF
@@ -75,8 +80,8 @@ EOF");
 		f.writef(q"EOF
 
     %s: $ =>
-EOF", convertRuleName(name));
-		writeRuleBody(name);
+EOF", convertRuleName(defName));
+		writeRuleBody(defName);
 	}
 
 	void close()
