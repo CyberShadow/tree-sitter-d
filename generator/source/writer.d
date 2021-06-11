@@ -16,17 +16,21 @@ struct Writer
 	File f;
 	Grammar grammar;
 
-	this(string fileName, Grammar grammar)
+	this(string fileName, Grammar grammar, const string[] extras)
 	{
 		f.open(fileName, "wb");
 
-		f.write(q"EOF
+		f.writef(q"EOF
 module.exports = grammar({
   name: 'd',
 
+  extras: $ => [
+%-(    $.%s,
+%|%)  ],
+
   rules: {
     source_file: $ => $.module,
-EOF");
+EOF", extras.map!convertRuleName);
 
 		this.grammar = grammar;
 	}

@@ -18,6 +18,13 @@ import writer;
 
 enum dlangOrgPath = "dlang.org";
 
+static immutable string[] extras = [
+	"WhiteSpace",
+	"EndOfLine",
+	"Comment",
+	"SpecialTokenSequence",
+];
+
 /// Entry point.
 void program()
 {
@@ -92,9 +99,9 @@ void program()
 			scan(node);
 	}
 
-	grammar.analyze(["Module"]);
+	grammar.analyze(["Module"] ~ extras);
 
-	auto writer = Writer("../grammar.js", grammar);
+	auto writer = Writer("../grammar.js", grammar, extras);
 
 	foreach (file; files)
 	{

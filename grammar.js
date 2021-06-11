@@ -1,12 +1,123 @@
 module.exports = grammar({
   name: 'd',
 
+  extras: $ => [
+    $.white_space,
+    $.end_of_line,
+    $.comment,
+    $.special_token_sequence,
+  ],
+
   rules: {
     source_file: $ => $.module,
 
     // ------------------------------------------------------------------------
     // https://dlang.org/spec/lex.html
     // ------------------------------------------------------------------------
+
+    end_of_line: $ =>
+      token(
+        // EndOfLine
+        choice(
+          "\r",
+          "\n",
+          seq(
+            "\r",
+            "\n",
+          ),
+          "\u2028",
+          "\u2029",
+          // EndOfFile
+          choice(
+            /$/m,
+            "\0",
+            "\x1A",
+          ),
+        ),
+      ),
+
+    // ---
+
+    white_space: $ =>
+      token(
+        // WhiteSpace
+        repeat1(
+          // Space
+          choice(
+            " ",
+            "\t",
+            "\v",
+            "\f",
+          ),
+        ),
+      ),
+
+    // ---
+
+    comment: $ =>
+      token(
+        // Comment
+        choice(
+          // BlockComment
+          seq(
+            "/*",
+            optional(
+              // Characters
+              repeat1(
+                // Character
+                /[\s\S]/,
+              ),
+            ),
+            "*/",
+          ),
+          // LineComment
+          seq(
+            "//",
+            optional(
+              // Characters
+              repeat1(
+                // Character
+                /[\s\S]/,
+              ),
+            ),
+            // EndOfLine
+            choice(
+              "\r",
+              "\n",
+              seq(
+                "\r",
+                "\n",
+              ),
+              "\u2028",
+              "\u2029",
+              // EndOfFile
+              choice(
+                /$/m,
+                "\0",
+                "\x1A",
+              ),
+            ),
+          ),
+          // NestingBlockComment
+          seq(
+            "/+",
+            optional(
+              // NestingBlockCommentCharacters
+              repeat1(
+                // NestingBlockCommentCharacter
+                choice(
+                  // Character
+                  /[\s\S]/,
+                  /* recursion */,
+                ),
+              ),
+            ),
+            "+/",
+          ),
+        ),
+      ),
+
+    // ---
 
     token_no_braces: $ =>
       choice(
@@ -7522,6 +7633,43 @@ module.exports = grammar({
         "__traits",
         "__vector",
         "__parameters",
+      ),
+
+    // ---
+
+    special_token_sequence: $ =>
+      choice(
+        seq(
+          "#",
+          "line",
+          $.integer_literal,
+          $.end_of_line,
+        ),
+        seq(
+          "#",
+          "line",
+          $.integer_literal,
+          $.filespec,
+          $.end_of_line,
+        ),
+      ),
+
+    // ---
+
+    filespec: $ =>
+      token(
+        // Filespec
+        seq(
+          "\"",
+          optional(
+            // Characters
+            repeat1(
+              // Character
+              /[\s\S]/,
+            ),
+          ),
+          "\"",
+        ),
       ),
 
     // ------------------------------------------------------------------------
