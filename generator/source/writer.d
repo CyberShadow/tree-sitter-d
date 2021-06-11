@@ -25,7 +25,7 @@ module.exports = grammar({
   name: 'd',
 
   rules: {
-    source_file: $ => $._module,
+    source_file: $ => $.module,
 EOF");
 
 		this.grammar = grammar;
@@ -95,7 +95,7 @@ EOF");
 private:
 	static string convertRuleName(string name)
 	{
-		return "_" ~ name.splitByCamelCase.map!toLower.join("_");
+		return name.splitByCamelCase.map!toLower.join("_");
 	}
 
 	void writeRuleBody(string defName)

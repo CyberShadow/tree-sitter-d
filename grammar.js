@@ -2,20 +2,20 @@ module.exports = grammar({
   name: 'd',
 
   rules: {
-    source_file: $ => $._module,
+    source_file: $ => $.module,
 
     // ------------------------------------------------------------------------
     // https://dlang.org/spec/lex.html
     // ------------------------------------------------------------------------
 
-    _token_no_braces: $ =>
+    token_no_braces: $ =>
       choice(
-        $._identifier,
-        $._string_literal,
-        $._character_literal,
-        $._integer_literal,
-        $._float_literal,
-        $._keyword,
+        $.identifier,
+        $.string_literal,
+        $.character_literal,
+        $.integer_literal,
+        $.float_literal,
+        $.keyword,
         "/",
         "/=",
         ".",
@@ -73,7 +73,7 @@ module.exports = grammar({
 
     // ---
 
-    _identifier: $ =>
+    identifier: $ =>
       token(
         // Identifier
         seq(
@@ -115,19 +115,19 @@ module.exports = grammar({
 
     // ---
 
-    _string_literal: $ =>
+    string_literal: $ =>
       choice(
-        $._wysiwyg_string,
-        $._alternate_wysiwyg_string,
-        $._double_quoted_string,
-        $._hex_string,
-        $._delimited_string,
-        $._token_string,
+        $.wysiwyg_string,
+        $.alternate_wysiwyg_string,
+        $.double_quoted_string,
+        $.hex_string,
+        $.delimited_string,
+        $.token_string,
       ),
 
     // ---
 
-    _wysiwyg_string: $ =>
+    wysiwyg_string: $ =>
       token(
         // WysiwygString
         seq(
@@ -171,7 +171,7 @@ module.exports = grammar({
         ),
       ),
 
-    _alternate_wysiwyg_string: $ =>
+    alternate_wysiwyg_string: $ =>
       token(
         // AlternateWysiwygString
         seq(
@@ -215,7 +215,7 @@ module.exports = grammar({
         ),
       ),
 
-    _double_quoted_string: $ =>
+    double_quoted_string: $ =>
       token(
         // DoubleQuotedString
         seq(
@@ -878,7 +878,7 @@ module.exports = grammar({
         ),
       ),
 
-    _hex_string: $ =>
+    hex_string: $ =>
       token(
         // HexString
         seq(
@@ -964,7 +964,7 @@ module.exports = grammar({
         ),
       ),
 
-    _delimited_string: $ =>
+    delimited_string: $ =>
       token(
         // DelimitedString
         seq(
@@ -1088,27 +1088,27 @@ module.exports = grammar({
 
     // ---
 
-    _token_string: $ =>
+    token_string: $ =>
       seq(
         "q{",
         optional(
-          $._token_string_tokens,
+          $.token_string_tokens,
         ),
         "}",
       ),
 
-    _token_string_tokens: $ =>
+    token_string_tokens: $ =>
       repeat1(
-        $._token_string_token,
+        $.token_string_token,
       ),
 
-    _token_string_token: $ =>
+    token_string_token: $ =>
       choice(
-        $._token_no_braces,
+        $.token_no_braces,
         seq(
           "{",
           optional(
-            $._token_string_tokens,
+            $.token_string_tokens,
           ),
           "}",
         ),
@@ -1116,7 +1116,7 @@ module.exports = grammar({
 
     // ---
 
-    _character_literal: $ =>
+    character_literal: $ =>
       token(
         // CharacterLiteral
         seq(
@@ -1751,7 +1751,7 @@ module.exports = grammar({
 
     // ---
 
-    _integer_literal: $ =>
+    integer_literal: $ =>
       token(
         // IntegerLiteral
         seq(
@@ -2112,7 +2112,7 @@ module.exports = grammar({
 
     // ---
 
-    _float_literal: $ =>
+    float_literal: $ =>
       token(
         // FloatLiteral
         choice(
@@ -7410,7 +7410,7 @@ module.exports = grammar({
 
     // ---
 
-    _keyword: $ =>
+    keyword: $ =>
       choice(
         "abstract",
         "alias",
@@ -7528,171 +7528,171 @@ module.exports = grammar({
     // https://dlang.org/spec/module.html
     // ------------------------------------------------------------------------
 
-    _module: $ =>
+    module: $ =>
       choice(
         seq(
-          $._module_declaration,
-          $._decl_defs,
+          $.module_declaration,
+          $.decl_defs,
         ),
-        $._decl_defs,
+        $.decl_defs,
       ),
 
-    _decl_defs: $ =>
+    decl_defs: $ =>
       repeat1(
-        $._decl_def,
+        $.decl_def,
       ),
 
-    _decl_def: $ =>
+    decl_def: $ =>
       choice(
-        $._attribute_specifier,
-        $._declaration,
-        $._constructor,
-        $._destructor,
-        $._postblit,
-        $._allocator,
-        $._deallocator,
-        $._invariant,
-        $._unit_test,
-        $._alias_this,
-        $._static_constructor,
-        $._static_destructor,
-        $._shared_static_constructor,
-        $._shared_static_destructor,
-        $._conditional_declaration,
-        $._debug_specification,
-        $._version_specification,
-        $._static_assert,
-        $._template_declaration,
-        $._template_mixin_declaration,
-        $._template_mixin,
-        $._mixin_declaration,
+        $.attribute_specifier,
+        $.declaration,
+        $.constructor,
+        $.destructor,
+        $.postblit,
+        $.allocator,
+        $.deallocator,
+        $.invariant,
+        $.unit_test,
+        $.alias_this,
+        $.static_constructor,
+        $.static_destructor,
+        $.shared_static_constructor,
+        $.shared_static_destructor,
+        $.conditional_declaration,
+        $.debug_specification,
+        $.version_specification,
+        $.static_assert,
+        $.template_declaration,
+        $.template_mixin_declaration,
+        $.template_mixin,
+        $.mixin_declaration,
         ";",
       ),
 
     // ---
 
-    _module_declaration: $ =>
+    module_declaration: $ =>
       seq(
         optional(
-          $._module_attributes,
+          $.module_attributes,
         ),
         "module",
-        $._module_fully_qualified_name,
+        $.module_fully_qualified_name,
         ";",
       ),
 
-    _module_attributes: $ =>
+    module_attributes: $ =>
       repeat1(
-        $._module_attribute,
+        $.module_attribute,
       ),
 
-    _module_attribute: $ =>
+    module_attribute: $ =>
       choice(
-        $._deprecated_attribute,
-        $._user_defined_attribute,
+        $.deprecated_attribute,
+        $.user_defined_attribute,
       ),
 
-    _module_fully_qualified_name: $ =>
+    module_fully_qualified_name: $ =>
       choice(
-        $._module_name,
+        $.module_name,
         seq(
-          $._packages,
+          $.packages,
           ".",
-          $._module_name,
+          $.module_name,
         ),
       ),
 
-    _module_name: $ =>
-      $._identifier,
+    module_name: $ =>
+      $.identifier,
 
-    _packages: $ =>
+    packages: $ =>
       choice(
-        $._package_name,
+        $.package_name,
         seq(
-          $._packages,
+          $.packages,
           ".",
-          $._package_name,
+          $.package_name,
         ),
       ),
 
-    _package_name: $ =>
-      $._identifier,
+    package_name: $ =>
+      $.identifier,
 
     // ---
 
-    _import_declaration: $ =>
+    import_declaration: $ =>
       choice(
         seq(
           "import",
-          $._import_list,
+          $.import_list,
           ";",
         ),
         seq(
           "static",
           "import",
-          $._import_list,
+          $.import_list,
           ";",
         ),
       ),
 
-    _import_list: $ =>
+    import_list: $ =>
       choice(
-        $._import,
-        $._import_bindings,
+        $.import,
+        $.import_bindings,
         seq(
-          $._import,
+          $.import,
           ",",
-          $._import_list,
+          $.import_list,
         ),
       ),
 
-    _import: $ =>
+    import: $ =>
       choice(
-        $._module_fully_qualified_name,
+        $.module_fully_qualified_name,
         seq(
-          $._module_alias_identifier,
+          $.module_alias_identifier,
           "=",
-          $._module_fully_qualified_name,
+          $.module_fully_qualified_name,
         ),
       ),
 
-    _import_bindings: $ =>
+    import_bindings: $ =>
       seq(
-        $._import,
+        $.import,
         ":",
-        $._import_bind_list,
+        $.import_bind_list,
       ),
 
-    _import_bind_list: $ =>
+    import_bind_list: $ =>
       choice(
-        $._import_bind,
+        $.import_bind,
         seq(
-          $._import_bind,
+          $.import_bind,
           ",",
-          $._import_bind_list,
+          $.import_bind_list,
         ),
       ),
 
-    _import_bind: $ =>
+    import_bind: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
-          $._identifier,
+          $.identifier,
           "=",
-          $._identifier,
+          $.identifier,
         ),
       ),
 
-    _module_alias_identifier: $ =>
-      $._identifier,
+    module_alias_identifier: $ =>
+      $.identifier,
 
     // ---
 
-    _mixin_declaration: $ =>
+    mixin_declaration: $ =>
       seq(
         "mixin",
         "(",
-        $._argument_list,
+        $.argument_list,
         ")",
         ";",
       ),
@@ -7701,203 +7701,203 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html
     // ------------------------------------------------------------------------
 
-    _declaration: $ =>
+    declaration: $ =>
       choice(
-        $._func_declaration,
-        $._var_declarations,
-        $._alias_declaration,
-        $._aggregate_declaration,
-        $._enum_declaration,
-        $._import_declaration,
-        $._conditional_declaration,
-        $._static_foreach_declaration,
-        $._static_assert,
+        $.func_declaration,
+        $.var_declarations,
+        $.alias_declaration,
+        $.aggregate_declaration,
+        $.enum_declaration,
+        $.import_declaration,
+        $.conditional_declaration,
+        $.static_foreach_declaration,
+        $.static_assert,
       ),
 
     // ---
 
-    _var_declarations: $ =>
+    var_declarations: $ =>
       choice(
         seq(
           optional(
-            $._storage_classes,
+            $.storage_classes,
           ),
-          $._basic_type,
-          $._declarators,
+          $.basic_type,
+          $.declarators,
           ";",
         ),
-        $._auto_declaration,
+        $.auto_declaration,
       ),
 
-    _declarators: $ =>
+    declarators: $ =>
       choice(
-        $._declarator_initializer,
+        $.declarator_initializer,
         seq(
-          $._declarator_initializer,
+          $.declarator_initializer,
           ",",
-          $._declarator_identifier_list,
+          $.declarator_identifier_list,
         ),
       ),
 
-    _declarator_initializer: $ =>
+    declarator_initializer: $ =>
       choice(
-        $._var_declarator,
+        $.var_declarator,
         seq(
-          $._var_declarator,
+          $.var_declarator,
           optional(
-            $._template_parameters,
+            $.template_parameters,
           ),
           "=",
-          $._initializer,
+          $.initializer,
         ),
-        $._alt_declarator,
+        $.alt_declarator,
         seq(
-          $._alt_declarator,
+          $.alt_declarator,
           "=",
-          $._initializer,
+          $.initializer,
         ),
       ),
 
-    _declarator_identifier_list: $ =>
+    declarator_identifier_list: $ =>
       choice(
-        $._declarator_identifier,
+        $.declarator_identifier,
         seq(
-          $._declarator_identifier,
+          $.declarator_identifier,
           ",",
-          $._declarator_identifier_list,
+          $.declarator_identifier_list,
         ),
       ),
 
-    _declarator_identifier: $ =>
+    declarator_identifier: $ =>
       choice(
-        $._var_declarator_identifier,
-        $._alt_declarator_identifier,
+        $.var_declarator_identifier,
+        $.alt_declarator_identifier,
       ),
 
-    _var_declarator_identifier: $ =>
+    var_declarator_identifier: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
-          $._identifier,
+          $.identifier,
           optional(
-            $._template_parameters,
+            $.template_parameters,
           ),
           "=",
-          $._initializer,
+          $.initializer,
         ),
       ),
 
-    _alt_declarator_identifier: $ =>
+    alt_declarator_identifier: $ =>
       choice(
         seq(
-          $._type_suffixes,
-          $._identifier,
+          $.type_suffixes,
+          $.identifier,
           optional(
-            $._alt_declarator_suffixes,
+            $.alt_declarator_suffixes,
           ),
         ),
         seq(
-          $._type_suffixes,
-          $._identifier,
+          $.type_suffixes,
+          $.identifier,
           optional(
-            $._alt_declarator_suffixes,
+            $.alt_declarator_suffixes,
           ),
           "=",
-          $._initializer,
+          $.initializer,
         ),
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
-          $._identifier,
-          $._alt_declarator_suffixes,
+          $.identifier,
+          $.alt_declarator_suffixes,
         ),
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
-          $._identifier,
-          $._alt_declarator_suffixes,
+          $.identifier,
+          $.alt_declarator_suffixes,
           "=",
-          $._initializer,
+          $.initializer,
         ),
       ),
 
-    _declarator: $ =>
+    declarator: $ =>
       choice(
-        $._var_declarator,
-        $._alt_declarator,
+        $.var_declarator,
+        $.alt_declarator,
       ),
 
-    _var_declarator: $ =>
+    var_declarator: $ =>
       seq(
         optional(
-          $._type_suffixes,
+          $.type_suffixes,
         ),
-        $._identifier,
+        $.identifier,
       ),
 
-    _alt_declarator: $ =>
+    alt_declarator: $ =>
       choice(
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
-          $._identifier,
-          $._alt_declarator_suffixes,
+          $.identifier,
+          $.alt_declarator_suffixes,
         ),
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
           "(",
-          $._alt_declarator_inner,
+          $.alt_declarator_inner,
           ")",
         ),
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
           "(",
-          $._alt_declarator_inner,
+          $.alt_declarator_inner,
           ")",
-          $._alt_func_declarator_suffix,
+          $.alt_func_declarator_suffix,
         ),
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
           "(",
-          $._alt_declarator_inner,
+          $.alt_declarator_inner,
           ")",
-          $._alt_declarator_suffixes,
+          $.alt_declarator_suffixes,
         ),
       ),
 
-    _alt_declarator_inner: $ =>
+    alt_declarator_inner: $ =>
       choice(
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
-          $._identifier,
+          $.identifier,
         ),
         seq(
           optional(
-            $._type_suffixes,
+            $.type_suffixes,
           ),
-          $._identifier,
-          $._alt_func_declarator_suffix,
+          $.identifier,
+          $.alt_func_declarator_suffix,
         ),
-        $._alt_declarator,
+        $.alt_declarator,
       ),
 
-    _alt_declarator_suffixes: $ =>
+    alt_declarator_suffixes: $ =>
       repeat1(
-        $._alt_declarator_suffix,
+        $.alt_declarator_suffix,
       ),
 
-    _alt_declarator_suffix: $ =>
+    alt_declarator_suffix: $ =>
       choice(
         seq(
           "[",
@@ -7905,35 +7905,35 @@ module.exports = grammar({
         ),
         seq(
           "[",
-          $._assign_expression,
+          $.assign_expression,
           "]",
         ),
         seq(
           "[",
-          $._type,
+          $.type,
           "]",
         ),
       ),
 
-    _alt_func_declarator_suffix: $ =>
+    alt_func_declarator_suffix: $ =>
       seq(
-        $._parameters,
+        $.parameters,
         optional(
-          $._member_function_attributes,
+          $.member_function_attributes,
         ),
       ),
 
     // ---
 
-    _storage_classes: $ =>
+    storage_classes: $ =>
       repeat1(
-        $._storage_class,
+        $.storage_class,
       ),
 
-    _storage_class: $ =>
+    storage_class: $ =>
       choice(
-        $._linkage_attribute,
-        $._align_attribute,
+        $.linkage_attribute,
+        $.align_attribute,
         "enum",
         "static",
         "extern",
@@ -7948,7 +7948,7 @@ module.exports = grammar({
         "inout",
         "shared",
         "__gshared",
-        $._property,
+        $.property,
         "nothrow",
         "pure",
         "ref",
@@ -7956,220 +7956,220 @@ module.exports = grammar({
 
     // ---
 
-    _initializer: $ =>
+    initializer: $ =>
       choice(
-        $._void_initializer,
-        $._non_void_initializer,
+        $.void_initializer,
+        $.non_void_initializer,
       ),
 
-    _non_void_initializer: $ =>
+    non_void_initializer: $ =>
       choice(
-        $._exp_initializer,
-        $._array_initializer,
-        $._struct_initializer,
+        $.exp_initializer,
+        $.array_initializer,
+        $.struct_initializer,
       ),
 
-    _exp_initializer: $ =>
-      $._assign_expression,
+    exp_initializer: $ =>
+      $.assign_expression,
 
-    _array_initializer: $ =>
+    array_initializer: $ =>
       seq(
         "[",
         optional(
-          $._array_member_initializations,
+          $.array_member_initializations,
         ),
         "]",
       ),
 
-    _array_member_initializations: $ =>
+    array_member_initializations: $ =>
       choice(
-        $._array_member_initialization,
+        $.array_member_initialization,
         seq(
-          $._array_member_initialization,
+          $.array_member_initialization,
           ",",
         ),
         seq(
-          $._array_member_initialization,
+          $.array_member_initialization,
           ",",
-          $._array_member_initializations,
+          $.array_member_initializations,
         ),
       ),
 
-    _array_member_initialization: $ =>
+    array_member_initialization: $ =>
       choice(
-        $._non_void_initializer,
+        $.non_void_initializer,
         seq(
-          $._assign_expression,
+          $.assign_expression,
           ":",
-          $._non_void_initializer,
+          $.non_void_initializer,
         ),
       ),
 
-    _struct_initializer: $ =>
+    struct_initializer: $ =>
       seq(
         "{",
         optional(
-          $._struct_member_initializers,
+          $.struct_member_initializers,
         ),
         "}",
       ),
 
-    _struct_member_initializers: $ =>
+    struct_member_initializers: $ =>
       choice(
-        $._struct_member_initializer,
+        $.struct_member_initializer,
         seq(
-          $._struct_member_initializer,
+          $.struct_member_initializer,
           ",",
         ),
         seq(
-          $._struct_member_initializer,
+          $.struct_member_initializer,
           ",",
-          $._struct_member_initializers,
+          $.struct_member_initializers,
         ),
       ),
 
-    _struct_member_initializer: $ =>
+    struct_member_initializer: $ =>
       choice(
-        $._non_void_initializer,
+        $.non_void_initializer,
         seq(
-          $._identifier,
+          $.identifier,
           ":",
-          $._non_void_initializer,
+          $.non_void_initializer,
         ),
       ),
 
     // ---
 
-    _auto_declaration: $ =>
+    auto_declaration: $ =>
       seq(
-        $._storage_classes,
-        $._auto_assignments,
+        $.storage_classes,
+        $.auto_assignments,
         ";",
       ),
 
-    _auto_assignments: $ =>
+    auto_assignments: $ =>
       choice(
-        $._auto_assignment,
+        $.auto_assignment,
         seq(
-          $._auto_assignments,
+          $.auto_assignments,
           ",",
-          $._auto_assignment,
+          $.auto_assignment,
         ),
       ),
 
-    _auto_assignment: $ =>
+    auto_assignment: $ =>
       seq(
-        $._identifier,
+        $.identifier,
         optional(
-          $._template_parameters,
+          $.template_parameters,
         ),
         "=",
-        $._initializer,
+        $.initializer,
       ),
 
     // ---
 
-    _alias_declaration: $ =>
+    alias_declaration: $ =>
       choice(
         seq(
           "alias",
           optional(
-            $._storage_classes,
+            $.storage_classes,
           ),
-          $._basic_type,
-          $._declarators,
+          $.basic_type,
+          $.declarators,
           ";",
         ),
         seq(
           "alias",
           optional(
-            $._storage_classes,
+            $.storage_classes,
           ),
-          $._basic_type,
-          $._func_declarator,
+          $.basic_type,
+          $.func_declarator,
           ";",
         ),
         seq(
           "alias",
-          $._alias_assignments,
+          $.alias_assignments,
           ";",
         ),
       ),
 
-    _alias_assignments: $ =>
+    alias_assignments: $ =>
       choice(
-        $._alias_assignment,
+        $.alias_assignment,
         seq(
-          $._alias_assignments,
+          $.alias_assignments,
           ",",
-          $._alias_assignment,
+          $.alias_assignment,
         ),
       ),
 
-    _alias_assignment: $ =>
+    alias_assignment: $ =>
       choice(
         seq(
-          $._identifier,
+          $.identifier,
           optional(
-            $._template_parameters,
+            $.template_parameters,
           ),
           "=",
           optional(
-            $._storage_classes,
+            $.storage_classes,
           ),
-          $._type,
+          $.type,
         ),
         seq(
-          $._identifier,
+          $.identifier,
           optional(
-            $._template_parameters,
+            $.template_parameters,
           ),
           "=",
-          $._function_literal,
+          $.function_literal,
         ),
         seq(
-          $._identifier,
+          $.identifier,
           optional(
-            $._template_parameters,
+            $.template_parameters,
           ),
           "=",
           optional(
-            $._storage_classes,
+            $.storage_classes,
           ),
-          $._basic_type,
-          $._parameters,
+          $.basic_type,
+          $.parameters,
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
         ),
       ),
 
     // ---
 
-    _void_initializer: $ =>
+    void_initializer: $ =>
       "void",
 
     // ------------------------------------------------------------------------
     // https://dlang.org/spec/type.html
     // ------------------------------------------------------------------------
 
-    _type: $ =>
+    type: $ =>
       seq(
         optional(
-          $._type_ctors,
+          $.type_ctors,
         ),
-        $._basic_type,
+        $.basic_type,
         optional(
-          $._type_suffixes,
+          $.type_suffixes,
         ),
       ),
 
-    _type_ctors: $ =>
+    type_ctors: $ =>
       repeat1(
-        $._type_ctor,
+        $.type_ctor,
       ),
 
-    _type_ctor: $ =>
+    type_ctor: $ =>
       choice(
         "const",
         "immutable",
@@ -8177,43 +8177,43 @@ module.exports = grammar({
         "shared",
       ),
 
-    _basic_type: $ =>
+    basic_type: $ =>
       choice(
-        $._fundamental_type,
+        $.fundamental_type,
         seq(
           ".",
-          $._qualified_identifier,
+          $.qualified_identifier,
         ),
-        $._qualified_identifier,
-        $._typeof,
+        $.qualified_identifier,
+        $.typeof,
         seq(
-          $._typeof,
+          $.typeof,
           ".",
-          $._qualified_identifier,
+          $.qualified_identifier,
         ),
         seq(
-          $._type_ctor,
+          $.type_ctor,
           "(",
-          $._type,
+          $.type,
           ")",
         ),
-        $._vector,
-        $._traits_expression,
-        $._mixin_type,
+        $.vector,
+        $.traits_expression,
+        $.mixin_type,
       ),
 
-    _vector: $ =>
+    vector: $ =>
       seq(
         "__vector",
         "(",
-        $._vector_base_type,
+        $.vector_base_type,
         ")",
       ),
 
-    _vector_base_type: $ =>
-      $._type,
+    vector_base_type: $ =>
+      $.type,
 
-    _fundamental_type: $ =>
+    fundamental_type: $ =>
       choice(
         "bool",
         "byte",
@@ -8241,12 +8241,12 @@ module.exports = grammar({
         "void",
       ),
 
-    _type_suffixes: $ =>
+    type_suffixes: $ =>
       repeat1(
-        $._type_suffix,
+        $.type_suffix,
       ),
 
-    _type_suffix: $ =>
+    type_suffix: $ =>
       choice(
         "*",
         seq(
@@ -8255,75 +8255,75 @@ module.exports = grammar({
         ),
         seq(
           "[",
-          $._assign_expression,
+          $.assign_expression,
           "]",
         ),
         seq(
           "[",
-          $._assign_expression,
+          $.assign_expression,
           "..",
-          $._assign_expression,
+          $.assign_expression,
           "]",
         ),
         seq(
           "[",
-          $._type,
+          $.type,
           "]",
         ),
         seq(
           "delegate",
-          $._parameters,
+          $.parameters,
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
         ),
         seq(
           "function",
-          $._parameters,
+          $.parameters,
           optional(
-            $._function_attributes,
+            $.function_attributes,
           ),
         ),
       ),
 
-    _qualified_identifier: $ =>
+    qualified_identifier: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
-          $._identifier,
+          $.identifier,
           ".",
-          $._qualified_identifier,
+          $.qualified_identifier,
         ),
-        $._template_instance,
+        $.template_instance,
         seq(
-          $._template_instance,
+          $.template_instance,
           ".",
-          $._qualified_identifier,
+          $.qualified_identifier,
         ),
         seq(
-          $._identifier,
+          $.identifier,
           "[",
-          $._assign_expression,
+          $.assign_expression,
           "]",
         ),
         seq(
-          $._identifier,
+          $.identifier,
           "[",
-          $._assign_expression,
+          $.assign_expression,
           "]",
           ".",
-          $._qualified_identifier,
+          $.qualified_identifier,
         ),
       ),
 
     // ---
 
-    _typeof: $ =>
+    typeof: $ =>
       choice(
         seq(
           "typeof",
           "(",
-          $._expression,
+          $.expression,
           ")",
         ),
         seq(
@@ -8336,11 +8336,11 @@ module.exports = grammar({
 
     // ---
 
-    _mixin_type: $ =>
+    mixin_type: $ =>
       seq(
         "mixin",
         "(",
-        $._argument_list,
+        $.argument_list,
         ")",
       ),
 
@@ -8348,25 +8348,25 @@ module.exports = grammar({
     // https://dlang.org/spec/attribute.html
     // ------------------------------------------------------------------------
 
-    _attribute_specifier: $ =>
+    attribute_specifier: $ =>
       choice(
         seq(
-          $._attribute,
+          $.attribute,
           ":",
         ),
         seq(
-          $._attribute,
-          $._declaration_block,
+          $.attribute,
+          $.declaration_block,
         ),
       ),
 
-    _attribute: $ =>
+    attribute: $ =>
       choice(
-        $._linkage_attribute,
-        $._align_attribute,
-        $._deprecated_attribute,
-        $._visibility_attribute,
-        $._pragma,
+        $.linkage_attribute,
+        $.align_attribute,
+        $.deprecated_attribute,
+        $.visibility_attribute,
+        $.pragma,
         "static",
         "extern",
         "abstract",
@@ -8380,19 +8380,19 @@ module.exports = grammar({
         "inout",
         "shared",
         "__gshared",
-        $._at_attribute,
-        $._function_attribute_kwd,
+        $.at_attribute,
+        $.function_attribute_kwd,
         "ref",
         "return",
       ),
 
-    _function_attribute_kwd: $ =>
+    function_attribute_kwd: $ =>
       choice(
         "nothrow",
         "pure",
       ),
 
-    _at_attribute: $ =>
+    at_attribute: $ =>
       choice(
         seq(
           "@",
@@ -8406,7 +8406,7 @@ module.exports = grammar({
           "@",
           "live",
         ),
-        $._property,
+        $.property,
         seq(
           "@",
           "safe",
@@ -8419,22 +8419,22 @@ module.exports = grammar({
           "@",
           "trusted",
         ),
-        $._user_defined_attribute,
+        $.user_defined_attribute,
       ),
 
-    _property: $ =>
+    property: $ =>
       seq(
         "@",
         "property",
       ),
 
-    _declaration_block: $ =>
+    declaration_block: $ =>
       choice(
-        $._decl_def,
+        $.decl_def,
         seq(
           "{",
           optional(
-            $._decl_defs,
+            $.decl_defs,
           ),
           "}",
         ),
@@ -8442,12 +8442,12 @@ module.exports = grammar({
 
     // ---
 
-    _linkage_attribute: $ =>
+    linkage_attribute: $ =>
       choice(
         seq(
           "extern",
           "(",
-          $._linkage_type,
+          $.linkage_type,
           ")",
         ),
         seq(
@@ -8455,7 +8455,7 @@ module.exports = grammar({
           "(",
           "C++",
           ",",
-          $._qualified_identifier,
+          $.qualified_identifier,
           ")",
         ),
         seq(
@@ -8463,12 +8463,12 @@ module.exports = grammar({
           "(",
           "C++",
           ",",
-          $._namespace_list,
+          $.namespace_list,
           ")",
         ),
       ),
 
-    _linkage_type: $ =>
+    linkage_type: $ =>
       choice(
         "C",
         "C++",
@@ -8478,56 +8478,56 @@ module.exports = grammar({
         "Objective-C",
       ),
 
-    _namespace_list: $ =>
+    namespace_list: $ =>
       choice(
-        $._conditional_expression,
+        $.conditional_expression,
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           ",",
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           ",",
-          $._namespace_list,
+          $.namespace_list,
         ),
       ),
 
     // ---
 
-    _align_attribute: $ =>
+    align_attribute: $ =>
       choice(
         "align",
         seq(
           "align",
           "(",
-          $._assign_expression,
+          $.assign_expression,
           ")",
         ),
       ),
 
     // ---
 
-    _deprecated_attribute: $ =>
+    deprecated_attribute: $ =>
       choice(
         "deprecated",
         seq(
           "deprecated",
           "(",
-          $._assign_expression,
+          $.assign_expression,
           ")",
         ),
       ),
 
     // ---
 
-    _visibility_attribute: $ =>
+    visibility_attribute: $ =>
       choice(
         "private",
         "package",
         seq(
           "package",
           "(",
-          $._qualified_identifier,
+          $.qualified_identifier,
           ")",
         ),
         "protected",
@@ -8537,37 +8537,37 @@ module.exports = grammar({
 
     // ---
 
-    _user_defined_attribute: $ =>
+    user_defined_attribute: $ =>
       choice(
         seq(
           "@",
           "(",
-          $._argument_list,
+          $.argument_list,
           ")",
         ),
         seq(
           "@",
-          $._identifier,
+          $.identifier,
         ),
         seq(
           "@",
-          $._identifier,
+          $.identifier,
           "(",
           optional(
-            $._argument_list,
+            $.argument_list,
           ),
           ")",
         ),
         seq(
           "@",
-          $._template_instance,
+          $.template_instance,
         ),
         seq(
           "@",
-          $._template_instance,
+          $.template_instance,
           "(",
           optional(
-            $._argument_list,
+            $.argument_list,
           ),
           ")",
         ),
@@ -8577,32 +8577,32 @@ module.exports = grammar({
     // https://dlang.org/spec/pragma.html
     // ------------------------------------------------------------------------
 
-    _pragma_statement: $ =>
+    pragma_statement: $ =>
       choice(
         seq(
-          $._pragma,
+          $.pragma,
           ";",
         ),
         seq(
-          $._pragma,
-          $._no_scope_statement,
+          $.pragma,
+          $.no_scope_statement,
         ),
       ),
 
-    _pragma: $ =>
+    pragma: $ =>
       choice(
         seq(
           "pragma",
           "(",
-          $._identifier,
+          $.identifier,
           ")",
         ),
         seq(
           "pragma",
           "(",
-          $._identifier,
+          $.identifier,
           ",",
-          $._argument_list,
+          $.argument_list,
           ")",
         ),
       ),
@@ -8611,568 +8611,568 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html
     // ------------------------------------------------------------------------
 
-    _expression: $ =>
-      $._comma_expression,
+    expression: $ =>
+      $.comma_expression,
 
-    _comma_expression: $ =>
+    comma_expression: $ =>
       choice(
-        $._assign_expression,
+        $.assign_expression,
         seq(
-          $._comma_expression,
+          $.comma_expression,
           ",",
-          $._assign_expression,
+          $.assign_expression,
         ),
       ),
 
     // ---
 
-    _assign_expression: $ =>
+    assign_expression: $ =>
       choice(
-        $._conditional_expression,
+        $.conditional_expression,
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "+=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "-=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "*=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "/=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "%=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "&=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "|=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "^=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "~=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "<<=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           ">>=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           ">>>=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._conditional_expression,
+          $.conditional_expression,
           "^^=",
-          $._assign_expression,
+          $.assign_expression,
         ),
       ),
 
     // ---
 
-    _conditional_expression: $ =>
+    conditional_expression: $ =>
       choice(
-        $._or_or_expression,
+        $.or_or_expression,
         seq(
-          $._or_or_expression,
+          $.or_or_expression,
           "?",
-          $._expression,
+          $.expression,
           ":",
-          $._conditional_expression,
+          $.conditional_expression,
         ),
       ),
 
     // ---
 
-    _or_or_expression: $ =>
+    or_or_expression: $ =>
       choice(
-        $._and_and_expression,
+        $.and_and_expression,
         seq(
-          $._or_or_expression,
+          $.or_or_expression,
           "||",
-          $._and_and_expression,
+          $.and_and_expression,
         ),
       ),
 
     // ---
 
-    _and_and_expression: $ =>
+    and_and_expression: $ =>
       choice(
-        $._or_expression,
+        $.or_expression,
         seq(
-          $._and_and_expression,
+          $.and_and_expression,
           "&&",
-          $._or_expression,
+          $.or_expression,
         ),
       ),
 
     // ---
 
-    _or_expression: $ =>
+    or_expression: $ =>
       choice(
-        $._xor_expression,
+        $.xor_expression,
         seq(
-          $._or_expression,
+          $.or_expression,
           "|",
-          $._xor_expression,
+          $.xor_expression,
         ),
       ),
 
     // ---
 
-    _xor_expression: $ =>
+    xor_expression: $ =>
       choice(
-        $._and_expression,
+        $.and_expression,
         seq(
-          $._xor_expression,
+          $.xor_expression,
           "^",
-          $._and_expression,
+          $.and_expression,
         ),
       ),
 
     // ---
 
-    _and_expression: $ =>
+    and_expression: $ =>
       choice(
-        $._cmp_expression,
+        $.cmp_expression,
         seq(
-          $._and_expression,
+          $.and_expression,
           "&",
-          $._cmp_expression,
+          $.cmp_expression,
         ),
       ),
 
     // ---
 
-    _cmp_expression: $ =>
+    cmp_expression: $ =>
       choice(
-        $._shift_expression,
-        $._equal_expression,
-        $._identity_expression,
-        $._rel_expression,
-        $._in_expression,
+        $.shift_expression,
+        $.equal_expression,
+        $.identity_expression,
+        $.rel_expression,
+        $.in_expression,
       ),
 
     // ---
 
-    _equal_expression: $ =>
+    equal_expression: $ =>
       choice(
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "==",
-          $._shift_expression,
+          $.shift_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "!=",
-          $._shift_expression,
+          $.shift_expression,
         ),
       ),
 
     // ---
 
-    _identity_expression: $ =>
+    identity_expression: $ =>
       choice(
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "is",
-          $._shift_expression,
+          $.shift_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "!",
           "is",
-          $._shift_expression,
+          $.shift_expression,
         ),
       ),
 
     // ---
 
-    _rel_expression: $ =>
+    rel_expression: $ =>
       choice(
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "<",
-          $._shift_expression,
+          $.shift_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "<",
           "=",
-          $._shift_expression,
+          $.shift_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           ">",
-          $._shift_expression,
+          $.shift_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           ">=",
-          $._shift_expression,
+          $.shift_expression,
         ),
       ),
 
     // ---
 
-    _in_expression: $ =>
+    in_expression: $ =>
       choice(
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "in",
-          $._shift_expression,
+          $.shift_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "!",
           "in",
-          $._shift_expression,
+          $.shift_expression,
         ),
       ),
 
     // ---
 
-    _shift_expression: $ =>
+    shift_expression: $ =>
       choice(
-        $._add_expression,
+        $.add_expression,
         seq(
-          $._shift_expression,
+          $.shift_expression,
           "<",
           "<",
-          $._add_expression,
+          $.add_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           ">",
           ">",
-          $._add_expression,
+          $.add_expression,
         ),
         seq(
-          $._shift_expression,
+          $.shift_expression,
           ">",
           ">",
           ">",
-          $._add_expression,
+          $.add_expression,
         ),
       ),
 
     // ---
 
-    _add_expression: $ =>
+    add_expression: $ =>
       choice(
-        $._mul_expression,
+        $.mul_expression,
         seq(
-          $._add_expression,
+          $.add_expression,
           "+",
-          $._mul_expression,
+          $.mul_expression,
         ),
         seq(
-          $._add_expression,
+          $.add_expression,
           "-",
-          $._mul_expression,
+          $.mul_expression,
         ),
-        $._cat_expression,
+        $.cat_expression,
       ),
 
     // ---
 
-    _cat_expression: $ =>
+    cat_expression: $ =>
       seq(
-        $._add_expression,
+        $.add_expression,
         "~",
-        $._mul_expression,
+        $.mul_expression,
       ),
 
     // ---
 
-    _mul_expression: $ =>
+    mul_expression: $ =>
       choice(
-        $._unary_expression,
+        $.unary_expression,
         seq(
-          $._mul_expression,
+          $.mul_expression,
           "*",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
-          $._mul_expression,
+          $.mul_expression,
           "/",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
-          $._mul_expression,
+          $.mul_expression,
           "%",
-          $._unary_expression,
+          $.unary_expression,
         ),
       ),
 
     // ---
 
-    _unary_expression: $ =>
+    unary_expression: $ =>
       choice(
         seq(
           "&",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
           "++",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
           "--",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
           "*",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
           "-",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
           "+",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
           "!",
-          $._unary_expression,
+          $.unary_expression,
         ),
-        $._complement_expression,
+        $.complement_expression,
         seq(
           "(",
-          $._type,
+          $.type,
           ")",
           ".",
-          $._identifier,
+          $.identifier,
         ),
         seq(
           "(",
-          $._type,
+          $.type,
           ")",
           ".",
-          $._template_instance,
+          $.template_instance,
         ),
-        $._delete_expression,
-        $._cast_expression,
-        $._pow_expression,
+        $.delete_expression,
+        $.cast_expression,
+        $.pow_expression,
       ),
 
     // ---
 
-    _complement_expression: $ =>
+    complement_expression: $ =>
       seq(
         "~",
-        $._unary_expression,
+        $.unary_expression,
       ),
 
     // ---
 
-    _new_expression: $ =>
+    new_expression: $ =>
       choice(
         seq(
           "new",
           optional(
-            $._allocator_arguments,
+            $.allocator_arguments,
           ),
-          $._type,
+          $.type,
         ),
         seq(
           "new",
           optional(
-            $._allocator_arguments,
+            $.allocator_arguments,
           ),
-          $._type,
+          $.type,
           "[",
-          $._assign_expression,
+          $.assign_expression,
           "]",
         ),
         seq(
           "new",
           optional(
-            $._allocator_arguments,
+            $.allocator_arguments,
           ),
-          $._type,
+          $.type,
           "(",
           optional(
-            $._argument_list,
+            $.argument_list,
           ),
           ")",
         ),
-        $._new_anon_class_expression,
+        $.new_anon_class_expression,
       ),
 
-    _allocator_arguments: $ =>
+    allocator_arguments: $ =>
       seq(
         "(",
         optional(
-          $._argument_list,
+          $.argument_list,
         ),
         ")",
       ),
 
-    _argument_list: $ =>
+    argument_list: $ =>
       choice(
-        $._assign_expression,
+        $.assign_expression,
         seq(
-          $._assign_expression,
+          $.assign_expression,
           ",",
         ),
         seq(
-          $._assign_expression,
+          $.assign_expression,
           ",",
-          $._argument_list,
+          $.argument_list,
         ),
       ),
 
     // ---
 
-    _delete_expression: $ =>
+    delete_expression: $ =>
       seq(
         "delete",
-        $._unary_expression,
+        $.unary_expression,
       ),
 
     // ---
 
-    _cast_expression: $ =>
+    cast_expression: $ =>
       choice(
         seq(
           "cast",
           "(",
-          $._type,
+          $.type,
           ")",
-          $._unary_expression,
+          $.unary_expression,
         ),
         seq(
           "cast",
           "(",
           optional(
-            $._type_ctors,
+            $.type_ctors,
           ),
           ")",
-          $._unary_expression,
+          $.unary_expression,
         ),
       ),
 
     // ---
 
-    _pow_expression: $ =>
+    pow_expression: $ =>
       choice(
-        $._postfix_expression,
+        $.postfix_expression,
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           "^^",
-          $._unary_expression,
+          $.unary_expression,
         ),
       ),
 
     // ---
 
-    _postfix_expression: $ =>
+    postfix_expression: $ =>
       choice(
-        $._primary_expression,
+        $.primary_expression,
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           ".",
-          $._identifier,
+          $.identifier,
         ),
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           ".",
-          $._template_instance,
+          $.template_instance,
         ),
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           ".",
-          $._new_expression,
+          $.new_expression,
         ),
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           "++",
         ),
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           "--",
         ),
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           "(",
           optional(
-            $._argument_list,
+            $.argument_list,
           ),
           ")",
         ),
         seq(
           optional(
-            $._type_ctors,
+            $.type_ctors,
           ),
-          $._basic_type,
+          $.basic_type,
           "(",
           optional(
-            $._argument_list,
+            $.argument_list,
           ),
           ")",
         ),
-        $._index_expression,
-        $._slice_expression,
+        $.index_expression,
+        $.slice_expression,
       ),
 
     // ---
 
-    _index_expression: $ =>
+    index_expression: $ =>
       seq(
-        $._postfix_expression,
+        $.postfix_expression,
         "[",
-        $._argument_list,
+        $.argument_list,
         "]",
       ),
 
     // ---
 
-    _slice_expression: $ =>
+    slice_expression: $ =>
       choice(
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           "[",
           "]",
         ),
         seq(
-          $._postfix_expression,
+          $.postfix_expression,
           "[",
-          $._slice,
+          $.slice,
           optional(
             ",",
           ),
@@ -9180,41 +9180,41 @@ module.exports = grammar({
         ),
       ),
 
-    _slice: $ =>
+    slice: $ =>
       choice(
-        $._assign_expression,
+        $.assign_expression,
         seq(
-          $._assign_expression,
+          $.assign_expression,
           ",",
-          $._slice,
+          $.slice,
         ),
         seq(
-          $._assign_expression,
+          $.assign_expression,
           "..",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
-          $._assign_expression,
+          $.assign_expression,
           "..",
-          $._assign_expression,
+          $.assign_expression,
           ",",
-          $._slice,
+          $.slice,
         ),
       ),
 
     // ---
 
-    _primary_expression: $ =>
+    primary_expression: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
           ".",
-          $._identifier,
+          $.identifier,
         ),
-        $._template_instance,
+        $.template_instance,
         seq(
           ".",
-          $._template_instance,
+          $.template_instance,
         ),
         "this",
         "super",
@@ -9222,118 +9222,118 @@ module.exports = grammar({
         "true",
         "false",
         "$",
-        $._integer_literal,
-        $._float_literal,
-        $._character_literal,
-        $._string_literals,
-        $._array_literal,
-        $._assoc_array_literal,
-        $._function_literal,
-        $._assert_expression,
-        $._mixin_expression,
-        $._import_expression,
-        $._new_expression,
+        $.integer_literal,
+        $.float_literal,
+        $.character_literal,
+        $.string_literals,
+        $.array_literal,
+        $.assoc_array_literal,
+        $.function_literal,
+        $.assert_expression,
+        $.mixin_expression,
+        $.import_expression,
+        $.new_expression,
         seq(
-          $._fundamental_type,
+          $.fundamental_type,
           ".",
-          $._identifier,
+          $.identifier,
         ),
         seq(
-          $._fundamental_type,
+          $.fundamental_type,
           "(",
           optional(
-            $._argument_list,
+            $.argument_list,
           ),
           ")",
         ),
         seq(
-          $._type_ctor,
+          $.type_ctor,
           "(",
-          $._type,
+          $.type,
           ")",
           ".",
-          $._identifier,
+          $.identifier,
         ),
         seq(
-          $._type_ctor,
+          $.type_ctor,
           "(",
-          $._type,
+          $.type,
           ")",
           "(",
           optional(
-            $._argument_list,
+            $.argument_list,
           ),
           ")",
         ),
-        $._typeof,
-        $._typeid_expression,
-        $._is_expression,
+        $.typeof,
+        $.typeid_expression,
+        $.is_expression,
         seq(
           "(",
-          $._expression,
+          $.expression,
           ")",
         ),
-        $._special_keyword,
-        $._traits_expression,
+        $.special_keyword,
+        $.traits_expression,
       ),
 
     // ---
 
-    _string_literals: $ =>
+    string_literals: $ =>
       choice(
-        $._string_literal,
+        $.string_literal,
         seq(
-          $._string_literals,
-          $._string_literal,
+          $.string_literals,
+          $.string_literal,
         ),
       ),
 
     // ---
 
-    _array_literal: $ =>
+    array_literal: $ =>
       seq(
         "[",
         optional(
-          $._argument_list,
+          $.argument_list,
         ),
         "]",
       ),
 
     // ---
 
-    _assoc_array_literal: $ =>
+    assoc_array_literal: $ =>
       seq(
         "[",
-        $._key_value_pairs,
+        $.key_value_pairs,
         "]",
       ),
 
-    _key_value_pairs: $ =>
+    key_value_pairs: $ =>
       choice(
-        $._key_value_pair,
+        $.key_value_pair,
         seq(
-          $._key_value_pair,
+          $.key_value_pair,
           ",",
-          $._key_value_pairs,
+          $.key_value_pairs,
         ),
       ),
 
-    _key_value_pair: $ =>
+    key_value_pair: $ =>
       seq(
-        $._key_expression,
+        $.key_expression,
         ":",
-        $._value_expression,
+        $.value_expression,
       ),
 
-    _key_expression: $ =>
-      $._assign_expression,
+    key_expression: $ =>
+      $.assign_expression,
 
-    _value_expression: $ =>
-      $._assign_expression,
+    value_expression: $ =>
+      $.assign_expression,
 
     // ---
 
-    _function_literal: $ =>
+    function_literal: $ =>
       choice(
         seq(
           "function",
@@ -9341,12 +9341,12 @@ module.exports = grammar({
             "ref",
           ),
           optional(
-            $._type,
+            $.type,
           ),
           optional(
-            $._parameter_with_attributes,
+            $.parameter_with_attributes,
           ),
-          $._function_literal_body2,
+          $.function_literal_body2,
         ),
         seq(
           "delegate",
@@ -9354,75 +9354,75 @@ module.exports = grammar({
             "ref",
           ),
           optional(
-            $._type,
+            $.type,
           ),
           optional(
-            $._parameter_with_member_attributes,
+            $.parameter_with_member_attributes,
           ),
-          $._function_literal_body2,
+          $.function_literal_body2,
         ),
         seq(
           optional(
             "ref",
           ),
-          $._parameter_with_member_attributes,
-          $._function_literal_body2,
+          $.parameter_with_member_attributes,
+          $.function_literal_body2,
         ),
-        $._function_literal_body,
+        $.function_literal_body,
         seq(
-          $._identifier,
+          $.identifier,
           "=>",
-          $._assign_expression,
+          $.assign_expression,
         ),
       ),
 
-    _parameter_with_attributes: $ =>
+    parameter_with_attributes: $ =>
       seq(
-        $._parameters,
+        $.parameters,
         optional(
-          $._function_attributes,
+          $.function_attributes,
         ),
       ),
 
-    _parameter_with_member_attributes: $ =>
+    parameter_with_member_attributes: $ =>
       seq(
-        $._parameters,
+        $.parameters,
         optional(
-          $._member_function_attributes,
+          $.member_function_attributes,
         ),
       ),
 
-    _function_literal_body2: $ =>
+    function_literal_body2: $ =>
       choice(
         seq(
           "=>",
-          $._assign_expression,
+          $.assign_expression,
         ),
-        $._function_literal_body,
+        $.function_literal_body,
       ),
 
     // ---
 
-    _assert_expression: $ =>
+    assert_expression: $ =>
       seq(
         "assert",
         "(",
-        $._assert_arguments,
+        $.assert_arguments,
         ")",
       ),
 
-    _assert_arguments: $ =>
+    assert_arguments: $ =>
       choice(
         seq(
-          $._assign_expression,
+          $.assign_expression,
           optional(
             ",",
           ),
         ),
         seq(
-          $._assign_expression,
+          $.assign_expression,
           ",",
-          $._assign_expression,
+          $.assign_expression,
           optional(
             ",",
           ),
@@ -9431,140 +9431,140 @@ module.exports = grammar({
 
     // ---
 
-    _mixin_expression: $ =>
+    mixin_expression: $ =>
       seq(
         "mixin",
         "(",
-        $._argument_list,
+        $.argument_list,
         ")",
       ),
 
     // ---
 
-    _import_expression: $ =>
+    import_expression: $ =>
       seq(
         "import",
         "(",
-        $._assign_expression,
+        $.assign_expression,
         ")",
       ),
 
     // ---
 
-    _typeid_expression: $ =>
+    typeid_expression: $ =>
       choice(
         seq(
           "typeid",
           "(",
-          $._type,
+          $.type,
           ")",
         ),
         seq(
           "typeid",
           "(",
-          $._expression,
+          $.expression,
           ")",
         ),
       ),
 
     // ---
 
-    _is_expression: $ =>
+    is_expression: $ =>
       choice(
         seq(
           "is",
           "(",
-          $._type,
+          $.type,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
+          $.type,
           ":",
-          $._type_specialization,
+          $.type_specialization,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
+          $.type,
           "==",
-          $._type_specialization,
+          $.type_specialization,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
+          $.type,
           ":",
-          $._type_specialization,
+          $.type_specialization,
           ",",
-          $._template_parameter_list,
+          $.template_parameter_list,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
+          $.type,
           "==",
-          $._type_specialization,
+          $.type_specialization,
           ",",
-          $._template_parameter_list,
+          $.template_parameter_list,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
-          $._identifier,
+          $.type,
+          $.identifier,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
-          $._identifier,
+          $.type,
+          $.identifier,
           ":",
-          $._type_specialization,
+          $.type_specialization,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
-          $._identifier,
+          $.type,
+          $.identifier,
           "==",
-          $._type_specialization,
+          $.type_specialization,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
-          $._identifier,
+          $.type,
+          $.identifier,
           ":",
-          $._type_specialization,
+          $.type_specialization,
           ",",
-          $._template_parameter_list,
+          $.template_parameter_list,
           ")",
         ),
         seq(
           "is",
           "(",
-          $._type,
-          $._identifier,
+          $.type,
+          $.identifier,
           "==",
-          $._type_specialization,
+          $.type_specialization,
           ",",
-          $._template_parameter_list,
+          $.template_parameter_list,
           ")",
         ),
       ),
 
-    _type_specialization: $ =>
+    type_specialization: $ =>
       choice(
-        $._type,
+        $.type,
         "struct",
         "union",
         "class",
@@ -9586,7 +9586,7 @@ module.exports = grammar({
 
     // ---
 
-    _special_keyword: $ =>
+    special_keyword: $ =>
       choice(
         "__FILE__",
         "__FILE_FULL_PATH__",
@@ -9600,103 +9600,103 @@ module.exports = grammar({
     // https://dlang.org/spec/statement.html
     // ------------------------------------------------------------------------
 
-    _statement: $ =>
+    statement: $ =>
       choice(
         ";",
-        $._non_empty_statement,
-        $._scope_block_statement,
+        $.non_empty_statement,
+        $.scope_block_statement,
       ),
 
-    _no_scope_non_empty_statement: $ =>
+    no_scope_non_empty_statement: $ =>
       choice(
-        $._non_empty_statement,
-        $._block_statement,
+        $.non_empty_statement,
+        $.block_statement,
       ),
 
-    _no_scope_statement: $ =>
+    no_scope_statement: $ =>
       choice(
         ";",
-        $._non_empty_statement,
-        $._block_statement,
+        $.non_empty_statement,
+        $.block_statement,
       ),
 
-    _non_empty_or_scope_block_statement: $ =>
+    non_empty_or_scope_block_statement: $ =>
       choice(
-        $._non_empty_statement,
-        $._scope_block_statement,
+        $.non_empty_statement,
+        $.scope_block_statement,
       ),
 
-    _non_empty_statement: $ =>
+    non_empty_statement: $ =>
       choice(
-        $._non_empty_statement_no_case_no_default,
-        $._case_statement,
-        $._case_range_statement,
-        $._default_statement,
+        $.non_empty_statement_no_case_no_default,
+        $.case_statement,
+        $.case_range_statement,
+        $.default_statement,
       ),
 
-    _non_empty_statement_no_case_no_default: $ =>
+    non_empty_statement_no_case_no_default: $ =>
       choice(
-        $._labeled_statement,
-        $._expression_statement,
-        $._declaration_statement,
-        $._if_statement,
-        $._while_statement,
-        $._do_statement,
-        $._for_statement,
-        $._foreach_statement,
-        $._switch_statement,
-        $._final_switch_statement,
-        $._continue_statement,
-        $._break_statement,
-        $._return_statement,
-        $._goto_statement,
-        $._with_statement,
-        $._synchronized_statement,
-        $._try_statement,
-        $._scope_guard_statement,
-        $._throw_statement,
-        $._asm_statement,
-        $._mixin_statement,
-        $._foreach_range_statement,
-        $._pragma_statement,
-        $._conditional_statement,
-        $._static_foreach_statement,
-        $._static_assert,
-        $._template_mixin,
-        $._import_declaration,
+        $.labeled_statement,
+        $.expression_statement,
+        $.declaration_statement,
+        $.if_statement,
+        $.while_statement,
+        $.do_statement,
+        $.for_statement,
+        $.foreach_statement,
+        $.switch_statement,
+        $.final_switch_statement,
+        $.continue_statement,
+        $.break_statement,
+        $.return_statement,
+        $.goto_statement,
+        $.with_statement,
+        $.synchronized_statement,
+        $.try_statement,
+        $.scope_guard_statement,
+        $.throw_statement,
+        $.asm_statement,
+        $.mixin_statement,
+        $.foreach_range_statement,
+        $.pragma_statement,
+        $.conditional_statement,
+        $.static_foreach_statement,
+        $.static_assert,
+        $.template_mixin,
+        $.import_declaration,
       ),
 
     // ---
 
-    _scope_statement: $ =>
+    scope_statement: $ =>
       choice(
-        $._non_empty_statement,
-        $._block_statement,
+        $.non_empty_statement,
+        $.block_statement,
       ),
 
     // ---
 
-    _scope_block_statement: $ =>
-      $._block_statement,
+    scope_block_statement: $ =>
+      $.block_statement,
 
     // ---
 
-    _labeled_statement: $ =>
+    labeled_statement: $ =>
       choice(
         seq(
-          $._identifier,
+          $.identifier,
           ":",
         ),
         seq(
-          $._identifier,
+          $.identifier,
           ":",
-          $._statement,
+          $.statement,
         ),
       ),
 
     // ---
 
-    _block_statement: $ =>
+    block_statement: $ =>
       choice(
         seq(
           "{",
@@ -9704,352 +9704,352 @@ module.exports = grammar({
         ),
         seq(
           "{",
-          $._statement_list,
+          $.statement_list,
           "}",
         ),
       ),
 
-    _statement_list: $ =>
+    statement_list: $ =>
       repeat1(
-        $._statement,
+        $.statement,
       ),
 
     // ---
 
-    _expression_statement: $ =>
+    expression_statement: $ =>
       seq(
-        $._expression,
+        $.expression,
         ";",
       ),
 
     // ---
 
-    _declaration_statement: $ =>
-      $._declaration,
+    declaration_statement: $ =>
+      $.declaration,
 
     // ---
 
-    _if_statement: $ =>
+    if_statement: $ =>
       choice(
         seq(
           "if",
           "(",
-          $._if_condition,
+          $.if_condition,
           ")",
-          $._then_statement,
+          $.then_statement,
         ),
         seq(
           "if",
           "(",
-          $._if_condition,
+          $.if_condition,
           ")",
-          $._then_statement,
+          $.then_statement,
           "else",
-          $._else_statement,
+          $.else_statement,
         ),
       ),
 
-    _if_condition: $ =>
+    if_condition: $ =>
       choice(
-        $._expression,
+        $.expression,
         seq(
           "auto",
-          $._identifier,
+          $.identifier,
           "=",
-          $._expression,
+          $.expression,
         ),
         seq(
-          $._type_ctors,
-          $._identifier,
+          $.type_ctors,
+          $.identifier,
           "=",
-          $._expression,
+          $.expression,
         ),
         seq(
           optional(
-            $._type_ctors,
+            $.type_ctors,
           ),
-          $._basic_type,
-          $._declarator,
+          $.basic_type,
+          $.declarator,
           "=",
-          $._expression,
+          $.expression,
         ),
       ),
 
-    _then_statement: $ =>
-      $._scope_statement,
+    then_statement: $ =>
+      $.scope_statement,
 
-    _else_statement: $ =>
-      $._scope_statement,
+    else_statement: $ =>
+      $.scope_statement,
 
     // ---
 
-    _while_statement: $ =>
+    while_statement: $ =>
       seq(
         "while",
         "(",
-        $._if_condition,
+        $.if_condition,
         ")",
-        $._scope_statement,
+        $.scope_statement,
       ),
 
     // ---
 
-    _do_statement: $ =>
+    do_statement: $ =>
       seq(
         "do",
-        $._scope_statement,
+        $.scope_statement,
         "while",
         "(",
-        $._expression,
+        $.expression,
         ")",
         ";",
       ),
 
     // ---
 
-    _for_statement: $ =>
+    for_statement: $ =>
       seq(
         "for",
         "(",
-        $._initialize,
+        $.initialize,
         optional(
-          $._test,
+          $.test,
         ),
         ";",
         optional(
-          $._increment,
+          $.increment,
         ),
         ")",
-        $._scope_statement,
+        $.scope_statement,
       ),
 
-    _initialize: $ =>
+    initialize: $ =>
       choice(
         ";",
-        $._no_scope_non_empty_statement,
+        $.no_scope_non_empty_statement,
       ),
 
-    _test: $ =>
-      $._expression,
+    test: $ =>
+      $.expression,
 
-    _increment: $ =>
-      $._expression,
+    increment: $ =>
+      $.expression,
 
     // ---
 
-    _aggregate_foreach: $ =>
+    aggregate_foreach: $ =>
       seq(
-        $._foreach,
+        $.foreach,
         "(",
-        $._foreach_type_list,
+        $.foreach_type_list,
         ";",
-        $._foreach_aggregate,
+        $.foreach_aggregate,
         ")",
       ),
 
-    _foreach_statement: $ =>
+    foreach_statement: $ =>
       seq(
-        $._aggregate_foreach,
-        $._no_scope_non_empty_statement,
+        $.aggregate_foreach,
+        $.no_scope_non_empty_statement,
       ),
 
-    _foreach: $ =>
+    foreach: $ =>
       choice(
         "foreach",
         "foreach_reverse",
       ),
 
-    _foreach_type_list: $ =>
+    foreach_type_list: $ =>
       choice(
-        $._foreach_type,
+        $.foreach_type,
         seq(
-          $._foreach_type,
+          $.foreach_type,
           ",",
-          $._foreach_type_list,
+          $.foreach_type_list,
         ),
       ),
 
-    _foreach_type: $ =>
+    foreach_type: $ =>
       choice(
         seq(
           optional(
-            $._foreach_type_attributes,
+            $.foreach_type_attributes,
           ),
-          $._basic_type,
-          $._declarator,
+          $.basic_type,
+          $.declarator,
         ),
         seq(
           optional(
-            $._foreach_type_attributes,
+            $.foreach_type_attributes,
           ),
-          $._identifier,
+          $.identifier,
         ),
         seq(
           optional(
-            $._foreach_type_attributes,
+            $.foreach_type_attributes,
           ),
           "alias",
-          $._identifier,
+          $.identifier,
         ),
       ),
 
-    _foreach_type_attributes: $ =>
+    foreach_type_attributes: $ =>
       seq(
-        $._foreach_type_attribute,
+        $.foreach_type_attribute,
         optional(
           optional(
-            $._foreach_type_attributes,
+            $.foreach_type_attributes,
           ),
         ),
       ),
 
-    _foreach_type_attribute: $ =>
+    foreach_type_attribute: $ =>
       choice(
         "ref",
-        $._type_ctor,
+        $.type_ctor,
         "enum",
       ),
 
-    _foreach_aggregate: $ =>
-      $._expression,
+    foreach_aggregate: $ =>
+      $.expression,
 
     // ---
 
-    _range_foreach: $ =>
+    range_foreach: $ =>
       seq(
-        $._foreach,
+        $.foreach,
         "(",
-        $._foreach_type,
+        $.foreach_type,
         ";",
-        $._lwr_expression,
+        $.lwr_expression,
         "..",
-        $._upr_expression,
+        $.upr_expression,
         ")",
       ),
 
-    _lwr_expression: $ =>
-      $._expression,
+    lwr_expression: $ =>
+      $.expression,
 
-    _upr_expression: $ =>
-      $._expression,
+    upr_expression: $ =>
+      $.expression,
 
-    _foreach_range_statement: $ =>
+    foreach_range_statement: $ =>
       seq(
-        $._range_foreach,
-        $._scope_statement,
+        $.range_foreach,
+        $.scope_statement,
       ),
 
     // ---
 
-    _switch_statement: $ =>
+    switch_statement: $ =>
       seq(
         "switch",
         "(",
-        $._expression,
+        $.expression,
         ")",
-        $._scope_statement,
+        $.scope_statement,
       ),
 
-    _case_statement: $ =>
+    case_statement: $ =>
       seq(
         "case",
-        $._argument_list,
+        $.argument_list,
         ":",
-        $._scope_statement_list,
+        $.scope_statement_list,
       ),
 
-    _case_range_statement: $ =>
+    case_range_statement: $ =>
       seq(
         "case",
-        $._first_exp,
+        $.first_exp,
         ":",
         "..",
         "case",
-        $._last_exp,
+        $.last_exp,
         ":",
-        $._scope_statement_list,
+        $.scope_statement_list,
       ),
 
-    _first_exp: $ =>
-      $._assign_expression,
+    first_exp: $ =>
+      $.assign_expression,
 
-    _last_exp: $ =>
-      $._assign_expression,
+    last_exp: $ =>
+      $.assign_expression,
 
-    _default_statement: $ =>
+    default_statement: $ =>
       seq(
         "default",
         ":",
-        $._scope_statement_list,
+        $.scope_statement_list,
       ),
 
-    _scope_statement_list: $ =>
-      $._statement_list_no_case_no_default,
+    scope_statement_list: $ =>
+      $.statement_list_no_case_no_default,
 
-    _statement_list_no_case_no_default: $ =>
+    statement_list_no_case_no_default: $ =>
       repeat1(
-        $._statement_no_case_no_default,
+        $.statement_no_case_no_default,
       ),
 
-    _statement_no_case_no_default: $ =>
+    statement_no_case_no_default: $ =>
       choice(
         ";",
-        $._non_empty_statement_no_case_no_default,
-        $._scope_block_statement,
+        $.non_empty_statement_no_case_no_default,
+        $.scope_block_statement,
       ),
 
     // ---
 
-    _final_switch_statement: $ =>
+    final_switch_statement: $ =>
       seq(
         "final",
         "switch",
         "(",
-        $._expression,
+        $.expression,
         ")",
-        $._scope_statement,
+        $.scope_statement,
       ),
 
     // ---
 
-    _continue_statement: $ =>
+    continue_statement: $ =>
       seq(
         "continue",
         optional(
-          $._identifier,
+          $.identifier,
         ),
         ";",
       ),
 
     // ---
 
-    _break_statement: $ =>
+    break_statement: $ =>
       seq(
         "break",
         optional(
-          $._identifier,
+          $.identifier,
         ),
         ";",
       ),
 
     // ---
 
-    _return_statement: $ =>
+    return_statement: $ =>
       seq(
         "return",
         optional(
-          $._expression,
+          $.expression,
         ),
         ";",
       ),
 
     // ---
 
-    _goto_statement: $ =>
+    goto_statement: $ =>
       choice(
         seq(
           "goto",
-          $._identifier,
+          $.identifier,
           ";",
         ),
         seq(
@@ -10065,176 +10065,176 @@ module.exports = grammar({
         seq(
           "goto",
           "case",
-          $._expression,
+          $.expression,
           ";",
         ),
       ),
 
     // ---
 
-    _with_statement: $ =>
+    with_statement: $ =>
       choice(
         seq(
           "with",
           "(",
-          $._expression,
+          $.expression,
           ")",
-          $._scope_statement,
+          $.scope_statement,
         ),
         seq(
           "with",
           "(",
-          $._symbol,
+          $.symbol,
           ")",
-          $._scope_statement,
+          $.scope_statement,
         ),
         seq(
           "with",
           "(",
-          $._template_instance,
+          $.template_instance,
           ")",
-          $._scope_statement,
+          $.scope_statement,
         ),
       ),
 
     // ---
 
-    _synchronized_statement: $ =>
+    synchronized_statement: $ =>
       choice(
         seq(
           "synchronized",
-          $._scope_statement,
+          $.scope_statement,
         ),
         seq(
           "synchronized",
           "(",
-          $._expression,
+          $.expression,
           ")",
-          $._scope_statement,
+          $.scope_statement,
         ),
       ),
 
     // ---
 
-    _try_statement: $ =>
+    try_statement: $ =>
       choice(
         seq(
           "try",
-          $._scope_statement,
-          $._catches,
+          $.scope_statement,
+          $.catches,
         ),
         seq(
           "try",
-          $._scope_statement,
-          $._catches,
-          $._finally_statement,
+          $.scope_statement,
+          $.catches,
+          $.finally_statement,
         ),
         seq(
           "try",
-          $._scope_statement,
-          $._finally_statement,
+          $.scope_statement,
+          $.finally_statement,
         ),
       ),
 
-    _catches: $ =>
+    catches: $ =>
       repeat1(
-        $._catch,
+        $.catch,
       ),
 
-    _catch: $ =>
+    catch: $ =>
       seq(
         "catch",
         "(",
-        $._catch_parameter,
+        $.catch_parameter,
         ")",
-        $._no_scope_non_empty_statement,
+        $.no_scope_non_empty_statement,
       ),
 
-    _catch_parameter: $ =>
+    catch_parameter: $ =>
       seq(
-        $._basic_type,
+        $.basic_type,
         optional(
-          $._identifier,
+          $.identifier,
         ),
       ),
 
-    _finally_statement: $ =>
+    finally_statement: $ =>
       seq(
         "finally",
-        $._no_scope_non_empty_statement,
+        $.no_scope_non_empty_statement,
       ),
 
     // ---
 
-    _throw_statement: $ =>
+    throw_statement: $ =>
       seq(
         "throw",
-        $._expression,
+        $.expression,
         ";",
       ),
 
     // ---
 
-    _scope_guard_statement: $ =>
+    scope_guard_statement: $ =>
       choice(
         seq(
           "scope",
           "(",
           "exit",
           ")",
-          $._non_empty_or_scope_block_statement,
+          $.non_empty_or_scope_block_statement,
         ),
         seq(
           "scope",
           "(",
           "success",
           ")",
-          $._non_empty_or_scope_block_statement,
+          $.non_empty_or_scope_block_statement,
         ),
         seq(
           "scope",
           "(",
           "failure",
           ")",
-          $._non_empty_or_scope_block_statement,
+          $.non_empty_or_scope_block_statement,
         ),
       ),
 
     // ---
 
-    _asm_statement: $ =>
+    asm_statement: $ =>
       seq(
         "asm",
         optional(
-          $._function_attributes,
+          $.function_attributes,
         ),
         "{",
         optional(
-          $._asm_instruction_list,
+          $.asm_instruction_list,
         ),
         "}",
       ),
 
-    _asm_instruction_list: $ =>
+    asm_instruction_list: $ =>
       choice(
         seq(
-          $._asm_instruction,
+          $.asm_instruction,
           ";",
         ),
         seq(
-          $._asm_instruction,
+          $.asm_instruction,
           ";",
-          $._asm_instruction_list,
+          $.asm_instruction_list,
         ),
       ),
 
     // ---
 
-    _mixin_statement: $ =>
+    mixin_statement: $ =>
       seq(
         "mixin",
         "(",
-        $._argument_list,
+        $.argument_list,
         ")",
         ";",
       ),
@@ -10243,70 +10243,70 @@ module.exports = grammar({
     // https://dlang.org/spec/struct.html
     // ------------------------------------------------------------------------
 
-    _aggregate_declaration: $ =>
+    aggregate_declaration: $ =>
       choice(
-        $._class_declaration,
-        $._interface_declaration,
-        $._struct_declaration,
-        $._union_declaration,
+        $.class_declaration,
+        $.interface_declaration,
+        $.struct_declaration,
+        $.union_declaration,
       ),
 
-    _struct_declaration: $ =>
+    struct_declaration: $ =>
       choice(
         seq(
           "struct",
-          $._identifier,
+          $.identifier,
           ";",
         ),
         seq(
           "struct",
-          $._identifier,
-          $._aggregate_body,
+          $.identifier,
+          $.aggregate_body,
         ),
-        $._struct_template_declaration,
-        $._anon_struct_declaration,
+        $.struct_template_declaration,
+        $.anon_struct_declaration,
       ),
 
-    _anon_struct_declaration: $ =>
+    anon_struct_declaration: $ =>
       seq(
         "struct",
-        $._aggregate_body,
+        $.aggregate_body,
       ),
 
-    _union_declaration: $ =>
+    union_declaration: $ =>
       choice(
         seq(
           "union",
-          $._identifier,
+          $.identifier,
           ";",
         ),
         seq(
           "union",
-          $._identifier,
-          $._aggregate_body,
+          $.identifier,
+          $.aggregate_body,
         ),
-        $._union_template_declaration,
-        $._anon_union_declaration,
+        $.union_template_declaration,
+        $.anon_union_declaration,
       ),
 
-    _anon_union_declaration: $ =>
+    anon_union_declaration: $ =>
       seq(
         "union",
-        $._aggregate_body,
+        $.aggregate_body,
       ),
 
-    _aggregate_body: $ =>
+    aggregate_body: $ =>
       seq(
         "{",
         optional(
-          $._decl_defs,
+          $.decl_defs,
         ),
         "}",
       ),
 
     // ---
 
-    _postblit: $ =>
+    postblit: $ =>
       choice(
         seq(
           "this",
@@ -10314,7 +10314,7 @@ module.exports = grammar({
           "this",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           ";",
         ),
@@ -10324,30 +10324,30 @@ module.exports = grammar({
           "this",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
-          $._function_body,
+          $.function_body,
         ),
       ),
 
     // ---
 
-    _invariant: $ =>
+    invariant: $ =>
       choice(
         seq(
           "invariant",
           "(",
           ")",
-          $._block_statement,
+          $.block_statement,
         ),
         seq(
           "invariant",
-          $._block_statement,
+          $.block_statement,
         ),
         seq(
           "invariant",
           "(",
-          $._assert_arguments,
+          $.assert_arguments,
           ")",
           ";",
         ),
@@ -10357,86 +10357,86 @@ module.exports = grammar({
     // https://dlang.org/spec/class.html
     // ------------------------------------------------------------------------
 
-    _class_declaration: $ =>
+    class_declaration: $ =>
       choice(
         seq(
           "class",
-          $._identifier,
+          $.identifier,
           ";",
         ),
         seq(
           "class",
-          $._identifier,
+          $.identifier,
           optional(
-            $._base_class_list,
+            $.base_class_list,
           ),
-          $._aggregate_body,
+          $.aggregate_body,
         ),
-        $._class_template_declaration,
+        $.class_template_declaration,
       ),
 
-    _base_class_list: $ =>
+    base_class_list: $ =>
       choice(
         seq(
           ":",
-          $._super_class_or_interface,
+          $.super_class_or_interface,
         ),
         seq(
           ":",
-          $._super_class_or_interface,
+          $.super_class_or_interface,
           ",",
-          $._interfaces,
+          $.interfaces,
         ),
       ),
 
-    _super_class_or_interface: $ =>
-      $._basic_type,
+    super_class_or_interface: $ =>
+      $.basic_type,
 
-    _interfaces: $ =>
+    interfaces: $ =>
       choice(
-        $._interface,
+        $.interface,
         seq(
-          $._interface,
+          $.interface,
           ",",
-          $._interfaces,
+          $.interfaces,
         ),
       ),
 
-    _interface: $ =>
-      $._basic_type,
+    interface: $ =>
+      $.basic_type,
 
     // ---
 
-    _constructor: $ =>
+    constructor: $ =>
       choice(
         seq(
           "this",
-          $._parameters,
+          $.parameters,
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
-          $._function_body,
+          $.function_body,
         ),
-        $._constructor_template,
+        $.constructor_template,
       ),
 
     // ---
 
-    _destructor: $ =>
+    destructor: $ =>
       seq(
         "~",
         "this",
         "(",
         ")",
         optional(
-          $._member_function_attributes,
+          $.member_function_attributes,
         ),
-        $._function_body,
+        $.function_body,
       ),
 
     // ---
 
-    _static_constructor: $ =>
+    static_constructor: $ =>
       choice(
         seq(
           "static",
@@ -10444,7 +10444,7 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           ";",
         ),
@@ -10454,15 +10454,15 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
-          $._function_body,
+          $.function_body,
         ),
       ),
 
     // ---
 
-    _static_destructor: $ =>
+    static_destructor: $ =>
       choice(
         seq(
           "static",
@@ -10471,7 +10471,7 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           ";",
         ),
@@ -10482,15 +10482,15 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
-          $._function_body,
+          $.function_body,
         ),
       ),
 
     // ---
 
-    _shared_static_constructor: $ =>
+    shared_static_constructor: $ =>
       choice(
         seq(
           "shared",
@@ -10499,7 +10499,7 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           ";",
         ),
@@ -10510,15 +10510,15 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
-          $._function_body,
+          $.function_body,
         ),
       ),
 
     // ---
 
-    _shared_static_destructor: $ =>
+    shared_static_destructor: $ =>
       choice(
         seq(
           "shared",
@@ -10528,7 +10528,7 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           ";",
         ),
@@ -10540,66 +10540,66 @@ module.exports = grammar({
           "(",
           ")",
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
-          $._function_body,
+          $.function_body,
         ),
       ),
 
     // ---
 
-    _allocator: $ =>
+    allocator: $ =>
       seq(
         "new",
-        $._parameters,
-        $._function_body,
+        $.parameters,
+        $.function_body,
       ),
 
     // ---
 
-    _deallocator: $ =>
+    deallocator: $ =>
       seq(
         "delete",
-        $._parameters,
-        $._function_body,
+        $.parameters,
+        $.function_body,
       ),
 
     // ---
 
-    _alias_this: $ =>
+    alias_this: $ =>
       seq(
         "alias",
-        $._identifier,
+        $.identifier,
         "this",
         ";",
       ),
 
     // ---
 
-    _new_anon_class_expression: $ =>
+    new_anon_class_expression: $ =>
       seq(
         "new",
         optional(
-          $._allocator_arguments,
+          $.allocator_arguments,
         ),
         "class",
         optional(
-          $._constructor_args,
+          $.constructor_args,
         ),
         optional(
-          $._super_class_or_interface,
+          $.super_class_or_interface,
         ),
         optional(
-          $._interfaces,
+          $.interfaces,
         ),
-        $._aggregate_body,
+        $.aggregate_body,
       ),
 
-    _constructor_args: $ =>
+    constructor_args: $ =>
       seq(
         "(",
         optional(
-          $._argument_list,
+          $.argument_list,
         ),
         ")",
       ),
@@ -10608,157 +10608,157 @@ module.exports = grammar({
     // https://dlang.org/spec/interface.html
     // ------------------------------------------------------------------------
 
-    _interface_declaration: $ =>
+    interface_declaration: $ =>
       choice(
         seq(
           "interface",
-          $._identifier,
+          $.identifier,
           ";",
         ),
         seq(
           "interface",
-          $._identifier,
+          $.identifier,
           optional(
-            $._base_interface_list,
+            $.base_interface_list,
           ),
-          $._aggregate_body,
+          $.aggregate_body,
         ),
-        $._interface_template_declaration,
+        $.interface_template_declaration,
       ),
 
-    _base_interface_list: $ =>
+    base_interface_list: $ =>
       seq(
         ":",
-        $._interfaces,
+        $.interfaces,
       ),
 
     // ------------------------------------------------------------------------
     // https://dlang.org/spec/enum.html
     // ------------------------------------------------------------------------
 
-    _enum_declaration: $ =>
+    enum_declaration: $ =>
       choice(
         seq(
           "enum",
-          $._identifier,
-          $._enum_body,
+          $.identifier,
+          $.enum_body,
         ),
         seq(
           "enum",
-          $._identifier,
+          $.identifier,
           ":",
-          $._enum_base_type,
-          $._enum_body,
+          $.enum_base_type,
+          $.enum_body,
         ),
-        $._anonymous_enum_declaration,
+        $.anonymous_enum_declaration,
       ),
 
-    _enum_base_type: $ =>
-      $._type,
+    enum_base_type: $ =>
+      $.type,
 
-    _enum_body: $ =>
+    enum_body: $ =>
       choice(
         seq(
           "{",
-          $._enum_members,
+          $.enum_members,
           "}",
         ),
         ";",
       ),
 
-    _enum_members: $ =>
+    enum_members: $ =>
       choice(
-        $._enum_member,
+        $.enum_member,
         seq(
-          $._enum_member,
+          $.enum_member,
           ",",
         ),
         seq(
-          $._enum_member,
+          $.enum_member,
           ",",
-          $._enum_members,
+          $.enum_members,
         ),
       ),
 
-    _enum_member_attributes: $ =>
+    enum_member_attributes: $ =>
       repeat1(
-        $._enum_member_attribute,
+        $.enum_member_attribute,
       ),
 
-    _enum_member_attribute: $ =>
+    enum_member_attribute: $ =>
       choice(
-        $._deprecated_attribute,
-        $._user_defined_attribute,
+        $.deprecated_attribute,
+        $.user_defined_attribute,
         seq(
           "@",
           "disable",
         ),
       ),
 
-    _enum_member: $ =>
+    enum_member: $ =>
       choice(
         seq(
           optional(
-            $._enum_member_attributes,
+            $.enum_member_attributes,
           ),
-          $._identifier,
+          $.identifier,
         ),
         seq(
           optional(
-            $._enum_member_attributes,
+            $.enum_member_attributes,
           ),
-          $._identifier,
+          $.identifier,
           "=",
-          $._assign_expression,
+          $.assign_expression,
         ),
       ),
 
-    _anonymous_enum_declaration: $ =>
+    anonymous_enum_declaration: $ =>
       choice(
         seq(
           "enum",
           ":",
-          $._enum_base_type,
+          $.enum_base_type,
           "{",
-          $._enum_members,
+          $.enum_members,
           "}",
         ),
         seq(
           "enum",
           "{",
-          $._enum_members,
+          $.enum_members,
           "}",
         ),
         seq(
           "enum",
           "{",
-          $._anonymous_enum_members,
+          $.anonymous_enum_members,
           "}",
         ),
       ),
 
-    _anonymous_enum_members: $ =>
+    anonymous_enum_members: $ =>
       choice(
-        $._anonymous_enum_member,
+        $.anonymous_enum_member,
         seq(
-          $._anonymous_enum_member,
+          $.anonymous_enum_member,
           ",",
         ),
         seq(
-          $._anonymous_enum_member,
+          $.anonymous_enum_member,
           ",",
-          $._anonymous_enum_members,
+          $.anonymous_enum_members,
         ),
       ),
 
-    _anonymous_enum_member: $ =>
+    anonymous_enum_member: $ =>
       choice(
-        $._enum_member,
+        $.enum_member,
         seq(
-          $._type,
-          $._identifier,
+          $.type,
+          $.identifier,
           "=",
-          $._assign_expression,
+          $.assign_expression,
         ),
       ),
 
@@ -10766,141 +10766,141 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html
     // ------------------------------------------------------------------------
 
-    _func_declaration: $ =>
+    func_declaration: $ =>
       choice(
         seq(
           optional(
-            $._storage_classes,
+            $.storage_classes,
           ),
-          $._basic_type,
-          $._func_declarator,
-          $._function_body,
+          $.basic_type,
+          $.func_declarator,
+          $.function_body,
         ),
-        $._auto_func_declaration,
+        $.auto_func_declaration,
       ),
 
-    _auto_func_declaration: $ =>
+    auto_func_declaration: $ =>
       seq(
-        $._storage_classes,
-        $._identifier,
-        $._func_declarator_suffix,
-        $._function_body,
+        $.storage_classes,
+        $.identifier,
+        $.func_declarator_suffix,
+        $.function_body,
       ),
 
-    _func_declarator: $ =>
+    func_declarator: $ =>
       seq(
         optional(
-          $._type_suffixes,
+          $.type_suffixes,
         ),
-        $._identifier,
-        $._func_declarator_suffix,
+        $.identifier,
+        $.func_declarator_suffix,
       ),
 
-    _func_declarator_suffix: $ =>
+    func_declarator_suffix: $ =>
       choice(
         seq(
-          $._parameters,
+          $.parameters,
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
         ),
         seq(
-          $._template_parameters,
-          $._parameters,
+          $.template_parameters,
+          $.parameters,
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           optional(
-            $._constraint,
+            $.constraint,
           ),
         ),
       ),
 
     // ---
 
-    _parameters: $ =>
+    parameters: $ =>
       seq(
         "(",
         optional(
-          $._parameter_list,
+          $.parameter_list,
         ),
         ")",
       ),
 
-    _parameter_list: $ =>
+    parameter_list: $ =>
       choice(
-        $._parameter,
+        $.parameter,
         seq(
-          $._parameter,
+          $.parameter,
           ",",
-          $._parameter_list,
+          $.parameter_list,
         ),
         seq(
-          $._variadic_arguments_attributes,
+          $.variadic_arguments_attributes,
           "...",
         ),
       ),
 
-    _parameter: $ =>
+    parameter: $ =>
       choice(
         seq(
           optional(
-            $._parameter_attributes,
+            $.parameter_attributes,
           ),
-          $._basic_type,
-          $._declarator,
+          $.basic_type,
+          $.declarator,
         ),
         seq(
           optional(
-            $._parameter_attributes,
+            $.parameter_attributes,
           ),
-          $._basic_type,
-          $._declarator,
+          $.basic_type,
+          $.declarator,
           "...",
         ),
         seq(
           optional(
-            $._parameter_attributes,
+            $.parameter_attributes,
           ),
-          $._basic_type,
-          $._declarator,
+          $.basic_type,
+          $.declarator,
           "=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
           optional(
-            $._parameter_attributes,
+            $.parameter_attributes,
           ),
-          $._type,
+          $.type,
         ),
         seq(
           optional(
-            $._parameter_attributes,
+            $.parameter_attributes,
           ),
-          $._type,
+          $.type,
           "...",
         ),
       ),
 
-    _parameter_attributes: $ =>
+    parameter_attributes: $ =>
       choice(
-        $._in_out,
-        $._user_defined_attribute,
+        $.in_out,
+        $.user_defined_attribute,
         seq(
-          $._parameter_attributes,
-          $._in_out,
+          $.parameter_attributes,
+          $.in_out,
         ),
         seq(
-          $._parameter_attributes,
-          $._user_defined_attribute,
+          $.parameter_attributes,
+          $.user_defined_attribute,
         ),
-        $._parameter_attributes,
+        $.parameter_attributes,
       ),
 
-    _in_out: $ =>
+    in_out: $ =>
       choice(
         "auto",
-        $._type_ctor,
+        $.type_ctor,
         "final",
         "in",
         "lazy",
@@ -10913,12 +10913,12 @@ module.exports = grammar({
         "scope",
       ),
 
-    _variadic_arguments_attributes: $ =>
+    variadic_arguments_attributes: $ =>
       repeat1(
-        $._variadic_arguments_attribute,
+        $.variadic_arguments_attribute,
       ),
 
-    _variadic_arguments_attribute: $ =>
+    variadic_arguments_attribute: $ =>
       choice(
         "const",
         "immutable",
@@ -10929,167 +10929,167 @@ module.exports = grammar({
 
     // ---
 
-    _function_attributes: $ =>
+    function_attributes: $ =>
       repeat1(
-        $._function_attribute,
+        $.function_attribute,
       ),
 
-    _function_attribute: $ =>
+    function_attribute: $ =>
       choice(
-        $._function_attribute_kwd,
-        $._property,
+        $.function_attribute_kwd,
+        $.property,
       ),
 
-    _member_function_attributes: $ =>
+    member_function_attributes: $ =>
       repeat1(
-        $._member_function_attribute,
+        $.member_function_attribute,
       ),
 
-    _member_function_attribute: $ =>
+    member_function_attribute: $ =>
       choice(
         "const",
         "immutable",
         "inout",
         "return",
         "shared",
-        $._function_attribute,
+        $.function_attribute,
       ),
 
     // ---
 
-    _function_body: $ =>
+    function_body: $ =>
       choice(
-        $._specified_function_body,
-        $._missing_function_body,
-        $._shortened_function_body,
+        $.specified_function_body,
+        $.missing_function_body,
+        $.shortened_function_body,
       ),
 
-    _function_literal_body: $ =>
-      $._block_statement,
+    function_literal_body: $ =>
+      $.block_statement,
 
-    _specified_function_body: $ =>
+    specified_function_body: $ =>
       choice(
         seq(
           optional(
             "do",
           ),
-          $._block_statement,
+          $.block_statement,
         ),
         seq(
           optional(
-            $._function_contracts,
+            $.function_contracts,
           ),
-          $._in_out_contract_expression,
+          $.in_out_contract_expression,
           optional(
             "do",
           ),
-          $._block_statement,
+          $.block_statement,
         ),
         seq(
           optional(
-            $._function_contracts,
+            $.function_contracts,
           ),
-          $._in_out_statement,
+          $.in_out_statement,
           "do",
-          $._block_statement,
+          $.block_statement,
         ),
       ),
 
-    _missing_function_body: $ =>
+    missing_function_body: $ =>
       choice(
         ";",
         seq(
           optional(
-            $._function_contracts,
+            $.function_contracts,
           ),
-          $._in_out_contract_expression,
+          $.in_out_contract_expression,
           ";",
         ),
         seq(
           optional(
-            $._function_contracts,
+            $.function_contracts,
           ),
-          $._in_out_statement,
+          $.in_out_statement,
         ),
       ),
 
-    _shortened_function_body: $ =>
+    shortened_function_body: $ =>
       seq(
         "=>",
-        $._assign_expression,
+        $.assign_expression,
         ";",
       ),
 
     // ---
 
-    _function_contracts: $ =>
+    function_contracts: $ =>
       repeat1(
-        $._function_contract,
+        $.function_contract,
       ),
 
-    _function_contract: $ =>
+    function_contract: $ =>
       choice(
-        $._in_out_contract_expression,
-        $._in_out_statement,
+        $.in_out_contract_expression,
+        $.in_out_statement,
       ),
 
-    _in_out_contract_expression: $ =>
+    in_out_contract_expression: $ =>
       choice(
-        $._in_contract_expression,
-        $._out_contract_expression,
+        $.in_contract_expression,
+        $.out_contract_expression,
       ),
 
-    _in_out_statement: $ =>
+    in_out_statement: $ =>
       choice(
-        $._in_statement,
-        $._out_statement,
+        $.in_statement,
+        $.out_statement,
       ),
 
-    _in_contract_expression: $ =>
+    in_contract_expression: $ =>
       seq(
         "in",
         "(",
-        $._assert_arguments,
+        $.assert_arguments,
         ")",
       ),
 
-    _out_contract_expression: $ =>
+    out_contract_expression: $ =>
       choice(
         seq(
           "out",
           "(",
           ";",
-          $._assert_arguments,
+          $.assert_arguments,
           ")",
         ),
         seq(
           "out",
           "(",
-          $._identifier,
+          $.identifier,
           ";",
-          $._assert_arguments,
+          $.assert_arguments,
           ")",
         ),
       ),
 
-    _in_statement: $ =>
+    in_statement: $ =>
       seq(
         "in",
-        $._block_statement,
+        $.block_statement,
       ),
 
-    _out_statement: $ =>
+    out_statement: $ =>
       choice(
         seq(
           "out",
-          $._block_statement,
+          $.block_statement,
         ),
         seq(
           "out",
           "(",
-          $._identifier,
+          $.identifier,
           ")",
-          $._block_statement,
+          $.block_statement,
         ),
       ),
 
@@ -11097,422 +11097,422 @@ module.exports = grammar({
     // https://dlang.org/spec/template.html
     // ------------------------------------------------------------------------
 
-    _template_declaration: $ =>
+    template_declaration: $ =>
       seq(
         "template",
-        $._identifier,
-        $._template_parameters,
+        $.identifier,
+        $.template_parameters,
         optional(
-          $._constraint,
+          $.constraint,
         ),
         "{",
         optional(
-          $._decl_defs,
+          $.decl_defs,
         ),
         "}",
       ),
 
-    _template_parameters: $ =>
+    template_parameters: $ =>
       seq(
         "(",
         optional(
-          $._template_parameter_list,
+          $.template_parameter_list,
         ),
         ")",
       ),
 
-    _template_parameter_list: $ =>
+    template_parameter_list: $ =>
       choice(
-        $._template_parameter,
+        $.template_parameter,
         seq(
-          $._template_parameter,
+          $.template_parameter,
           ",",
         ),
         seq(
-          $._template_parameter,
+          $.template_parameter,
           ",",
-          $._template_parameter_list,
+          $.template_parameter_list,
         ),
       ),
 
-    _template_parameter: $ =>
+    template_parameter: $ =>
       choice(
-        $._template_type_parameter,
-        $._template_value_parameter,
-        $._template_alias_parameter,
-        $._template_sequence_parameter,
-        $._template_this_parameter,
+        $.template_type_parameter,
+        $.template_value_parameter,
+        $.template_alias_parameter,
+        $.template_sequence_parameter,
+        $.template_this_parameter,
       ),
 
     // ---
 
-    _template_instance: $ =>
+    template_instance: $ =>
       seq(
-        $._identifier,
-        $._template_arguments,
+        $.identifier,
+        $.template_arguments,
       ),
 
-    _template_arguments: $ =>
+    template_arguments: $ =>
       choice(
         seq(
           "!",
           "(",
           optional(
-            $._template_argument_list,
+            $.template_argument_list,
           ),
           ")",
         ),
         seq(
           "!",
-          $._template_single_argument,
+          $.template_single_argument,
         ),
       ),
 
-    _template_argument_list: $ =>
+    template_argument_list: $ =>
       choice(
-        $._template_argument,
+        $.template_argument,
         seq(
-          $._template_argument,
+          $.template_argument,
           ",",
         ),
         seq(
-          $._template_argument,
+          $.template_argument,
           ",",
-          $._template_argument_list,
+          $.template_argument_list,
         ),
       ),
 
-    _template_argument: $ =>
+    template_argument: $ =>
       choice(
-        $._type,
-        $._assign_expression,
-        $._symbol,
+        $.type,
+        $.assign_expression,
+        $.symbol,
       ),
 
-    _symbol: $ =>
+    symbol: $ =>
       choice(
-        $._symbol_tail,
+        $.symbol_tail,
         seq(
           ".",
-          $._symbol_tail,
+          $.symbol_tail,
         ),
       ),
 
-    _symbol_tail: $ =>
+    symbol_tail: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
-          $._identifier,
+          $.identifier,
           ".",
-          $._symbol_tail,
+          $.symbol_tail,
         ),
-        $._template_instance,
+        $.template_instance,
         seq(
-          $._template_instance,
+          $.template_instance,
           ".",
-          $._symbol_tail,
+          $.symbol_tail,
         ),
       ),
 
-    _template_single_argument: $ =>
+    template_single_argument: $ =>
       choice(
-        $._identifier,
-        $._fundamental_type,
-        $._character_literal,
-        $._string_literal,
-        $._integer_literal,
-        $._float_literal,
+        $.identifier,
+        $.fundamental_type,
+        $.character_literal,
+        $.string_literal,
+        $.integer_literal,
+        $.float_literal,
         "true",
         "false",
         "null",
         "this",
-        $._special_keyword,
+        $.special_keyword,
       ),
 
     // ---
 
-    _template_type_parameter: $ =>
+    template_type_parameter: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
-          $._identifier,
-          $._template_type_parameter_specialization,
+          $.identifier,
+          $.template_type_parameter_specialization,
         ),
         seq(
-          $._identifier,
-          $._template_type_parameter_default,
+          $.identifier,
+          $.template_type_parameter_default,
         ),
         seq(
-          $._identifier,
-          $._template_type_parameter_specialization,
-          $._template_type_parameter_default,
+          $.identifier,
+          $.template_type_parameter_specialization,
+          $.template_type_parameter_default,
         ),
       ),
 
-    _template_type_parameter_specialization: $ =>
+    template_type_parameter_specialization: $ =>
       seq(
         ":",
-        $._type,
+        $.type,
       ),
 
-    _template_type_parameter_default: $ =>
+    template_type_parameter_default: $ =>
       seq(
         "=",
-        $._type,
+        $.type,
       ),
 
     // ---
 
-    _template_this_parameter: $ =>
+    template_this_parameter: $ =>
       seq(
         "this",
-        $._template_type_parameter,
+        $.template_type_parameter,
       ),
 
     // ---
 
-    _template_value_parameter: $ =>
+    template_value_parameter: $ =>
       choice(
         seq(
-          $._basic_type,
-          $._declarator,
+          $.basic_type,
+          $.declarator,
         ),
         seq(
-          $._basic_type,
-          $._declarator,
-          $._template_value_parameter_specialization,
+          $.basic_type,
+          $.declarator,
+          $.template_value_parameter_specialization,
         ),
         seq(
-          $._basic_type,
-          $._declarator,
-          $._template_value_parameter_default,
+          $.basic_type,
+          $.declarator,
+          $.template_value_parameter_default,
         ),
         seq(
-          $._basic_type,
-          $._declarator,
-          $._template_value_parameter_specialization,
-          $._template_value_parameter_default,
+          $.basic_type,
+          $.declarator,
+          $.template_value_parameter_specialization,
+          $.template_value_parameter_default,
         ),
       ),
 
-    _template_value_parameter_specialization: $ =>
+    template_value_parameter_specialization: $ =>
       seq(
         ":",
-        $._conditional_expression,
+        $.conditional_expression,
       ),
 
-    _template_value_parameter_default: $ =>
+    template_value_parameter_default: $ =>
       choice(
         seq(
           "=",
-          $._assign_expression,
+          $.assign_expression,
         ),
         seq(
           "=",
-          $._special_keyword,
+          $.special_keyword,
         ),
       ),
 
     // ---
 
-    _template_alias_parameter: $ =>
+    template_alias_parameter: $ =>
       choice(
         seq(
           "alias",
-          $._identifier,
+          $.identifier,
           optional(
-            $._template_alias_parameter_specialization,
+            $.template_alias_parameter_specialization,
           ),
           optional(
-            $._template_alias_parameter_default,
+            $.template_alias_parameter_default,
           ),
         ),
         seq(
           "alias",
-          $._basic_type,
-          $._declarator,
+          $.basic_type,
+          $.declarator,
           optional(
-            $._template_alias_parameter_specialization,
+            $.template_alias_parameter_specialization,
           ),
           optional(
-            $._template_alias_parameter_default,
+            $.template_alias_parameter_default,
           ),
         ),
       ),
 
-    _template_alias_parameter_specialization: $ =>
+    template_alias_parameter_specialization: $ =>
       choice(
         seq(
           ":",
-          $._type,
+          $.type,
         ),
         seq(
           ":",
-          $._conditional_expression,
+          $.conditional_expression,
         ),
       ),
 
-    _template_alias_parameter_default: $ =>
+    template_alias_parameter_default: $ =>
       choice(
         seq(
           "=",
-          $._type,
+          $.type,
         ),
         seq(
           "=",
-          $._conditional_expression,
+          $.conditional_expression,
         ),
       ),
 
     // ---
 
-    _template_sequence_parameter: $ =>
+    template_sequence_parameter: $ =>
       seq(
-        $._identifier,
+        $.identifier,
         "...",
       ),
 
     // ---
 
-    _constructor_template: $ =>
+    constructor_template: $ =>
       choice(
         seq(
           "this",
-          $._template_parameters,
-          $._parameters,
+          $.template_parameters,
+          $.parameters,
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           optional(
-            $._constraint,
+            $.constraint,
           ),
           ":",
         ),
         seq(
           "this",
-          $._template_parameters,
-          $._parameters,
+          $.template_parameters,
+          $.parameters,
           optional(
-            $._member_function_attributes,
+            $.member_function_attributes,
           ),
           optional(
-            $._constraint,
+            $.constraint,
           ),
-          $._function_body,
+          $.function_body,
         ),
       ),
 
     // ---
 
-    _class_template_declaration: $ =>
+    class_template_declaration: $ =>
       choice(
         seq(
           "class",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           ";",
         ),
         seq(
           "class",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           optional(
-            $._constraint,
+            $.constraint,
           ),
           optional(
-            $._base_class_list,
+            $.base_class_list,
           ),
-          $._aggregate_body,
+          $.aggregate_body,
         ),
         seq(
           "class",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           optional(
-            $._base_class_list,
+            $.base_class_list,
           ),
           optional(
-            $._constraint,
+            $.constraint,
           ),
-          $._aggregate_body,
+          $.aggregate_body,
         ),
       ),
 
-    _interface_template_declaration: $ =>
+    interface_template_declaration: $ =>
       choice(
         seq(
           "interface",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           ";",
         ),
         seq(
           "interface",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           optional(
-            $._constraint,
+            $.constraint,
           ),
           optional(
-            $._base_interface_list,
+            $.base_interface_list,
           ),
-          $._aggregate_body,
+          $.aggregate_body,
         ),
         seq(
           "interface",
-          $._identifier,
-          $._template_parameters,
-          $._base_interface_list,
-          $._constraint,
-          $._aggregate_body,
+          $.identifier,
+          $.template_parameters,
+          $.base_interface_list,
+          $.constraint,
+          $.aggregate_body,
         ),
       ),
 
-    _struct_template_declaration: $ =>
+    struct_template_declaration: $ =>
       choice(
         seq(
           "struct",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           ";",
         ),
         seq(
           "struct",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           optional(
-            $._constraint,
+            $.constraint,
           ),
-          $._aggregate_body,
+          $.aggregate_body,
         ),
       ),
 
-    _union_template_declaration: $ =>
+    union_template_declaration: $ =>
       choice(
         seq(
           "union",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           ";",
         ),
         seq(
           "union",
-          $._identifier,
-          $._template_parameters,
+          $.identifier,
+          $.template_parameters,
           optional(
-            $._constraint,
+            $.constraint,
           ),
-          $._aggregate_body,
+          $.aggregate_body,
         ),
       ),
 
     // ---
 
-    _constraint: $ =>
+    constraint: $ =>
       seq(
         "if",
         "(",
-        $._expression,
+        $.expression,
         ")",
       ),
 
@@ -11520,61 +11520,61 @@ module.exports = grammar({
     // https://dlang.org/spec/template-mixin.html
     // ------------------------------------------------------------------------
 
-    _template_mixin_declaration: $ =>
+    template_mixin_declaration: $ =>
       seq(
         "mixin",
         "template",
-        $._identifier,
-        $._template_parameters,
+        $.identifier,
+        $.template_parameters,
         optional(
-          $._constraint,
+          $.constraint,
         ),
         "{",
         optional(
-          $._decl_defs,
+          $.decl_defs,
         ),
         "}",
       ),
 
-    _template_mixin: $ =>
+    template_mixin: $ =>
       seq(
         "mixin",
-        $._mixin_template_name,
+        $.mixin_template_name,
         optional(
-          $._template_arguments,
+          $.template_arguments,
         ),
         optional(
-          $._identifier,
+          $.identifier,
         ),
         ";",
       ),
 
-    _mixin_template_name: $ =>
+    mixin_template_name: $ =>
       choice(
         seq(
           ".",
-          $._mixin_qualified_identifier,
+          $.mixin_qualified_identifier,
         ),
-        $._mixin_qualified_identifier,
+        $.mixin_qualified_identifier,
         seq(
-          $._typeof,
+          $.typeof,
           ".",
-          $._mixin_qualified_identifier,
+          $.mixin_qualified_identifier,
         ),
       ),
 
-    _mixin_qualified_identifier: $ =>
+    mixin_qualified_identifier: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
-          $._identifier,
+          $.identifier,
           ".",
-          $._mixin_qualified_identifier,
+          $.mixin_qualified_identifier,
         ),
         seq(
-          $._template_instance,
+          $.template_instance,
           ".",
-          $._mixin_qualified_identifier,
+          $.mixin_qualified_identifier,
         ),
       ),
 
@@ -11582,73 +11582,73 @@ module.exports = grammar({
     // https://dlang.org/spec/version.html
     // ------------------------------------------------------------------------
 
-    _conditional_declaration: $ =>
+    conditional_declaration: $ =>
       choice(
         seq(
-          $._condition,
-          $._declaration_block,
+          $.condition,
+          $.declaration_block,
         ),
         seq(
-          $._condition,
-          $._declaration_block,
+          $.condition,
+          $.declaration_block,
           "else",
-          $._declaration_block,
+          $.declaration_block,
         ),
         seq(
-          $._condition,
+          $.condition,
           ":",
           optional(
-            $._decl_defs,
+            $.decl_defs,
           ),
         ),
         seq(
-          $._condition,
-          $._declaration_block,
+          $.condition,
+          $.declaration_block,
           "else",
           ":",
           optional(
-            $._decl_defs,
+            $.decl_defs,
           ),
         ),
       ),
 
-    _conditional_statement: $ =>
+    conditional_statement: $ =>
       choice(
         seq(
-          $._condition,
-          $._no_scope_non_empty_statement,
+          $.condition,
+          $.no_scope_non_empty_statement,
         ),
         seq(
-          $._condition,
-          $._no_scope_non_empty_statement,
+          $.condition,
+          $.no_scope_non_empty_statement,
           "else",
-          $._no_scope_non_empty_statement,
+          $.no_scope_non_empty_statement,
         ),
       ),
 
     // ---
 
-    _condition: $ =>
+    condition: $ =>
       choice(
-        $._version_condition,
-        $._debug_condition,
-        $._static_if_condition,
+        $.version_condition,
+        $.debug_condition,
+        $.static_if_condition,
       ),
 
     // ---
 
-    _version_condition: $ =>
+    version_condition: $ =>
       choice(
         seq(
           "version",
           "(",
-          $._integer_literal,
+          $.integer_literal,
           ")",
         ),
         seq(
           "version",
           "(",
-          $._identifier,
+          $.identifier,
           ")",
         ),
         seq(
@@ -11667,113 +11667,113 @@ module.exports = grammar({
 
     // ---
 
-    _version_specification: $ =>
+    version_specification: $ =>
       choice(
         seq(
           "version",
           "=",
-          $._identifier,
+          $.identifier,
           ";",
         ),
         seq(
           "version",
           "=",
-          $._integer_literal,
+          $.integer_literal,
           ";",
         ),
       ),
 
     // ---
 
-    _debug_condition: $ =>
+    debug_condition: $ =>
       choice(
         "debug",
         seq(
           "debug",
           "(",
-          $._integer_literal,
+          $.integer_literal,
           ")",
         ),
         seq(
           "debug",
           "(",
-          $._identifier,
+          $.identifier,
           ")",
         ),
       ),
 
     // ---
 
-    _debug_specification: $ =>
+    debug_specification: $ =>
       choice(
         seq(
           "debug",
           "=",
-          $._identifier,
+          $.identifier,
           ";",
         ),
         seq(
           "debug",
           "=",
-          $._integer_literal,
+          $.integer_literal,
           ";",
         ),
       ),
 
     // ---
 
-    _static_if_condition: $ =>
+    static_if_condition: $ =>
       seq(
         "static",
         "if",
         "(",
-        $._assign_expression,
+        $.assign_expression,
         ")",
       ),
 
     // ---
 
-    _static_foreach: $ =>
+    static_foreach: $ =>
       choice(
         seq(
           "static",
-          $._aggregate_foreach,
+          $.aggregate_foreach,
         ),
         seq(
           "static",
-          $._range_foreach,
+          $.range_foreach,
         ),
       ),
 
-    _static_foreach_declaration: $ =>
+    static_foreach_declaration: $ =>
       choice(
         seq(
-          $._static_foreach,
-          $._declaration_block,
+          $.static_foreach,
+          $.declaration_block,
         ),
         seq(
-          $._static_foreach,
+          $.static_foreach,
           ":",
           optional(
-            $._decl_defs,
+            $.decl_defs,
           ),
         ),
       ),
 
-    _static_foreach_statement: $ =>
+    static_foreach_statement: $ =>
       seq(
-        $._static_foreach,
-        $._no_scope_non_empty_statement,
+        $.static_foreach,
+        $.no_scope_non_empty_statement,
       ),
 
     // ---
 
-    _static_assert: $ =>
+    static_assert: $ =>
       seq(
         "static",
         "assert",
         "(",
-        $._assert_arguments,
+        $.assert_arguments,
         ")",
         ";",
       ),
@@ -11782,17 +11782,17 @@ module.exports = grammar({
     // https://dlang.org/spec/traits.html
     // ------------------------------------------------------------------------
 
-    _traits_expression: $ =>
+    traits_expression: $ =>
       seq(
         "__traits",
         "(",
-        $._traits_keyword,
+        $.traits_keyword,
         ",",
-        $._traits_arguments,
+        $.traits_arguments,
         ")",
       ),
 
-    _traits_keyword: $ =>
+    traits_keyword: $ =>
       choice(
         "isAbstractClass",
         "isArithmetic",
@@ -11854,132 +11854,132 @@ module.exports = grammar({
         "toType",
       ),
 
-    _traits_arguments: $ =>
+    traits_arguments: $ =>
       choice(
-        $._traits_argument,
+        $.traits_argument,
         seq(
-          $._traits_argument,
+          $.traits_argument,
           ",",
-          $._traits_arguments,
+          $.traits_arguments,
         ),
       ),
 
-    _traits_argument: $ =>
+    traits_argument: $ =>
       choice(
-        $._assign_expression,
-        $._type,
+        $.assign_expression,
+        $.type,
       ),
 
     // ------------------------------------------------------------------------
     // https://dlang.org/spec/unittest.html
     // ------------------------------------------------------------------------
 
-    _unit_test: $ =>
+    unit_test: $ =>
       seq(
         "unittest",
-        $._block_statement,
+        $.block_statement,
       ),
 
     // ------------------------------------------------------------------------
     // https://dlang.org/spec/iasm.html
     // ------------------------------------------------------------------------
 
-    _asm_instruction: $ =>
+    asm_instruction: $ =>
       choice(
         seq(
-          $._identifier,
+          $.identifier,
           ":",
-          $._asm_instruction,
+          $.asm_instruction,
         ),
         seq(
           "align",
-          $._integer_expression,
+          $.integer_expression,
         ),
         "even",
         "naked",
         seq(
           "db",
-          $._operands,
+          $.operands,
         ),
         seq(
           "ds",
-          $._operands,
+          $.operands,
         ),
         seq(
           "di",
-          $._operands,
+          $.operands,
         ),
         seq(
           "dl",
-          $._operands,
+          $.operands,
         ),
         seq(
           "df",
-          $._operands,
+          $.operands,
         ),
         seq(
           "dd",
-          $._operands,
+          $.operands,
         ),
         seq(
           "de",
-          $._operands,
+          $.operands,
         ),
         seq(
           "db",
-          $._string_literal,
+          $.string_literal,
         ),
         seq(
           "ds",
-          $._string_literal,
+          $.string_literal,
         ),
         seq(
           "di",
-          $._string_literal,
+          $.string_literal,
         ),
         seq(
           "dl",
-          $._string_literal,
+          $.string_literal,
         ),
         seq(
           "dw",
-          $._string_literal,
+          $.string_literal,
         ),
         seq(
           "dq",
-          $._string_literal,
+          $.string_literal,
         ),
-        $._opcode,
+        $.opcode,
         seq(
-          $._opcode,
-          $._operands,
+          $.opcode,
+          $.operands,
         ),
       ),
 
-    _opcode: $ =>
-      $._identifier,
+    opcode: $ =>
+      $.identifier,
 
-    _operands: $ =>
+    operands: $ =>
       choice(
-        $._operand,
+        $.operand,
         seq(
-          $._operand,
+          $.operand,
           ",",
-          $._operands,
+          $.operands,
         ),
       ),
 
     // ---
 
-    _integer_expression: $ =>
+    integer_expression: $ =>
       choice(
-        $._integer_literal,
-        $._identifier,
+        $.integer_literal,
+        $.identifier,
       ),
 
     // ---
 
-    _register: $ =>
+    register: $ =>
       choice(
         seq(
           "AL",
@@ -12085,7 +12085,7 @@ module.exports = grammar({
 
     // ---
 
-    _register64: $ =>
+    register64: $ =>
       choice(
         seq(
           "RAX",
@@ -12191,252 +12191,252 @@ module.exports = grammar({
 
     // ---
 
-    _operand: $ =>
-      $._asm_exp,
+    operand: $ =>
+      $.asm_exp,
 
-    _asm_exp: $ =>
+    asm_exp: $ =>
       choice(
-        $._asm_log_or_exp,
+        $.asm_log_or_exp,
         seq(
-          $._asm_log_or_exp,
+          $.asm_log_or_exp,
           "?",
-          $._asm_exp,
+          $.asm_exp,
           ":",
-          $._asm_exp,
+          $.asm_exp,
         ),
       ),
 
-    _asm_log_or_exp: $ =>
+    asm_log_or_exp: $ =>
       choice(
-        $._asm_log_and_exp,
+        $.asm_log_and_exp,
         seq(
-          $._asm_log_or_exp,
+          $.asm_log_or_exp,
           "||",
-          $._asm_log_and_exp,
+          $.asm_log_and_exp,
         ),
       ),
 
-    _asm_log_and_exp: $ =>
+    asm_log_and_exp: $ =>
       choice(
-        $._asm_or_exp,
+        $.asm_or_exp,
         seq(
-          $._asm_log_and_exp,
+          $.asm_log_and_exp,
           "&&",
-          $._asm_or_exp,
+          $.asm_or_exp,
         ),
       ),
 
-    _asm_or_exp: $ =>
+    asm_or_exp: $ =>
       choice(
-        $._asm_xor_exp,
+        $.asm_xor_exp,
         seq(
-          $._asm_or_exp,
+          $.asm_or_exp,
           "|",
-          $._asm_xor_exp,
+          $.asm_xor_exp,
         ),
       ),
 
-    _asm_xor_exp: $ =>
+    asm_xor_exp: $ =>
       choice(
-        $._asm_and_exp,
+        $.asm_and_exp,
         seq(
-          $._asm_xor_exp,
+          $.asm_xor_exp,
           "^",
-          $._asm_and_exp,
+          $.asm_and_exp,
         ),
       ),
 
-    _asm_and_exp: $ =>
+    asm_and_exp: $ =>
       choice(
-        $._asm_equal_exp,
+        $.asm_equal_exp,
         seq(
-          $._asm_and_exp,
+          $.asm_and_exp,
           "&",
-          $._asm_equal_exp,
+          $.asm_equal_exp,
         ),
       ),
 
-    _asm_equal_exp: $ =>
+    asm_equal_exp: $ =>
       choice(
-        $._asm_rel_exp,
+        $.asm_rel_exp,
         seq(
-          $._asm_equal_exp,
+          $.asm_equal_exp,
           "==",
-          $._asm_rel_exp,
+          $.asm_rel_exp,
         ),
         seq(
-          $._asm_equal_exp,
+          $.asm_equal_exp,
           "!=",
-          $._asm_rel_exp,
+          $.asm_rel_exp,
         ),
       ),
 
-    _asm_rel_exp: $ =>
+    asm_rel_exp: $ =>
       choice(
-        $._asm_shift_exp,
+        $.asm_shift_exp,
         seq(
-          $._asm_rel_exp,
+          $.asm_rel_exp,
           "<",
-          $._asm_shift_exp,
+          $.asm_shift_exp,
         ),
         seq(
-          $._asm_rel_exp,
+          $.asm_rel_exp,
           "<",
           "=",
-          $._asm_shift_exp,
+          $.asm_shift_exp,
         ),
         seq(
-          $._asm_rel_exp,
+          $.asm_rel_exp,
           ">",
-          $._asm_shift_exp,
+          $.asm_shift_exp,
         ),
         seq(
-          $._asm_rel_exp,
+          $.asm_rel_exp,
           ">=",
-          $._asm_shift_exp,
+          $.asm_shift_exp,
         ),
       ),
 
-    _asm_shift_exp: $ =>
+    asm_shift_exp: $ =>
       choice(
-        $._asm_add_exp,
+        $.asm_add_exp,
         seq(
-          $._asm_shift_exp,
+          $.asm_shift_exp,
           "<",
           "<",
-          $._asm_add_exp,
+          $.asm_add_exp,
         ),
         seq(
-          $._asm_shift_exp,
+          $.asm_shift_exp,
           ">>",
-          $._asm_add_exp,
+          $.asm_add_exp,
         ),
         seq(
-          $._asm_shift_exp,
+          $.asm_shift_exp,
           ">>>",
-          $._asm_add_exp,
+          $.asm_add_exp,
         ),
       ),
 
-    _asm_add_exp: $ =>
+    asm_add_exp: $ =>
       choice(
-        $._asm_mul_exp,
+        $.asm_mul_exp,
         seq(
-          $._asm_add_exp,
+          $.asm_add_exp,
           "+",
-          $._asm_mul_exp,
+          $.asm_mul_exp,
         ),
         seq(
-          $._asm_add_exp,
+          $.asm_add_exp,
           "-",
-          $._asm_mul_exp,
+          $.asm_mul_exp,
         ),
       ),
 
-    _asm_mul_exp: $ =>
+    asm_mul_exp: $ =>
       choice(
-        $._asm_br_exp,
+        $.asm_br_exp,
         seq(
-          $._asm_mul_exp,
+          $.asm_mul_exp,
           "*",
-          $._asm_br_exp,
+          $.asm_br_exp,
         ),
         seq(
-          $._asm_mul_exp,
+          $.asm_mul_exp,
           "/",
-          $._asm_br_exp,
+          $.asm_br_exp,
         ),
         seq(
-          $._asm_mul_exp,
+          $.asm_mul_exp,
           "%",
-          $._asm_br_exp,
+          $.asm_br_exp,
         ),
       ),
 
-    _asm_br_exp: $ =>
+    asm_br_exp: $ =>
       choice(
-        $._asm_una_exp,
+        $.asm_una_exp,
         seq(
-          $._asm_br_exp,
+          $.asm_br_exp,
           "[",
-          $._asm_exp,
+          $.asm_exp,
           "]",
         ),
       ),
 
-    _asm_una_exp: $ =>
+    asm_una_exp: $ =>
       choice(
         seq(
-          $._asm_type_prefix,
-          $._asm_exp,
+          $.asm_type_prefix,
+          $.asm_exp,
         ),
         seq(
           "offsetof",
-          $._asm_exp,
+          $.asm_exp,
         ),
         seq(
           "seg",
-          $._asm_exp,
+          $.asm_exp,
         ),
         seq(
           "+",
-          $._asm_una_exp,
+          $.asm_una_exp,
         ),
         seq(
           "-",
-          $._asm_una_exp,
+          $.asm_una_exp,
         ),
         seq(
           "!",
-          $._asm_una_exp,
+          $.asm_una_exp,
         ),
         seq(
           "~",
-          $._asm_una_exp,
+          $.asm_una_exp,
         ),
-        $._asm_primary_exp,
+        $.asm_primary_exp,
       ),
 
-    _asm_primary_exp: $ =>
+    asm_primary_exp: $ =>
       choice(
-        $._integer_literal,
-        $._float_literal,
+        $.integer_literal,
+        $.float_literal,
         "__LOCAL_SIZE",
         "$",
-        $._register,
+        $.register,
         seq(
-          $._register,
+          $.register,
           ":",
-          $._asm_exp,
+          $.asm_exp,
         ),
-        $._register64,
+        $.register64,
         seq(
-          $._register64,
+          $.register64,
           ":",
-          $._asm_exp,
+          $.asm_exp,
         ),
-        $._dot_identifier,
+        $.dot_identifier,
         "this",
       ),
 
-    _dot_identifier: $ =>
+    dot_identifier: $ =>
       choice(
-        $._identifier,
+        $.identifier,
         seq(
-          $._identifier,
+          $.identifier,
           ".",
-          $._dot_identifier,
+          $.dot_identifier,
         ),
         seq(
-          $._fundamental_type,
+          $.fundamental_type,
           ".",
-          $._identifier,
+          $.identifier,
         ),
       ),
 
     // ---
 
-    _asm_type_prefix: $ =>
+    asm_type_prefix: $ =>
       choice(
         seq(
           "near",
@@ -12459,7 +12459,7 @@ module.exports = grammar({
           "ptr",
         ),
         seq(
-          $._fundamental_type,
+          $.fundamental_type,
           "ptr",
         ),
       ),
