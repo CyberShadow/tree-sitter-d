@@ -374,6 +374,12 @@ string toString(in Node[] d)
 		if (node.isCallToEmpty("AMP"))
 			s ~= "&";
 		else
+		if (node.isCallToEmpty("LT"))
+			s ~= "<";
+		else
+		if (node.isCallToEmpty("GT"))
+			s ~= ">";
+		else
 		if (node.isCallToEmpty("LPAREN"))
 			s ~= "(";
 		else
