@@ -38,10 +38,9 @@ module.exports = grammar({
     // ---
 
     _white_space: $ =>
-      choice(
+      seq(
         $._space,
-        seq(
-          $._space,
+        optional(
           $._white_space,
         ),
       ),
@@ -91,10 +90,9 @@ module.exports = grammar({
       ),
 
     _nesting_block_comment_characters: $ =>
-      choice(
+      seq(
         $._nesting_block_comment_character,
-        seq(
-          $._nesting_block_comment_character,
+        optional(
           $._nesting_block_comment_characters,
         ),
       ),
@@ -106,10 +104,9 @@ module.exports = grammar({
       ),
 
     _characters: $ =>
-      choice(
+      seq(
         $._character,
-        seq(
-          $._character,
+        optional(
           $._characters,
         ),
       ),
@@ -117,10 +114,9 @@ module.exports = grammar({
     // ---
 
     _tokens: $ =>
-      choice(
+      seq(
         $._token,
-        seq(
-          $._token,
+        optional(
           $._tokens,
         ),
       ),
@@ -193,19 +189,17 @@ module.exports = grammar({
     // ---
 
     _identifier: $ =>
-      choice(
+      seq(
         $._identifier_start,
-        seq(
-          $._identifier_start,
+        optional(
           $._identifier_chars,
         ),
       ),
 
     _identifier_chars: $ =>
-      choice(
+      seq(
         $._identifier_char,
-        seq(
-          $._identifier_char,
+        optional(
           $._identifier_chars,
         ),
       ),
@@ -263,10 +257,9 @@ module.exports = grammar({
       ),
 
     _wysiwyg_characters: $ =>
-      choice(
+      seq(
         $._wysiwyg_character,
-        seq(
-          $._wysiwyg_character,
+        optional(
           $._wysiwyg_characters,
         ),
       ),
@@ -290,10 +283,9 @@ module.exports = grammar({
       ),
 
     _double_quoted_characters: $ =>
-      choice(
+      seq(
         $._double_quoted_character,
-        seq(
-          $._double_quoted_character,
+        optional(
           $._double_quoted_characters,
         ),
       ),
@@ -376,10 +368,9 @@ module.exports = grammar({
       ),
 
     _hex_string_chars: $ =>
-      choice(
+      seq(
         $._hex_string_char,
-        seq(
-          $._hex_string_char,
+        optional(
           $._hex_string_chars,
         ),
       ),
@@ -456,10 +447,9 @@ module.exports = grammar({
     // ---
 
     _integer_literal: $ =>
-      choice(
+      seq(
         $._integer,
-        seq(
-          $._integer,
+        optional(
           $._integer_suffix,
         ),
       ),
@@ -524,19 +514,17 @@ module.exports = grammar({
       ),
 
     _decimal_digits: $ =>
-      choice(
+      seq(
         $._decimal_digit,
-        seq(
-          $._decimal_digit,
+        optional(
           $._decimal_digits,
         ),
       ),
 
     _decimal_digits_us: $ =>
-      choice(
+      seq(
         $._decimal_digit_us,
-        seq(
-          $._decimal_digit_us,
+        optional(
           $._decimal_digits_us,
         ),
       ),
@@ -555,10 +543,9 @@ module.exports = grammar({
       ),
 
     _decimal_digits_no_starting_us: $ =>
-      choice(
+      seq(
         $._decimal_digit,
-        seq(
-          $._decimal_digit,
+        optional(
           $._decimal_digits_us,
         ),
       ),
@@ -594,10 +581,9 @@ module.exports = grammar({
       ),
 
     _binary_digits_us: $ =>
-      choice(
+      seq(
         $._binary_digit_us,
-        seq(
-          $._binary_digit_us,
+        optional(
           $._binary_digits_us,
         ),
       ),
@@ -627,19 +613,17 @@ module.exports = grammar({
       ),
 
     _hex_digits: $ =>
-      choice(
+      seq(
         $._hex_digit,
-        seq(
-          $._hex_digit,
+        optional(
           $._hex_digits,
         ),
       ),
 
     _hex_digits_us: $ =>
-      choice(
+      seq(
         $._hex_digit_us,
-        seq(
-          $._hex_digit_us,
+        optional(
           $._hex_digits_us,
         ),
       ),
@@ -658,10 +642,9 @@ module.exports = grammar({
       ),
 
     _hex_digits_no_starting_us: $ =>
-      choice(
+      seq(
         $._hex_digit,
-        seq(
-          $._hex_digit,
+        optional(
           $._hex_digits_us,
         ),
       ),
@@ -1017,10 +1000,9 @@ module.exports = grammar({
       ),
 
     _decl_defs: $ =>
-      choice(
+      seq(
         $._decl_def,
-        seq(
-          $._decl_def,
+        optional(
           $._decl_defs,
         ),
       ),
@@ -1066,10 +1048,9 @@ module.exports = grammar({
       ),
 
     _module_attributes: $ =>
-      choice(
+      seq(
         $._module_attribute,
-        seq(
-          $._module_attribute,
+        optional(
           $._module_attributes,
         ),
       ),
@@ -1381,10 +1362,9 @@ module.exports = grammar({
       ),
 
     _alt_declarator_suffixes: $ =>
-      choice(
+      seq(
         $._alt_declarator_suffix,
-        seq(
-          $._alt_declarator_suffix,
+        optional(
           $._alt_declarator_suffixes,
         ),
       ),
@@ -1418,10 +1398,9 @@ module.exports = grammar({
     // ---
 
     _storage_classes: $ =>
-      choice(
+      seq(
         $._storage_class,
-        seq(
-          $._storage_class,
+        optional(
           $._storage_classes,
         ),
       ),
@@ -1661,10 +1640,9 @@ module.exports = grammar({
       ),
 
     _type_ctors: $ =>
-      choice(
+      seq(
         $._type_ctor,
-        seq(
-          $._type_ctor,
+        optional(
           $._type_ctors,
         ),
       ),
@@ -3232,10 +3210,9 @@ module.exports = grammar({
       ),
 
     _statement_list: $ =>
-      choice(
+      seq(
         $._statement,
-        seq(
-          $._statement,
+        optional(
           $._statement_list,
         ),
       ),
@@ -3425,10 +3402,9 @@ module.exports = grammar({
       ),
 
     _foreach_type_attributes: $ =>
-      choice(
+      seq(
         $._foreach_type_attribute,
-        seq(
-          $._foreach_type_attribute,
+        optional(
           optional(
             $._foreach_type_attributes,
           ),
@@ -3519,10 +3495,9 @@ module.exports = grammar({
       $._statement_list_no_case_no_default,
 
     _statement_list_no_case_no_default: $ =>
-      choice(
+      seq(
         $._statement_no_case_no_default,
-        seq(
-          $._statement_no_case_no_default,
+        optional(
           $._statement_list_no_case_no_default,
         ),
       ),
@@ -3673,10 +3648,9 @@ module.exports = grammar({
       ),
 
     _catches: $ =>
-      choice(
+      seq(
         $._catch,
-        seq(
-          $._catch,
+        optional(
           $._catches,
         ),
       ),
@@ -4282,10 +4256,9 @@ module.exports = grammar({
       ),
 
     _enum_member_attributes: $ =>
-      choice(
+      seq(
         $._enum_member_attribute,
-        seq(
-          $._enum_member_attribute,
+        optional(
           $._enum_member_attributes,
         ),
       ),
@@ -4519,10 +4492,9 @@ module.exports = grammar({
       ),
 
     _variadic_arguments_attributes: $ =>
-      choice(
+      seq(
         $._variadic_arguments_attribute,
-        seq(
-          $._variadic_arguments_attribute,
+        optional(
           $._variadic_arguments_attributes,
         ),
       ),
@@ -4539,10 +4511,9 @@ module.exports = grammar({
     // ---
 
     _function_attributes: $ =>
-      choice(
+      seq(
         $._function_attribute,
-        seq(
-          $._function_attribute,
+        optional(
           $._function_attributes,
         ),
       ),
@@ -4554,10 +4525,9 @@ module.exports = grammar({
       ),
 
     _member_function_attributes: $ =>
-      choice(
+      seq(
         $._member_function_attribute,
-        seq(
-          $._member_function_attribute,
+        optional(
           $._member_function_attributes,
         ),
       ),
@@ -4640,10 +4610,9 @@ module.exports = grammar({
     // ---
 
     _function_contracts: $ =>
-      choice(
+      seq(
         $._function_contract,
-        seq(
-          $._function_contract,
+        optional(
           $._function_contracts,
         ),
       ),

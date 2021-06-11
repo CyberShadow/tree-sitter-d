@@ -426,6 +426,31 @@ struct Grammar
 				(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
 				(ref Optional     v) => node,
 			);
+
+			// Transform choice(a, seq(a, b)) into seq(a, optional(b))
+			node.value.match!(
+				(ref Choice choice)
+				{
+					if (choice.nodes.length != 2)
+						return;
+					choice.nodes[1].match!(
+						(ref Seq seq)
+						{
+							if (seq.nodes.length != 2)
+								return;
+							if (seq.nodes[0] != choice.nodes[0])
+								return;
+							node = Node(NodeValue(Seq([
+								seq.nodes[0],
+								Node(NodeValue(Optional([
+									seq.nodes[1],
+								]))),
+							])));
+						},
+						(ref _) {});
+				},
+				(ref _) {},
+			);
 		}
 
 		foreach (name, ref def; defs)
