@@ -236,6 +236,8 @@ module.exports = grammar({
         $._token_string,
       ),
 
+    // ---
+
     _wysiwyg_string: $ =>
       seq(
         "r\"",
@@ -425,10 +427,11 @@ module.exports = grammar({
         $._identifier,
       ),
 
+    // ---
+
     _token_string: $ =>
       seq(
-        "q",
-        "{",
+        "q{",
         optional(
           $._tokens,
         ),
@@ -988,6 +991,8 @@ module.exports = grammar({
           $._end_of_line,
         ),
       ),
+
+    // ---
 
     _filespec: $ =>
       seq(

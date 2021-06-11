@@ -8,6 +8,7 @@ import std.string;
 import std.sumtype;
 
 import ae.utils.aa;
+import ae.utils.meta;
 
 import ddoc;
 
@@ -38,6 +39,12 @@ struct Grammar
 	struct Def
 	{
 		Node node;
+		enum Kind
+		{
+			tokens,
+			chars,
+		}
+		Kind kind;
 	}
 
 	Def[string] defs;
@@ -66,6 +73,7 @@ struct Grammar
 	{
 		string currentName;
 		DDoc[string] macros;
+		Def.Kind kind;
 	}
 
 	private static Node[] parseDefinition(const DDoc line, ref const ParseContext context)
@@ -92,6 +100,7 @@ struct Grammar
 			if (node.isCallTo("B"))
 			{
 				auto text = node.call.contents.toString();
+				enforce(context.kind == Def.Kind.chars, `B in GRAMMAR block: ` ~ text);
 				if (text.length == 6 && text.startsWith(`\u`))
 					seqNodes ~= Node(NodeValue(LiteralChars(wchar(text[2 .. $].to!ushort(16)).to!string)));
 				else
@@ -113,7 +122,6 @@ struct Grammar
 						"c",
 						"w",
 						"d",
-						`q`,
 						`q"`,
 						`(`, `[`, `<`, `{`,
 						`)`, `]`, `>`, `}`,
@@ -235,6 +243,8 @@ struct Grammar
 							"=>",
 							"#",
 
+							`q{`,
+
 							"C",
 							"C++",
 							"D",
@@ -316,10 +326,11 @@ struct Grammar
 	}
 
 	/// Parse and accumulate definitions from DDoc AST
-	string[] parse(const DDoc ddoc, DDoc[string] macros)
+	string[] parse(const DDoc ddoc, DDoc[string] macros, Def.Kind kind)
 	{
 		ParseContext context;
 		context.macros = macros;
+		context.kind = kind;
 
 		Node[] currentDefs;
 		string[] newDefs;
@@ -329,10 +340,10 @@ struct Grammar
 			if (!context.currentName)
 				return;
 
-			auto newNode = Node(NodeValue(Choice(currentDefs)));
+			auto newDef = Def(Node(NodeValue(Choice(currentDefs))), kind);
 			defs.update(context.currentName,
-				{ newDefs ~= context.currentName; return Def(newNode); },
-				(ref Def def) { enforce(def.node == newNode, "Definition mismatch for " ~ context.currentName); }
+				{ newDefs ~= context.currentName; return newDef; },
+				(ref Def def) { enforce(def == newDef, "Definition mismatch for " ~ context.currentName); }
 			);
 			context.currentName = null;
 			currentDefs = null;
@@ -368,6 +379,7 @@ struct Grammar
 	void analyze()
 	{
 		checkReferences();
+		checkKinds();
 		optimize();
 	}
 
@@ -387,6 +399,77 @@ struct Grammar
 		}
 		foreach (name, ref def; defs)
 			scan(def.node);
+	}
+
+	private void checkKinds()
+	{
+		foreach (defName, ref def; defs)
+			final switch (def.kind)
+			{
+				case Def.Kind.chars:
+				{
+					enum State : ubyte
+					{
+						hasChars = 1 << 0,
+						hasToken = 1 << 1,
+						recurses = 1 << 2,
+					}
+
+					HashSet!string scanning;
+
+					State checkDef(string defName)
+					{
+						scope(failure) { import std.stdio; stderr.writefln("While checking %s:", defName); }
+						if (defName in scanning)
+							return State.recurses;
+						scanning.add(defName);
+						scope(success) scanning.remove(defName);
+
+						State concat(State a, State b)
+						{
+							if (((a & State.hasToken) && b != 0) ||
+								((b & State.hasToken) && a != 0))
+								throw new Exception("Token / token fragment definition %s contains mixed %s and %s".format(defName, a, b));
+							return a | b;
+						}
+
+						State scanNode(ref Node node)
+						{
+							return node.value.match!(
+								(ref Placeholder  v) => State.init,
+								(ref LiteralChars v) => State.hasChars,
+								(ref LiteralToken v) => State.hasToken,
+								(ref Reference    v) { enforce(defs[v.name].kind == Def.Kind.chars, "%s of kind %s references %s of kind %s".format(defName, def.kind, v.name, defs[v.name].kind)); return checkDef(v.name); },
+								(ref Choice       v) => v.nodes.map!scanNode().fold!((a, b) => State(a | b)),
+								(ref Seq          v) => v.nodes.map!scanNode().fold!concat,
+								(ref Optional     v) => v.node[0].I!scanNode(),
+							);
+						}
+						return scanNode(defs[defName].node);
+					}
+
+					checkDef(defName);
+					break;
+				}
+
+				case Def.Kind.tokens:
+				{
+					void scanNode(ref Node node)
+					{
+						node.value.match!(
+							(ref Placeholder  v) {},
+							(ref LiteralChars v) { throw new Exception("Definition %s with kind %s has literal chars: %(%s%)".format(defName, def.kind, [v.chars])); },
+							(ref LiteralToken v) {},
+							(ref Reference    v) {},
+							(ref Choice       v) { v.nodes.each!scanNode(); },
+							(ref Seq          v) { v.nodes.each!scanNode(); },
+							(ref Optional     v) { v.node .each!scanNode(); },
+						);
+					}
+					scanNode(def.node);
+					break;
+				}
+			}
 	}
 
 	private void optimize()

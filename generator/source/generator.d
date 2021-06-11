@@ -77,10 +77,11 @@ void program()
 			if (node.type != Node.Type.call)
 				return;
 
-			if (node.call.macroName == "GRAMMAR")
+			if (node.call.macroName == "GRAMMAR" || node.call.macroName == "GRAMMAR_LEX")
 			{
 				auto macros = (globalMacros ~ ddoc.macros).fold!merge((DDoc[string]).init);
-				auto newDefs = grammar.parse(node.call.contents, macros);
+				auto kind = node.call.macroName == "GRAMMAR" ? Grammar.Def.Kind.tokens : Grammar.Def.Kind.chars;
+				auto newDefs = grammar.parse(node.call.contents, macros, kind);
 				order[file] ~= newDefs;
 			}
 			else
