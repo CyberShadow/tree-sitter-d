@@ -14,7 +14,7 @@ import ddoc;
 
 struct Grammar
 {
-	struct Placeholder { string description; }
+	struct RegExp { string regexp; }
 	struct LiteralChars { string chars; } // Describes contiguous characters (e.g. number syntax)
 	struct LiteralToken { string literal; } // May be surrounded by whitespace/comments
 	struct Reference { string name; }
@@ -24,7 +24,7 @@ struct Grammar
 	struct Optional { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
 	// https://issues.dlang.org/show_bug.cgi?id=22003
 	alias NodeValue = SumType!(
-		Placeholder,
+		RegExp,
 		LiteralChars,
 		LiteralToken,
 		Reference,
@@ -90,13 +90,23 @@ struct Grammar
 			if (node.isCallTo("I"))
 			{
 				auto text = node.getSingleTextChild();
-				enforce(text.among(
-					"any Unicode character",
-					"physical end of the file",
-					"Letter",
-					"UniversalAlpha",
-				), "Unknown I: " ~ text);
-				seqNodes ~= Node(NodeValue(Placeholder(text)));
+				switch (text)
+				{
+					case "any Unicode character":
+						seqNodes ~= Node(NodeValue(RegExp(`/[\s\S]/`)));
+						break;
+					case "physical end of the file":
+						seqNodes ~= Node(NodeValue(RegExp(`/$/m`))); // illustrative
+						break;
+					case "Letter":
+						seqNodes ~= Node(NodeValue(RegExp(`/\pLetter/`)));
+						break;
+					case "UniversalAlpha":
+						seqNodes ~= Node(NodeValue(RegExp(`/\pUniversalAlpha/`)));
+						break;
+					default:
+						throw new Exception("Unknown I: " ~ text);
+				}
 			}
 			else
 			if (node.isCallTo("B"))
@@ -390,7 +400,7 @@ struct Grammar
 		void scan(Node node)
 		{
 			node.value.match!(
-				(ref Placeholder  v) {},
+				(ref RegExp       v) {},
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
 				(ref Reference    v) { enforce(v.name in defs, "Unknown reference: " ~ v.name); },
@@ -410,7 +420,7 @@ struct Grammar
 		{
 			// Optimize children
 			node.value.match!(
-				(ref Placeholder  v) {},
+				(ref RegExp       v) {},
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
 				(ref Reference    v) {},
@@ -422,7 +432,7 @@ struct Grammar
 
 			// Optimize node
 			node = node.value.match!(
-				(ref Placeholder  v) => node,
+				(ref RegExp       v) => node,
 				(ref LiteralChars v) => node,
 				(ref LiteralToken v) => node,
 				(ref Reference    v) => node,
@@ -530,7 +540,7 @@ struct Grammar
 						State scanNode(ref Node node)
 						{
 							return node.value.match!(
-								(ref Placeholder  v) => State.init,
+								(ref RegExp       v) => State.init,
 								(ref LiteralChars v) => State.hasChars,
 								(ref LiteralToken v) => State.hasToken,
 								(ref Reference    v) { enforce(defs[v.name].kind == Def.Kind.chars, "%s of kind %s references %s of kind %s".format(defName, def.kind, v.name, defs[v.name].kind)); return checkDef(v.name); },
@@ -552,7 +562,7 @@ struct Grammar
 					void scanNode(ref Node node)
 					{
 						node.value.match!(
-							(ref Placeholder  v) {},
+							(ref RegExp       v) {},
 							(ref LiteralChars v) { throw new Exception("Definition %s with kind %s has literal chars: %(%s%)".format(defName, def.kind, [v.chars])); },
 							(ref LiteralToken v) {},
 							(ref Reference    v) {},

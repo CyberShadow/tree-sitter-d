@@ -9,13 +9,13 @@ module.exports = grammar({
     // ------------------------------------------------------------------------
 
     _character: $ =>
-      /* any Unicode character */,
+      /[\s\S]/,
 
     // ---
 
     _end_of_file: $ =>
       choice(
-        /* physical end of the file */,
+        /$/m,
         "\0",
         "\x1A",
       ),
@@ -192,8 +192,8 @@ module.exports = grammar({
     _identifier_start: $ =>
       choice(
         "_",
-        /* Letter */,
-        /* UniversalAlpha */,
+        /\pLetter/,
+        /\pUniversalAlpha/,
       ),
 
     _identifier_char: $ =>

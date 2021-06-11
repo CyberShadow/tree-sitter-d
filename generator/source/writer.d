@@ -108,7 +108,7 @@ private:
 			}
 
 			node.value.match!(
-				(ref Grammar.Placeholder  v) => single("/* " ~ v.description ~ " */"),
+				(ref Grammar.RegExp       v) => single(v.regexp),
 				(ref Grammar.LiteralChars v) => single(format!"%(%s%)"([v.chars])),
 				(ref Grammar.LiteralToken v) => single(format!"%(%s%)"([v.literal])),
 				(ref Grammar.Reference    v) => single("$." ~ convertRuleName(v.name)),
