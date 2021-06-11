@@ -8,12 +8,7 @@ module.exports = grammar({
     // https://dlang.org/spec/lex.html
     // ------------------------------------------------------------------------
 
-    _tokens: $ =>
-      repeat1(
-        $._token,
-      ),
-
-    _token: $ =>
+    _token_no_braces: $ =>
       choice(
         $._identifier,
         $._string_literal,
@@ -54,8 +49,6 @@ module.exports = grammar({
         ")",
         "[",
         "]",
-        "{",
-        "}",
         "?",
         ",",
         ";",
@@ -1099,9 +1092,26 @@ module.exports = grammar({
       seq(
         "q{",
         optional(
-          $._tokens,
+          $._token_string_tokens,
         ),
         "}",
+      ),
+
+    _token_string_tokens: $ =>
+      repeat1(
+        $._token_string_token,
+      ),
+
+    _token_string_token: $ =>
+      choice(
+        $._token_no_braces,
+        seq(
+          "{",
+          optional(
+            $._token_string_tokens,
+          ),
+          "}",
+        ),
       ),
 
     // ---
@@ -7541,8 +7551,7 @@ module.exports = grammar({
         $._postblit,
         $._allocator,
         $._deallocator,
-        $._class_invariant,
-        $._struct_invariant,
+        $._invariant,
         $._unit_test,
         $._alias_this,
         $._static_constructor,
@@ -8672,9 +8681,7 @@ module.exports = grammar({
         ),
         seq(
           $._conditional_expression,
-          "<",
-          "<",
-          "=",
+          "<<=",
           $._assign_expression,
         ),
         seq(
@@ -9683,11 +9690,6 @@ module.exports = grammar({
         seq(
           $._identifier,
           ":",
-          $._no_scope_statement,
-        ),
-        seq(
-          $._identifier,
-          ":",
           $._statement,
         ),
       ),
@@ -9723,12 +9725,7 @@ module.exports = grammar({
     // ---
 
     _declaration_statement: $ =>
-      seq(
-        optional(
-          $._storage_classes,
-        ),
-        $._declaration,
-      ),
+      $._declaration,
 
     // ---
 
@@ -10335,7 +10332,7 @@ module.exports = grammar({
 
     // ---
 
-    _struct_invariant: $ =>
+    _invariant: $ =>
       choice(
         seq(
           "invariant",
@@ -10382,21 +10379,17 @@ module.exports = grammar({
       choice(
         seq(
           ":",
-          $._super_class,
+          $._super_class_or_interface,
         ),
         seq(
           ":",
-          $._super_class,
+          $._super_class_or_interface,
           ",",
-          $._interfaces,
-        ),
-        seq(
-          ":",
           $._interfaces,
         ),
       ),
 
-    _super_class: $ =>
+    _super_class_or_interface: $ =>
       $._basic_type,
 
     _interfaces: $ =>
@@ -10422,14 +10415,6 @@ module.exports = grammar({
           optional(
             $._member_function_attributes,
           ),
-          ";",
-        ),
-        seq(
-          "this",
-          $._parameters,
-          optional(
-            $._member_function_attributes,
-          ),
           $._function_body,
         ),
         $._constructor_template,
@@ -10438,27 +10423,15 @@ module.exports = grammar({
     // ---
 
     _destructor: $ =>
-      choice(
-        seq(
-          "~",
-          "this",
-          "(",
-          ")",
-          optional(
-            $._member_function_attributes,
-          ),
-          ";",
+      seq(
+        "~",
+        "this",
+        "(",
+        ")",
+        optional(
+          $._member_function_attributes,
         ),
-        seq(
-          "~",
-          "this",
-          "(",
-          ")",
-          optional(
-            $._member_function_attributes,
-          ),
-          $._function_body,
-        ),
+        $._function_body,
       ),
 
     // ---
@@ -10575,57 +10548,20 @@ module.exports = grammar({
 
     // ---
 
-    _class_invariant: $ =>
-      choice(
-        seq(
-          "invariant",
-          "(",
-          ")",
-          $._block_statement,
-        ),
-        seq(
-          "invariant",
-          $._block_statement,
-        ),
-        seq(
-          "invariant",
-          "(",
-          $._assert_arguments,
-          ")",
-          ";",
-        ),
-      ),
-
-    // ---
-
     _allocator: $ =>
-      choice(
-        seq(
-          "new",
-          $._parameters,
-          ";",
-        ),
-        seq(
-          "new",
-          $._parameters,
-          $._function_body,
-        ),
+      seq(
+        "new",
+        $._parameters,
+        $._function_body,
       ),
 
     // ---
 
     _deallocator: $ =>
-      choice(
-        seq(
-          "delete",
-          $._parameters,
-          ";",
-        ),
-        seq(
-          "delete",
-          $._parameters,
-          $._function_body,
-        ),
+      seq(
+        "delete",
+        $._parameters,
+        $._function_body,
       ),
 
     // ---
@@ -10651,7 +10587,7 @@ module.exports = grammar({
           $._constructor_args,
         ),
         optional(
-          $._super_class,
+          $._super_class_or_interface,
         ),
         optional(
           $._interfaces,
@@ -11029,7 +10965,7 @@ module.exports = grammar({
       ),
 
     _function_literal_body: $ =>
-      $._specified_function_body,
+      $._block_statement,
 
     _specified_function_body: $ =>
       choice(
