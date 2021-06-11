@@ -459,7 +459,40 @@ struct Grammar
 		}
 
 		foreach (name, ref def; defs)
+		{
 			optimizeNode(def.node);
+
+			// Transform x := seq(y, optional(x)) into x := repeat1(y)
+			// (attempt to remove recursion)
+			{
+				def.node.match!(
+					(ref Seq seq)
+					{
+						if (seq.nodes.length != 2)
+							return;
+						seq.nodes[1].match!(
+							(ref Optional optional)
+							{
+								optional.node[0].match!(
+									(ref Reference reference)
+									{
+										if (reference.name != name)
+											return;
+
+										def.node = Node(NodeValue(Repeat1([
+											seq.nodes[0],
+										])));
+									},
+									(_) {}
+								);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+			}
+		}
 	}
 
 	private void checkKinds()
