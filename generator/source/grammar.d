@@ -20,6 +20,7 @@ struct Grammar
 	struct Reference { string name; }
 	struct Choice { Node[] nodes; }
 	struct Seq { Node[] nodes; }
+	struct Repeat1 { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
 	struct Optional { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
 	// https://issues.dlang.org/show_bug.cgi?id=22003
 	alias NodeValue = SumType!(
@@ -28,6 +29,7 @@ struct Grammar
 		LiteralToken,
 		Reference,
 		Choice,
+		Repeat1,
 		Seq,
 		Optional,
 	);
@@ -394,6 +396,7 @@ struct Grammar
 				(ref Reference    v) { enforce(v.name in defs, "Unknown reference: " ~ v.name); },
 				(ref Choice       v) { v.nodes.each!scan(); },
 				(ref Seq          v) { v.nodes.each!scan(); },
+				(ref Repeat1      v) { v.node .each!scan(); },
 				(ref Optional     v) { v.node .each!scan(); },
 			);
 		}
@@ -413,6 +416,7 @@ struct Grammar
 				(ref Reference    v) {},
 				(ref Choice       v) { v.nodes.each!optimizeNode(); },
 				(ref Seq          v) { v.nodes.each!optimizeNode(); },
+				(ref Repeat1      v) { v.node .each!optimizeNode(); },
 				(ref Optional     v) { v.node .each!optimizeNode(); },
 			);
 
@@ -424,6 +428,7 @@ struct Grammar
 				(ref Reference    v) => node,
 				(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
 				(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
+				(ref Repeat1      v) => node,
 				(ref Optional     v) => node,
 			);
 
@@ -498,6 +503,7 @@ struct Grammar
 								(ref Reference    v) { enforce(defs[v.name].kind == Def.Kind.chars, "%s of kind %s references %s of kind %s".format(defName, def.kind, v.name, defs[v.name].kind)); return checkDef(v.name); },
 								(ref Choice       v) => v.nodes.map!scanNode().fold!((a, b) => State(a | b)),
 								(ref Seq          v) => v.nodes.map!scanNode().fold!concat,
+								(ref Repeat1      v) => v.node[0].I!scanNode().I!(x => concat(x, x)),
 								(ref Optional     v) => v.node[0].I!scanNode(),
 							);
 						}
@@ -519,6 +525,7 @@ struct Grammar
 							(ref Reference    v) {},
 							(ref Choice       v) { v.nodes.each!scanNode(); },
 							(ref Seq          v) { v.nodes.each!scanNode(); },
+							(ref Repeat1      v) { v.node .each!scanNode(); },
 							(ref Optional     v) { v.node .each!scanNode(); },
 						);
 					}

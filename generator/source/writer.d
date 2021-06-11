@@ -114,6 +114,7 @@ private:
 				(ref Grammar.Reference    v) => single("$." ~ convertRuleName(v.name)),
 				(ref Grammar.Choice       v) => list("choice"  , v.nodes),
 				(ref Grammar.Seq          v) => list("seq"     , v.nodes),
+				(ref Grammar.Repeat1      v) => list("repeat1" , v.node),
 				(ref Grammar.Optional     v) => list("optional", v.node),
 			);
 		}
