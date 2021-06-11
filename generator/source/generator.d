@@ -94,7 +94,7 @@ void program()
 
 	grammar.analyze();
 
-	auto writer = Writer("../grammar.js");
+	auto writer = Writer("../grammar.js", grammar);
 
 	foreach (file; files)
 	{
@@ -103,7 +103,7 @@ void program()
 		{
 			writer.startSection();
 			foreach (def; section)
-				writer.writeRule(def, grammar.defs[def]);
+				writer.writeRule(def);
 		}
 	}
 

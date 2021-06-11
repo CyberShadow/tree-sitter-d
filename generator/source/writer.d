@@ -6,6 +6,7 @@ import std.stdio;
 import std.string;
 import std.sumtype;
 
+import ae.utils.aa;
 import ae.utils.text : splitByCamelCase;
 
 import grammar;
@@ -13,8 +14,9 @@ import grammar;
 struct Writer
 {
 	File f;
+	Grammar grammar;
 
-	this(string fileName)
+	this(string fileName, Grammar grammar)
 	{
 		f.open(fileName, "wb");
 
@@ -25,6 +27,8 @@ module.exports = grammar({
   rules: {
     source_file: $ => $._module,
 EOF");
+
+		this.grammar = grammar;
 	}
 
 	string currentFile;
@@ -44,8 +48,9 @@ EOF");
 			sectionHeaderPending = true;
 	}
 
-	void writeRule(string name, ref Grammar.Def def)
+	void writeRule(string name)
 	{
+		scope(failure) { import std.stdio : stderr; stderr.writeln("Error while writing rule ", name); }
 		if (fileHeaderPending)
 		{
 			f.writef(q"EOF
@@ -71,7 +76,7 @@ EOF");
 
     %s: $ =>
 EOF", convertRuleName(name));
-		writeRuleBody(def.node);
+		writeRuleBody(name);
 	}
 
 	void close()
@@ -88,37 +93,63 @@ private:
 		return "_" ~ name.splitByCamelCase.map!toLower.join("_");
 	}
 
-	void writeRuleBody(ref Grammar.Node node)
+	void writeRuleBody(string defName)
 	{
 		int indent = 6;
 
-		void writeNode(ref Grammar.Node node)
+		void line(string s) { f.writeln(" ".replicate(indent), s); }
+		void single(string s) { line(s ~ ","); }
+
+		void list(T)(string fun, T[] children, void delegate(ref T) childWriter)
 		{
-			void line(string s) { f.writeln(" ".replicate(indent), s); }
-			void single(string s) { line(s ~ ","); }
-
-			void list(string fun, Grammar.Node[] children)
-			{
-				line(fun ~ "(");
-				indent += 2;
-				foreach (ref child; children)
-					writeNode(child);
-				indent -= 2;
-				line("),");
-			}
-
-			node.value.match!(
-				(ref Grammar.RegExp       v) => single(v.regexp),
-				(ref Grammar.LiteralChars v) => single(format!"%(%s%)"([v.chars])),
-				(ref Grammar.LiteralToken v) => single(format!"%(%s%)"([v.literal])),
-				(ref Grammar.Reference    v) => single("$." ~ convertRuleName(v.name)),
-				(ref Grammar.Choice       v) => list("choice"  , v.nodes),
-				(ref Grammar.Seq          v) => list("seq"     , v.nodes),
-				(ref Grammar.Repeat1      v) => list("repeat1" , v.node),
-				(ref Grammar.Optional     v) => list("optional", v.node),
-			);
+			line(fun ~ "(");
+			indent += 2;
+			foreach (ref child; children)
+				childWriter(child);
+			indent -= 2;
+			line("),");
 		}
-		writeNode(node);
+
+		HashSet!string visiting;
+
+		void writeDef(ref string defName)
+		{
+			if (defName in visiting)
+				return single("/* recursion */");
+			visiting.add(defName);
+			scope(success) visiting.remove(defName);
+
+			auto def = &grammar.defs[defName];
+			if (def.kind == Grammar.Def.Kind.chars)
+				line("// " ~ defName);
+
+			void writeNode(ref Grammar.Node node)
+			{
+				node.value.match!(
+					(ref Grammar.RegExp       v) => single(v.regexp),
+					(ref Grammar.LiteralChars v) => single(format!"%(%s%)"([v.chars])),
+					(ref Grammar.LiteralToken v) => single(format!"%(%s%)"([v.literal])),
+					// https://issues.dlang.org/show_bug.cgi?id=22016
+					(ref Grammar.Reference    v) { if (def.kind == Grammar.Def.Kind.chars) writeDef(v.name); else single("$." ~ convertRuleName(v.name)); },
+					(ref Grammar.Choice       v) => list("choice"  , v.nodes, &writeNode),
+					(ref Grammar.Seq          v) => list("seq"     , v.nodes, &writeNode),
+					(ref Grammar.Repeat1      v) => list("repeat1" , v.node , &writeNode),
+					(ref Grammar.Optional     v) => list("optional", v.node , &writeNode),
+				);
+			}
+			writeNode(def.node);
+		}
+
+		auto def = &grammar.defs[defName];
+		final switch (def.kind)
+		{
+			case Grammar.Def.Kind.chars:
+				list("token", [defName], &writeDef);
+				break;
+			case Grammar.Def.Kind.tokens:
+				writeDef(defName);
+				break;
+		}
 	}
 }
 

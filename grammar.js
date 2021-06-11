@@ -9,97 +9,253 @@ module.exports = grammar({
     // ------------------------------------------------------------------------
 
     _character: $ =>
-      /[\s\S]/,
+      token(
+        // Character
+        /[\s\S]/,
+      ),
 
     // ---
 
     _end_of_file: $ =>
-      choice(
-        /$/m,
-        "\0",
-        "\x1A",
+      token(
+        // EndOfFile
+        choice(
+          /$/m,
+          "\0",
+          "\x1A",
+        ),
       ),
 
     // ---
 
     _end_of_line: $ =>
-      choice(
-        "\r",
-        "\n",
-        seq(
+      token(
+        // EndOfLine
+        choice(
           "\r",
           "\n",
+          seq(
+            "\r",
+            "\n",
+          ),
+          "\u2028",
+          "\u2029",
+          // EndOfFile
+          choice(
+            /$/m,
+            "\0",
+            "\x1A",
+          ),
         ),
-        "\u2028",
-        "\u2029",
-        $._end_of_file,
       ),
 
     // ---
 
     _white_space: $ =>
-      repeat1(
-        $._space,
+      token(
+        // WhiteSpace
+        repeat1(
+          // Space
+          choice(
+            " ",
+            "\t",
+            "\v",
+            "\f",
+          ),
+        ),
       ),
 
     _space: $ =>
-      choice(
-        " ",
-        "\t",
-        "\v",
-        "\f",
+      token(
+        // Space
+        choice(
+          " ",
+          "\t",
+          "\v",
+          "\f",
+        ),
       ),
 
     // ---
 
     _comment: $ =>
-      choice(
-        $._block_comment,
-        $._line_comment,
-        $._nesting_block_comment,
+      token(
+        // Comment
+        choice(
+          // BlockComment
+          seq(
+            "/*",
+            optional(
+              // Characters
+              repeat1(
+                // Character
+                /[\s\S]/,
+              ),
+            ),
+            "*/",
+          ),
+          // LineComment
+          seq(
+            "//",
+            optional(
+              // Characters
+              repeat1(
+                // Character
+                /[\s\S]/,
+              ),
+            ),
+            // EndOfLine
+            choice(
+              "\r",
+              "\n",
+              seq(
+                "\r",
+                "\n",
+              ),
+              "\u2028",
+              "\u2029",
+              // EndOfFile
+              choice(
+                /$/m,
+                "\0",
+                "\x1A",
+              ),
+            ),
+          ),
+          // NestingBlockComment
+          seq(
+            "/+",
+            optional(
+              // NestingBlockCommentCharacters
+              repeat1(
+                // NestingBlockCommentCharacter
+                choice(
+                  // Character
+                  /[\s\S]/,
+                  /* recursion */,
+                ),
+              ),
+            ),
+            "+/",
+          ),
+        ),
       ),
 
     _block_comment: $ =>
-      seq(
-        "/*",
-        optional(
-          $._characters,
+      token(
+        // BlockComment
+        seq(
+          "/*",
+          optional(
+            // Characters
+            repeat1(
+              // Character
+              /[\s\S]/,
+            ),
+          ),
+          "*/",
         ),
-        "*/",
       ),
 
     _line_comment: $ =>
-      seq(
-        "//",
-        optional(
-          $._characters,
+      token(
+        // LineComment
+        seq(
+          "//",
+          optional(
+            // Characters
+            repeat1(
+              // Character
+              /[\s\S]/,
+            ),
+          ),
+          // EndOfLine
+          choice(
+            "\r",
+            "\n",
+            seq(
+              "\r",
+              "\n",
+            ),
+            "\u2028",
+            "\u2029",
+            // EndOfFile
+            choice(
+              /$/m,
+              "\0",
+              "\x1A",
+            ),
+          ),
         ),
-        $._end_of_line,
       ),
 
     _nesting_block_comment: $ =>
-      seq(
-        "/+",
-        optional(
-          $._nesting_block_comment_characters,
+      token(
+        // NestingBlockComment
+        seq(
+          "/+",
+          optional(
+            // NestingBlockCommentCharacters
+            repeat1(
+              // NestingBlockCommentCharacter
+              choice(
+                // Character
+                /[\s\S]/,
+                /* recursion */,
+              ),
+            ),
+          ),
+          "+/",
         ),
-        "+/",
       ),
 
     _nesting_block_comment_characters: $ =>
-      repeat1(
-        $._nesting_block_comment_character,
+      token(
+        // NestingBlockCommentCharacters
+        repeat1(
+          // NestingBlockCommentCharacter
+          choice(
+            // Character
+            /[\s\S]/,
+            // NestingBlockComment
+            seq(
+              "/+",
+              optional(
+                /* recursion */,
+              ),
+              "+/",
+            ),
+          ),
+        ),
       ),
 
     _nesting_block_comment_character: $ =>
-      choice(
-        $._character,
-        $._nesting_block_comment,
+      token(
+        // NestingBlockCommentCharacter
+        choice(
+          // Character
+          /[\s\S]/,
+          // NestingBlockComment
+          seq(
+            "/+",
+            optional(
+              // NestingBlockCommentCharacters
+              repeat1(
+                /* recursion */,
+              ),
+            ),
+            "+/",
+          ),
+        ),
       ),
 
     _characters: $ =>
-      repeat1(
-        $._character,
+      token(
+        // Characters
+        repeat1(
+          // Character
+          /[\s\S]/,
+        ),
       ),
 
     // ---
@@ -177,30 +333,108 @@ module.exports = grammar({
     // ---
 
     _identifier: $ =>
-      seq(
-        $._identifier_start,
-        optional(
-          $._identifier_chars,
+      token(
+        // Identifier
+        seq(
+          // IdentifierStart
+          choice(
+            "_",
+            /\pLetter/,
+            /\pUniversalAlpha/,
+          ),
+          optional(
+            // IdentifierChars
+            repeat1(
+              // IdentifierChar
+              choice(
+                // IdentifierStart
+                choice(
+                  "_",
+                  /\pLetter/,
+                  /\pUniversalAlpha/,
+                ),
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+            ),
+          ),
         ),
       ),
 
     _identifier_chars: $ =>
-      repeat1(
-        $._identifier_char,
+      token(
+        // IdentifierChars
+        repeat1(
+          // IdentifierChar
+          choice(
+            // IdentifierStart
+            choice(
+              "_",
+              /\pLetter/,
+              /\pUniversalAlpha/,
+            ),
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+          ),
+        ),
       ),
 
     _identifier_start: $ =>
-      choice(
-        "_",
-        /\pLetter/,
-        /\pUniversalAlpha/,
+      token(
+        // IdentifierStart
+        choice(
+          "_",
+          /\pLetter/,
+          /\pUniversalAlpha/,
+        ),
       ),
 
     _identifier_char: $ =>
-      choice(
-        $._identifier_start,
-        "0",
-        $._non_zero_digit,
+      token(
+        // IdentifierChar
+        choice(
+          // IdentifierStart
+          choice(
+            "_",
+            /\pLetter/,
+            /\pUniversalAlpha/,
+          ),
+          "0",
+          // NonZeroDigit
+          choice(
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+          ),
+        ),
       ),
 
     // ---
@@ -218,180 +452,3176 @@ module.exports = grammar({
     // ---
 
     _wysiwyg_string: $ =>
-      seq(
-        "r\"",
-        optional(
-          $._wysiwyg_characters,
-        ),
-        "\"",
-        optional(
-          $._string_postfix,
+      token(
+        // WysiwygString
+        seq(
+          "r\"",
+          optional(
+            // WysiwygCharacters
+            repeat1(
+              // WysiwygCharacter
+              choice(
+                // Character
+                /[\s\S]/,
+                // EndOfLine
+                choice(
+                  "\r",
+                  "\n",
+                  seq(
+                    "\r",
+                    "\n",
+                  ),
+                  "\u2028",
+                  "\u2029",
+                  // EndOfFile
+                  choice(
+                    /$/m,
+                    "\0",
+                    "\x1A",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          "\"",
+          optional(
+            // StringPostfix
+            choice(
+              "c",
+              "w",
+              "d",
+            ),
+          ),
         ),
       ),
 
     _alternate_wysiwyg_string: $ =>
-      seq(
-        "`",
-        optional(
-          $._wysiwyg_characters,
-        ),
-        "`",
-        optional(
-          $._string_postfix,
+      token(
+        // AlternateWysiwygString
+        seq(
+          "`",
+          optional(
+            // WysiwygCharacters
+            repeat1(
+              // WysiwygCharacter
+              choice(
+                // Character
+                /[\s\S]/,
+                // EndOfLine
+                choice(
+                  "\r",
+                  "\n",
+                  seq(
+                    "\r",
+                    "\n",
+                  ),
+                  "\u2028",
+                  "\u2029",
+                  // EndOfFile
+                  choice(
+                    /$/m,
+                    "\0",
+                    "\x1A",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          "`",
+          optional(
+            // StringPostfix
+            choice(
+              "c",
+              "w",
+              "d",
+            ),
+          ),
         ),
       ),
 
     _wysiwyg_characters: $ =>
-      repeat1(
-        $._wysiwyg_character,
+      token(
+        // WysiwygCharacters
+        repeat1(
+          // WysiwygCharacter
+          choice(
+            // Character
+            /[\s\S]/,
+            // EndOfLine
+            choice(
+              "\r",
+              "\n",
+              seq(
+                "\r",
+                "\n",
+              ),
+              "\u2028",
+              "\u2029",
+              // EndOfFile
+              choice(
+                /$/m,
+                "\0",
+                "\x1A",
+              ),
+            ),
+          ),
+        ),
       ),
 
     _wysiwyg_character: $ =>
-      choice(
-        $._character,
-        $._end_of_line,
+      token(
+        // WysiwygCharacter
+        choice(
+          // Character
+          /[\s\S]/,
+          // EndOfLine
+          choice(
+            "\r",
+            "\n",
+            seq(
+              "\r",
+              "\n",
+            ),
+            "\u2028",
+            "\u2029",
+            // EndOfFile
+            choice(
+              /$/m,
+              "\0",
+              "\x1A",
+            ),
+          ),
+        ),
       ),
 
     _double_quoted_string: $ =>
-      seq(
-        "\"",
-        optional(
-          $._double_quoted_characters,
-        ),
-        "\"",
-        optional(
-          $._string_postfix,
+      token(
+        // DoubleQuotedString
+        seq(
+          "\"",
+          optional(
+            // DoubleQuotedCharacters
+            repeat1(
+              // DoubleQuotedCharacter
+              choice(
+                // Character
+                /[\s\S]/,
+                // EscapeSequence
+                choice(
+                  "\\\\'",
+                  "\\\\\"",
+                  "\\\\?",
+                  "\\\\\\\\",
+                  "\\0",
+                  "\\a",
+                  "\\b",
+                  "\\f",
+                  "\\n",
+                  "\\r",
+                  "\\t",
+                  "\\v",
+                  seq(
+                    "\\x",
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    "\\\\",
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                  ),
+                  seq(
+                    "\\\\",
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                  ),
+                  seq(
+                    "\\\\",
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                  ),
+                  seq(
+                    "\\u",
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    "\\U",
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    "\\\\",
+                    // NamedCharacterEntity
+                    seq(
+                      "&",
+                      // Identifier
+                      seq(
+                        // IdentifierStart
+                        choice(
+                          "_",
+                          /\pLetter/,
+                          /\pUniversalAlpha/,
+                        ),
+                        optional(
+                          // IdentifierChars
+                          repeat1(
+                            // IdentifierChar
+                            choice(
+                              // IdentifierStart
+                              choice(
+                                "_",
+                                /\pLetter/,
+                                /\pUniversalAlpha/,
+                              ),
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      ";",
+                    ),
+                  ),
+                ),
+                // EndOfLine
+                choice(
+                  "\r",
+                  "\n",
+                  seq(
+                    "\r",
+                    "\n",
+                  ),
+                  "\u2028",
+                  "\u2029",
+                  // EndOfFile
+                  choice(
+                    /$/m,
+                    "\0",
+                    "\x1A",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          "\"",
+          optional(
+            // StringPostfix
+            choice(
+              "c",
+              "w",
+              "d",
+            ),
+          ),
         ),
       ),
 
     _double_quoted_characters: $ =>
-      repeat1(
-        $._double_quoted_character,
+      token(
+        // DoubleQuotedCharacters
+        repeat1(
+          // DoubleQuotedCharacter
+          choice(
+            // Character
+            /[\s\S]/,
+            // EscapeSequence
+            choice(
+              "\\\\'",
+              "\\\\\"",
+              "\\\\?",
+              "\\\\\\\\",
+              "\\0",
+              "\\a",
+              "\\b",
+              "\\f",
+              "\\n",
+              "\\r",
+              "\\t",
+              "\\v",
+              seq(
+                "\\x",
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+              seq(
+                "\\\\",
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+              ),
+              seq(
+                "\\\\",
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+              ),
+              seq(
+                "\\\\",
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+              ),
+              seq(
+                "\\u",
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+              seq(
+                "\\U",
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+              seq(
+                "\\\\",
+                // NamedCharacterEntity
+                seq(
+                  "&",
+                  // Identifier
+                  seq(
+                    // IdentifierStart
+                    choice(
+                      "_",
+                      /\pLetter/,
+                      /\pUniversalAlpha/,
+                    ),
+                    optional(
+                      // IdentifierChars
+                      repeat1(
+                        // IdentifierChar
+                        choice(
+                          // IdentifierStart
+                          choice(
+                            "_",
+                            /\pLetter/,
+                            /\pUniversalAlpha/,
+                          ),
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  ";",
+                ),
+              ),
+            ),
+            // EndOfLine
+            choice(
+              "\r",
+              "\n",
+              seq(
+                "\r",
+                "\n",
+              ),
+              "\u2028",
+              "\u2029",
+              // EndOfFile
+              choice(
+                /$/m,
+                "\0",
+                "\x1A",
+              ),
+            ),
+          ),
+        ),
       ),
 
     _double_quoted_character: $ =>
-      choice(
-        $._character,
-        $._escape_sequence,
-        $._end_of_line,
+      token(
+        // DoubleQuotedCharacter
+        choice(
+          // Character
+          /[\s\S]/,
+          // EscapeSequence
+          choice(
+            "\\\\'",
+            "\\\\\"",
+            "\\\\?",
+            "\\\\\\\\",
+            "\\0",
+            "\\a",
+            "\\b",
+            "\\f",
+            "\\n",
+            "\\r",
+            "\\t",
+            "\\v",
+            seq(
+              "\\x",
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+            ),
+            seq(
+              "\\\\",
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+            ),
+            seq(
+              "\\\\",
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+            ),
+            seq(
+              "\\\\",
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+            ),
+            seq(
+              "\\u",
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+            ),
+            seq(
+              "\\U",
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+            ),
+            seq(
+              "\\\\",
+              // NamedCharacterEntity
+              seq(
+                "&",
+                // Identifier
+                seq(
+                  // IdentifierStart
+                  choice(
+                    "_",
+                    /\pLetter/,
+                    /\pUniversalAlpha/,
+                  ),
+                  optional(
+                    // IdentifierChars
+                    repeat1(
+                      // IdentifierChar
+                      choice(
+                        // IdentifierStart
+                        choice(
+                          "_",
+                          /\pLetter/,
+                          /\pUniversalAlpha/,
+                        ),
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                ";",
+              ),
+            ),
+          ),
+          // EndOfLine
+          choice(
+            "\r",
+            "\n",
+            seq(
+              "\r",
+              "\n",
+            ),
+            "\u2028",
+            "\u2029",
+            // EndOfFile
+            choice(
+              /$/m,
+              "\0",
+              "\x1A",
+            ),
+          ),
+        ),
       ),
 
     _escape_sequence: $ =>
-      choice(
-        "\\\\'",
-        "\\\\\"",
-        "\\\\?",
-        "\\\\\\\\",
-        "\\0",
-        "\\a",
-        "\\b",
-        "\\f",
-        "\\n",
-        "\\r",
-        "\\t",
-        "\\v",
-        seq(
-          "\\x",
-          $._hex_digit,
-          $._hex_digit,
-        ),
-        seq(
-          "\\\\",
-          $._octal_digit,
-        ),
-        seq(
-          "\\\\",
-          $._octal_digit,
-          $._octal_digit,
-        ),
-        seq(
-          "\\\\",
-          $._octal_digit,
-          $._octal_digit,
-          $._octal_digit,
-        ),
-        seq(
-          "\\u",
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-        ),
-        seq(
-          "\\U",
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-          $._hex_digit,
-        ),
-        seq(
-          "\\\\",
-          $._named_character_entity,
+      token(
+        // EscapeSequence
+        choice(
+          "\\\\'",
+          "\\\\\"",
+          "\\\\?",
+          "\\\\\\\\",
+          "\\0",
+          "\\a",
+          "\\b",
+          "\\f",
+          "\\n",
+          "\\r",
+          "\\t",
+          "\\v",
+          seq(
+            "\\x",
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+          ),
+          seq(
+            "\\\\",
+            // OctalDigit
+            choice(
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+            ),
+          ),
+          seq(
+            "\\\\",
+            // OctalDigit
+            choice(
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+            ),
+            // OctalDigit
+            choice(
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+            ),
+          ),
+          seq(
+            "\\\\",
+            // OctalDigit
+            choice(
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+            ),
+            // OctalDigit
+            choice(
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+            ),
+            // OctalDigit
+            choice(
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+            ),
+          ),
+          seq(
+            "\\u",
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+          ),
+          seq(
+            "\\U",
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+          ),
+          seq(
+            "\\\\",
+            // NamedCharacterEntity
+            seq(
+              "&",
+              // Identifier
+              seq(
+                // IdentifierStart
+                choice(
+                  "_",
+                  /\pLetter/,
+                  /\pUniversalAlpha/,
+                ),
+                optional(
+                  // IdentifierChars
+                  repeat1(
+                    // IdentifierChar
+                    choice(
+                      // IdentifierStart
+                      choice(
+                        "_",
+                        /\pLetter/,
+                        /\pUniversalAlpha/,
+                      ),
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              ";",
+            ),
+          ),
         ),
       ),
 
     _hex_string: $ =>
-      seq(
-        "x\"",
-        optional(
-          $._hex_string_chars,
-        ),
-        "\"",
-        optional(
-          $._string_postfix,
+      token(
+        // HexString
+        seq(
+          "x\"",
+          optional(
+            // HexStringChars
+            repeat1(
+              // HexStringChar
+              choice(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // WhiteSpace
+                repeat1(
+                  // Space
+                  choice(
+                    " ",
+                    "\t",
+                    "\v",
+                    "\f",
+                  ),
+                ),
+                // EndOfLine
+                choice(
+                  "\r",
+                  "\n",
+                  seq(
+                    "\r",
+                    "\n",
+                  ),
+                  "\u2028",
+                  "\u2029",
+                  // EndOfFile
+                  choice(
+                    /$/m,
+                    "\0",
+                    "\x1A",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          "\"",
+          optional(
+            // StringPostfix
+            choice(
+              "c",
+              "w",
+              "d",
+            ),
+          ),
         ),
       ),
 
     _hex_string_chars: $ =>
-      repeat1(
-        $._hex_string_char,
+      token(
+        // HexStringChars
+        repeat1(
+          // HexStringChar
+          choice(
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // WhiteSpace
+            repeat1(
+              // Space
+              choice(
+                " ",
+                "\t",
+                "\v",
+                "\f",
+              ),
+            ),
+            // EndOfLine
+            choice(
+              "\r",
+              "\n",
+              seq(
+                "\r",
+                "\n",
+              ),
+              "\u2028",
+              "\u2029",
+              // EndOfFile
+              choice(
+                /$/m,
+                "\0",
+                "\x1A",
+              ),
+            ),
+          ),
+        ),
       ),
 
     _hex_string_char: $ =>
-      choice(
-        $._hex_digit,
-        $._white_space,
-        $._end_of_line,
+      token(
+        // HexStringChar
+        choice(
+          // HexDigit
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            // HexLetter
+            choice(
+              "a",
+              "b",
+              "c",
+              "d",
+              "e",
+              "f",
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+            ),
+          ),
+          // WhiteSpace
+          repeat1(
+            // Space
+            choice(
+              " ",
+              "\t",
+              "\v",
+              "\f",
+            ),
+          ),
+          // EndOfLine
+          choice(
+            "\r",
+            "\n",
+            seq(
+              "\r",
+              "\n",
+            ),
+            "\u2028",
+            "\u2029",
+            // EndOfFile
+            choice(
+              /$/m,
+              "\0",
+              "\x1A",
+            ),
+          ),
+        ),
       ),
 
     _string_postfix: $ =>
-      choice(
-        "c",
-        "w",
-        "d",
+      token(
+        // StringPostfix
+        choice(
+          "c",
+          "w",
+          "d",
+        ),
       ),
 
     _delimited_string: $ =>
-      seq(
-        "q\"",
-        $._delimiter,
-        optional(
-          $._wysiwyg_characters,
+      token(
+        // DelimitedString
+        seq(
+          "q\"",
+          // Delimiter
+          choice(
+            "(",
+            "{",
+            "[",
+            "<",
+            // Identifier
+            seq(
+              // IdentifierStart
+              choice(
+                "_",
+                /\pLetter/,
+                /\pUniversalAlpha/,
+              ),
+              optional(
+                // IdentifierChars
+                repeat1(
+                  // IdentifierChar
+                  choice(
+                    // IdentifierStart
+                    choice(
+                      "_",
+                      /\pLetter/,
+                      /\pUniversalAlpha/,
+                    ),
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          optional(
+            // WysiwygCharacters
+            repeat1(
+              // WysiwygCharacter
+              choice(
+                // Character
+                /[\s\S]/,
+                // EndOfLine
+                choice(
+                  "\r",
+                  "\n",
+                  seq(
+                    "\r",
+                    "\n",
+                  ),
+                  "\u2028",
+                  "\u2029",
+                  // EndOfFile
+                  choice(
+                    /$/m,
+                    "\0",
+                    "\x1A",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // MatchingDelimiter
+          choice(
+            ")",
+            "}",
+            "]",
+            ">",
+            // Identifier
+            seq(
+              // IdentifierStart
+              choice(
+                "_",
+                /\pLetter/,
+                /\pUniversalAlpha/,
+              ),
+              optional(
+                // IdentifierChars
+                repeat1(
+                  // IdentifierChar
+                  choice(
+                    // IdentifierStart
+                    choice(
+                      "_",
+                      /\pLetter/,
+                      /\pUniversalAlpha/,
+                    ),
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          "\"",
         ),
-        $._matching_delimiter,
-        "\"",
       ),
 
     _delimiter: $ =>
-      choice(
-        "(",
-        "{",
-        "[",
-        "<",
-        $._identifier,
+      token(
+        // Delimiter
+        choice(
+          "(",
+          "{",
+          "[",
+          "<",
+          // Identifier
+          seq(
+            // IdentifierStart
+            choice(
+              "_",
+              /\pLetter/,
+              /\pUniversalAlpha/,
+            ),
+            optional(
+              // IdentifierChars
+              repeat1(
+                // IdentifierChar
+                choice(
+                  // IdentifierStart
+                  choice(
+                    "_",
+                    /\pLetter/,
+                    /\pUniversalAlpha/,
+                  ),
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     _matching_delimiter: $ =>
-      choice(
-        ")",
-        "}",
-        "]",
-        ">",
-        $._identifier,
+      token(
+        // MatchingDelimiter
+        choice(
+          ")",
+          "}",
+          "]",
+          ">",
+          // Identifier
+          seq(
+            // IdentifierStart
+            choice(
+              "_",
+              /\pLetter/,
+              /\pUniversalAlpha/,
+            ),
+            optional(
+              // IdentifierChars
+              repeat1(
+                // IdentifierChar
+                choice(
+                  // IdentifierStart
+                  choice(
+                    "_",
+                    /\pLetter/,
+                    /\pUniversalAlpha/,
+                  ),
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     // ---
@@ -408,396 +3638,12867 @@ module.exports = grammar({
     // ---
 
     _character_literal: $ =>
-      seq(
-        "'",
-        $._single_quoted_character,
-        "'",
+      token(
+        // CharacterLiteral
+        seq(
+          "'",
+          // SingleQuotedCharacter
+          choice(
+            // Character
+            /[\s\S]/,
+            // EscapeSequence
+            choice(
+              "\\\\'",
+              "\\\\\"",
+              "\\\\?",
+              "\\\\\\\\",
+              "\\0",
+              "\\a",
+              "\\b",
+              "\\f",
+              "\\n",
+              "\\r",
+              "\\t",
+              "\\v",
+              seq(
+                "\\x",
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+              seq(
+                "\\\\",
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+              ),
+              seq(
+                "\\\\",
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+              ),
+              seq(
+                "\\\\",
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+                // OctalDigit
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                ),
+              ),
+              seq(
+                "\\u",
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+              seq(
+                "\\U",
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+              seq(
+                "\\\\",
+                // NamedCharacterEntity
+                seq(
+                  "&",
+                  // Identifier
+                  seq(
+                    // IdentifierStart
+                    choice(
+                      "_",
+                      /\pLetter/,
+                      /\pUniversalAlpha/,
+                    ),
+                    optional(
+                      // IdentifierChars
+                      repeat1(
+                        // IdentifierChar
+                        choice(
+                          // IdentifierStart
+                          choice(
+                            "_",
+                            /\pLetter/,
+                            /\pUniversalAlpha/,
+                          ),
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  ";",
+                ),
+              ),
+            ),
+          ),
+          "'",
+        ),
       ),
 
     _single_quoted_character: $ =>
-      choice(
-        $._character,
-        $._escape_sequence,
+      token(
+        // SingleQuotedCharacter
+        choice(
+          // Character
+          /[\s\S]/,
+          // EscapeSequence
+          choice(
+            "\\\\'",
+            "\\\\\"",
+            "\\\\?",
+            "\\\\\\\\",
+            "\\0",
+            "\\a",
+            "\\b",
+            "\\f",
+            "\\n",
+            "\\r",
+            "\\t",
+            "\\v",
+            seq(
+              "\\x",
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+            ),
+            seq(
+              "\\\\",
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+            ),
+            seq(
+              "\\\\",
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+            ),
+            seq(
+              "\\\\",
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+              // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+              ),
+            ),
+            seq(
+              "\\u",
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+            ),
+            seq(
+              "\\U",
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+            ),
+            seq(
+              "\\\\",
+              // NamedCharacterEntity
+              seq(
+                "&",
+                // Identifier
+                seq(
+                  // IdentifierStart
+                  choice(
+                    "_",
+                    /\pLetter/,
+                    /\pUniversalAlpha/,
+                  ),
+                  optional(
+                    // IdentifierChars
+                    repeat1(
+                      // IdentifierChar
+                      choice(
+                        // IdentifierStart
+                        choice(
+                          "_",
+                          /\pLetter/,
+                          /\pUniversalAlpha/,
+                        ),
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                ";",
+              ),
+            ),
+          ),
+        ),
       ),
 
     // ---
 
     _integer_literal: $ =>
-      seq(
-        $._integer,
-        optional(
-          $._integer_suffix,
+      token(
+        // IntegerLiteral
+        seq(
+          // Integer
+          choice(
+            // DecimalInteger
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+              seq(
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                // DecimalDigitsUS
+                repeat1(
+                  // DecimalDigitUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+            ),
+            // BinaryInteger
+            seq(
+              // BinPrefix
+              choice(
+                "0b",
+                "0B",
+              ),
+              // BinaryDigitsNoSingleUS
+              choice(
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+                seq(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  // BinaryDigitsUS
+                  repeat1(
+                    // BinaryDigitUS
+                    choice(
+                      // BinaryDigit
+                      choice(
+                        "0",
+                        "1",
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // BinaryDigitsUS
+                  repeat1(
+                    // BinaryDigitUS
+                    choice(
+                      // BinaryDigit
+                      choice(
+                        "0",
+                        "1",
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                ),
+                seq(
+                  // BinaryDigitsUS
+                  repeat1(
+                    // BinaryDigitUS
+                    choice(
+                      // BinaryDigit
+                      choice(
+                        "0",
+                        "1",
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  // BinaryDigitsUS
+                  repeat1(
+                    // BinaryDigitUS
+                    choice(
+                      // BinaryDigit
+                      choice(
+                        "0",
+                        "1",
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // HexadecimalInteger
+            seq(
+              // HexPrefix
+              choice(
+                "0x",
+                "0X",
+              ),
+              // HexDigitsNoSingleUS
+              choice(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                seq(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          optional(
+            // IntegerSuffix
+            choice(
+              "L",
+              "u",
+              "U",
+              "Lu",
+              "LU",
+              "uL",
+              "UL",
+            ),
+          ),
         ),
       ),
 
     _integer: $ =>
-      choice(
-        $._decimal_integer,
-        $._binary_integer,
-        $._hexadecimal_integer,
+      token(
+        // Integer
+        choice(
+          // DecimalInteger
+          choice(
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+            seq(
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+              // DecimalDigitsUS
+              repeat1(
+                // DecimalDigitUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+            ),
+          ),
+          // BinaryInteger
+          seq(
+            // BinPrefix
+            choice(
+              "0b",
+              "0B",
+            ),
+            // BinaryDigitsNoSingleUS
+            choice(
+              // BinaryDigit
+              choice(
+                "0",
+                "1",
+              ),
+              seq(
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+                // BinaryDigitsUS
+                repeat1(
+                  // BinaryDigitUS
+                  choice(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+              seq(
+                // BinaryDigitsUS
+                repeat1(
+                  // BinaryDigitUS
+                  choice(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    "_",
+                  ),
+                ),
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+              ),
+              seq(
+                // BinaryDigitsUS
+                repeat1(
+                  // BinaryDigitUS
+                  choice(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    "_",
+                  ),
+                ),
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+                // BinaryDigitsUS
+                repeat1(
+                  // BinaryDigitUS
+                  choice(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // HexadecimalInteger
+          seq(
+            // HexPrefix
+            choice(
+              "0x",
+              "0X",
+            ),
+            // HexDigitsNoSingleUS
+            choice(
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              seq(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+              seq(
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     _integer_suffix: $ =>
-      choice(
-        "L",
-        "u",
-        "U",
-        "Lu",
-        "LU",
-        "uL",
-        "UL",
+      token(
+        // IntegerSuffix
+        choice(
+          "L",
+          "u",
+          "U",
+          "Lu",
+          "LU",
+          "uL",
+          "UL",
+        ),
       ),
 
     _decimal_integer: $ =>
-      choice(
-        "0",
-        $._non_zero_digit,
-        seq(
-          $._non_zero_digit,
-          $._decimal_digits_us,
+      token(
+        // DecimalInteger
+        choice(
+          "0",
+          // NonZeroDigit
+          choice(
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+          ),
+          seq(
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+            // DecimalDigitsUS
+            repeat1(
+              // DecimalDigitUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                "_",
+              ),
+            ),
+          ),
         ),
       ),
 
     _binary_integer: $ =>
-      seq(
-        $._bin_prefix,
-        $._binary_digits_no_single_us,
+      token(
+        // BinaryInteger
+        seq(
+          // BinPrefix
+          choice(
+            "0b",
+            "0B",
+          ),
+          // BinaryDigitsNoSingleUS
+          choice(
+            // BinaryDigit
+            choice(
+              "0",
+              "1",
+            ),
+            seq(
+              // BinaryDigit
+              choice(
+                "0",
+                "1",
+              ),
+              // BinaryDigitsUS
+              repeat1(
+                // BinaryDigitUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  "_",
+                ),
+              ),
+            ),
+            seq(
+              // BinaryDigitsUS
+              repeat1(
+                // BinaryDigitUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  "_",
+                ),
+              ),
+              // BinaryDigit
+              choice(
+                "0",
+                "1",
+              ),
+            ),
+            seq(
+              // BinaryDigitsUS
+              repeat1(
+                // BinaryDigitUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  "_",
+                ),
+              ),
+              // BinaryDigit
+              choice(
+                "0",
+                "1",
+              ),
+              // BinaryDigitsUS
+              repeat1(
+                // BinaryDigitUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  "_",
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     _bin_prefix: $ =>
-      choice(
-        "0b",
-        "0B",
+      token(
+        // BinPrefix
+        choice(
+          "0b",
+          "0B",
+        ),
       ),
 
     _hexadecimal_integer: $ =>
-      seq(
-        $._hex_prefix,
-        $._hex_digits_no_single_us,
+      token(
+        // HexadecimalInteger
+        seq(
+          // HexPrefix
+          choice(
+            "0x",
+            "0X",
+          ),
+          // HexDigitsNoSingleUS
+          choice(
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            seq(
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              // HexDigitsUS
+              repeat1(
+                // HexDigitUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+            ),
+            seq(
+              // HexDigitsUS
+              repeat1(
+                // HexDigitUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     _non_zero_digit: $ =>
-      choice(
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
+      token(
+        // NonZeroDigit
+        choice(
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+        ),
       ),
 
     _decimal_digits: $ =>
-      repeat1(
-        $._decimal_digit,
+      token(
+        // DecimalDigits
+        repeat1(
+          // DecimalDigit
+          choice(
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+          ),
+        ),
       ),
 
     _decimal_digits_us: $ =>
-      repeat1(
-        $._decimal_digit_us,
+      token(
+        // DecimalDigitsUS
+        repeat1(
+          // DecimalDigitUS
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            "_",
+          ),
+        ),
       ),
 
     _decimal_digits_no_single_us: $ =>
-      choice(
-        $._decimal_digit,
-        seq(
-          $._decimal_digit,
-          $._decimal_digits_us,
-        ),
-        seq(
-          $._decimal_digits_us,
-          $._decimal_digit,
+      token(
+        // DecimalDigitsNoSingleUS
+        choice(
+          // DecimalDigit
+          choice(
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+          ),
+          seq(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            // DecimalDigitsUS
+            repeat1(
+              // DecimalDigitUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                "_",
+              ),
+            ),
+          ),
+          seq(
+            // DecimalDigitsUS
+            repeat1(
+              // DecimalDigitUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                "_",
+              ),
+            ),
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+          ),
         ),
       ),
 
     _decimal_digits_no_starting_us: $ =>
-      seq(
-        $._decimal_digit,
-        optional(
-          $._decimal_digits_us,
+      token(
+        // DecimalDigitsNoStartingUS
+        seq(
+          // DecimalDigit
+          choice(
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+          ),
+          optional(
+            // DecimalDigitsUS
+            repeat1(
+              // DecimalDigitUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                "_",
+              ),
+            ),
+          ),
         ),
       ),
 
     _decimal_digit: $ =>
-      choice(
-        "0",
-        $._non_zero_digit,
+      token(
+        // DecimalDigit
+        choice(
+          "0",
+          // NonZeroDigit
+          choice(
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+          ),
+        ),
       ),
 
     _decimal_digit_us: $ =>
-      choice(
-        $._decimal_digit,
-        "_",
+      token(
+        // DecimalDigitUS
+        choice(
+          // DecimalDigit
+          choice(
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+          ),
+          "_",
+        ),
       ),
 
     _binary_digits_no_single_us: $ =>
-      choice(
-        $._binary_digit,
-        seq(
-          $._binary_digit,
-          $._binary_digits_us,
-        ),
-        seq(
-          $._binary_digits_us,
-          $._binary_digit,
-        ),
-        seq(
-          $._binary_digits_us,
-          $._binary_digit,
-          $._binary_digits_us,
+      token(
+        // BinaryDigitsNoSingleUS
+        choice(
+          // BinaryDigit
+          choice(
+            "0",
+            "1",
+          ),
+          seq(
+            // BinaryDigit
+            choice(
+              "0",
+              "1",
+            ),
+            // BinaryDigitsUS
+            repeat1(
+              // BinaryDigitUS
+              choice(
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+                "_",
+              ),
+            ),
+          ),
+          seq(
+            // BinaryDigitsUS
+            repeat1(
+              // BinaryDigitUS
+              choice(
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+                "_",
+              ),
+            ),
+            // BinaryDigit
+            choice(
+              "0",
+              "1",
+            ),
+          ),
+          seq(
+            // BinaryDigitsUS
+            repeat1(
+              // BinaryDigitUS
+              choice(
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+                "_",
+              ),
+            ),
+            // BinaryDigit
+            choice(
+              "0",
+              "1",
+            ),
+            // BinaryDigitsUS
+            repeat1(
+              // BinaryDigitUS
+              choice(
+                // BinaryDigit
+                choice(
+                  "0",
+                  "1",
+                ),
+                "_",
+              ),
+            ),
+          ),
         ),
       ),
 
     _binary_digits_us: $ =>
-      repeat1(
-        $._binary_digit_us,
+      token(
+        // BinaryDigitsUS
+        repeat1(
+          // BinaryDigitUS
+          choice(
+            // BinaryDigit
+            choice(
+              "0",
+              "1",
+            ),
+            "_",
+          ),
+        ),
       ),
 
     _binary_digit: $ =>
-      choice(
-        "0",
-        "1",
+      token(
+        // BinaryDigit
+        choice(
+          "0",
+          "1",
+        ),
       ),
 
     _binary_digit_us: $ =>
-      choice(
-        $._binary_digit,
-        "_",
+      token(
+        // BinaryDigitUS
+        choice(
+          // BinaryDigit
+          choice(
+            "0",
+            "1",
+          ),
+          "_",
+        ),
       ),
 
     _octal_digit: $ =>
-      choice(
-        "0",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
+      token(
+        // OctalDigit
+        choice(
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+        ),
       ),
 
     _hex_digits: $ =>
-      repeat1(
-        $._hex_digit,
+      token(
+        // HexDigits
+        repeat1(
+          // HexDigit
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            // HexLetter
+            choice(
+              "a",
+              "b",
+              "c",
+              "d",
+              "e",
+              "f",
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+            ),
+          ),
+        ),
       ),
 
     _hex_digits_us: $ =>
-      repeat1(
-        $._hex_digit_us,
+      token(
+        // HexDigitsUS
+        repeat1(
+          // HexDigitUS
+          choice(
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            "_",
+          ),
+        ),
       ),
 
     _hex_digits_no_single_us: $ =>
-      choice(
-        $._hex_digit,
-        seq(
-          $._hex_digit,
-          $._hex_digits_us,
-        ),
-        seq(
-          $._hex_digits_us,
-          $._hex_digit,
+      token(
+        // HexDigitsNoSingleUS
+        choice(
+          // HexDigit
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            // HexLetter
+            choice(
+              "a",
+              "b",
+              "c",
+              "d",
+              "e",
+              "f",
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+            ),
+          ),
+          seq(
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            // HexDigitsUS
+            repeat1(
+              // HexDigitUS
+              choice(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                "_",
+              ),
+            ),
+          ),
+          seq(
+            // HexDigitsUS
+            repeat1(
+              // HexDigitUS
+              choice(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                "_",
+              ),
+            ),
+            // HexDigit
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // HexLetter
+              choice(
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+          ),
         ),
       ),
 
     _hex_digits_no_starting_us: $ =>
-      seq(
-        $._hex_digit,
-        optional(
-          $._hex_digits_us,
+      token(
+        // HexDigitsNoStartingUS
+        seq(
+          // HexDigit
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            // HexLetter
+            choice(
+              "a",
+              "b",
+              "c",
+              "d",
+              "e",
+              "f",
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+            ),
+          ),
+          optional(
+            // HexDigitsUS
+            repeat1(
+              // HexDigitUS
+              choice(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                "_",
+              ),
+            ),
+          ),
         ),
       ),
 
     _hex_digit: $ =>
-      choice(
-        $._decimal_digit,
-        $._hex_letter,
+      token(
+        // HexDigit
+        choice(
+          // DecimalDigit
+          choice(
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+          ),
+          // HexLetter
+          choice(
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+          ),
+        ),
       ),
 
     _hex_digit_us: $ =>
-      choice(
-        $._hex_digit,
-        "_",
+      token(
+        // HexDigitUS
+        choice(
+          // HexDigit
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            // HexLetter
+            choice(
+              "a",
+              "b",
+              "c",
+              "d",
+              "e",
+              "f",
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+            ),
+          ),
+          "_",
+        ),
       ),
 
     _hex_letter: $ =>
-      choice(
-        "a",
-        "b",
-        "c",
-        "d",
-        "e",
-        "f",
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
+      token(
+        // HexLetter
+        choice(
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+        ),
       ),
 
     // ---
 
     _float_literal: $ =>
-      choice(
-        $._float,
-        seq(
-          $._float,
-          $._suffix,
-        ),
-        seq(
-          $._integer,
-          $._float_suffix,
-        ),
-        seq(
-          $._integer,
-          $._imaginary_suffix,
-        ),
-        seq(
-          $._integer,
-          $._float_suffix,
-          $._imaginary_suffix,
-        ),
-        seq(
-          $._integer,
-          $._real_suffix,
-          $._imaginary_suffix,
+      token(
+        // FloatLiteral
+        choice(
+          // Float
+          choice(
+            // DecimalFloat
+            choice(
+              seq(
+                // LeadingDecimal
+                choice(
+                  // DecimalInteger
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    seq(
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  seq(
+                    "0",
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                ".",
+              ),
+              seq(
+                // LeadingDecimal
+                choice(
+                  // DecimalInteger
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    seq(
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  seq(
+                    "0",
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                ".",
+                // DecimalDigits
+                repeat1(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                // DecimalDigits
+                repeat1(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+                ".",
+                // DecimalDigitsNoStartingUS
+                seq(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  optional(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+                // DecimalExponent
+                seq(
+                  // DecimalExponentStart
+                  choice(
+                    "e",
+                    "E",
+                    "e+",
+                    "E+",
+                    "e-",
+                    "E-",
+                  ),
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                ".",
+                // DecimalInteger
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  seq(
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                ".",
+                // DecimalInteger
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  seq(
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+                // DecimalExponent
+                seq(
+                  // DecimalExponentStart
+                  choice(
+                    "e",
+                    "E",
+                    "e+",
+                    "E+",
+                    "e-",
+                    "E-",
+                  ),
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                // LeadingDecimal
+                choice(
+                  // DecimalInteger
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    seq(
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  seq(
+                    "0",
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // DecimalExponent
+                seq(
+                  // DecimalExponentStart
+                  choice(
+                    "e",
+                    "E",
+                    "e+",
+                    "E+",
+                    "e-",
+                    "E-",
+                  ),
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // HexFloat
+            choice(
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                // HexDigitsNoSingleUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                ),
+                ".",
+                // HexDigitsNoStartingUS
+                seq(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  optional(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+                // HexExponent
+                seq(
+                  // HexExponentStart
+                  choice(
+                    "p",
+                    "P",
+                    "p+",
+                    "P+",
+                    "p-",
+                    "P-",
+                  ),
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                ".",
+                // HexDigitsNoStartingUS
+                seq(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  optional(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+                // HexExponent
+                seq(
+                  // HexExponentStart
+                  choice(
+                    "p",
+                    "P",
+                    "p+",
+                    "P+",
+                    "p-",
+                    "P-",
+                  ),
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                // HexDigitsNoSingleUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                ),
+                // HexExponent
+                seq(
+                  // HexExponentStart
+                  choice(
+                    "p",
+                    "P",
+                    "p+",
+                    "P+",
+                    "p-",
+                    "P-",
+                  ),
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          seq(
+            // Float
+            choice(
+              // DecimalFloat
+              choice(
+                seq(
+                  // LeadingDecimal
+                  choice(
+                    // DecimalInteger
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      seq(
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                    ),
+                    seq(
+                      "0",
+                      // DecimalDigitsNoSingleUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  ".",
+                ),
+                seq(
+                  // LeadingDecimal
+                  choice(
+                    // DecimalInteger
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      seq(
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                    ),
+                    seq(
+                      "0",
+                      // DecimalDigitsNoSingleUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  ".",
+                  // DecimalDigits
+                  repeat1(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  // DecimalDigits
+                  repeat1(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                  ".",
+                  // DecimalDigitsNoStartingUS
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    optional(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  // DecimalExponent
+                  seq(
+                    // DecimalExponentStart
+                    choice(
+                      "e",
+                      "E",
+                      "e+",
+                      "E+",
+                      "e-",
+                      "E-",
+                    ),
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  ".",
+                  // DecimalInteger
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    seq(
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  ".",
+                  // DecimalInteger
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    seq(
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  // DecimalExponent
+                  seq(
+                    // DecimalExponentStart
+                    choice(
+                      "e",
+                      "E",
+                      "e+",
+                      "E+",
+                      "e-",
+                      "E-",
+                    ),
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  // LeadingDecimal
+                  choice(
+                    // DecimalInteger
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                      seq(
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                    ),
+                    seq(
+                      "0",
+                      // DecimalDigitsNoSingleUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // DecimalExponent
+                  seq(
+                    // DecimalExponentStart
+                    choice(
+                      "e",
+                      "E",
+                      "e+",
+                      "E+",
+                      "e-",
+                      "E-",
+                    ),
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // HexFloat
+              choice(
+                seq(
+                  // HexPrefix
+                  choice(
+                    "0x",
+                    "0X",
+                  ),
+                  // HexDigitsNoSingleUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    seq(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      // HexDigitsUS
+                      repeat1(
+                        // HexDigitUS
+                        choice(
+                          // HexDigit
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // HexDigitsUS
+                      repeat1(
+                        // HexDigitUS
+                        choice(
+                          // HexDigit
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                    ),
+                  ),
+                  ".",
+                  // HexDigitsNoStartingUS
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    optional(
+                      // HexDigitsUS
+                      repeat1(
+                        // HexDigitUS
+                        choice(
+                          // HexDigit
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  // HexExponent
+                  seq(
+                    // HexExponentStart
+                    choice(
+                      "p",
+                      "P",
+                      "p+",
+                      "P+",
+                      "p-",
+                      "P-",
+                    ),
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  // HexPrefix
+                  choice(
+                    "0x",
+                    "0X",
+                  ),
+                  ".",
+                  // HexDigitsNoStartingUS
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    optional(
+                      // HexDigitsUS
+                      repeat1(
+                        // HexDigitUS
+                        choice(
+                          // HexDigit
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  // HexExponent
+                  seq(
+                    // HexExponentStart
+                    choice(
+                      "p",
+                      "P",
+                      "p+",
+                      "P+",
+                      "p-",
+                      "P-",
+                    ),
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  // HexPrefix
+                  choice(
+                    "0x",
+                    "0X",
+                  ),
+                  // HexDigitsNoSingleUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    seq(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      // HexDigitsUS
+                      repeat1(
+                        // HexDigitUS
+                        choice(
+                          // HexDigit
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // HexDigitsUS
+                      repeat1(
+                        // HexDigitUS
+                        choice(
+                          // HexDigit
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                    ),
+                  ),
+                  // HexExponent
+                  seq(
+                    // HexExponentStart
+                    choice(
+                      "p",
+                      "P",
+                      "p+",
+                      "P+",
+                      "p-",
+                      "P-",
+                    ),
+                    // DecimalDigitsNoSingleUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            "_",
+                          ),
+                        ),
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Suffix
+            choice(
+              // FloatSuffix
+              choice(
+                "f",
+                "F",
+              ),
+              // RealSuffix
+              "L",
+              // ImaginarySuffix
+              "i",
+              seq(
+                // FloatSuffix
+                choice(
+                  "f",
+                  "F",
+                ),
+                // ImaginarySuffix
+                "i",
+              ),
+              seq(
+                // RealSuffix
+                "L",
+                // ImaginarySuffix
+                "i",
+              ),
+            ),
+          ),
+          seq(
+            // Integer
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // BinaryInteger
+              seq(
+                // BinPrefix
+                choice(
+                  "0b",
+                  "0B",
+                ),
+                // BinaryDigitsNoSingleUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  seq(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // HexadecimalInteger
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                // HexDigitsNoSingleUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // FloatSuffix
+            choice(
+              "f",
+              "F",
+            ),
+          ),
+          seq(
+            // Integer
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // BinaryInteger
+              seq(
+                // BinPrefix
+                choice(
+                  "0b",
+                  "0B",
+                ),
+                // BinaryDigitsNoSingleUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  seq(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // HexadecimalInteger
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                // HexDigitsNoSingleUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // ImaginarySuffix
+            "i",
+          ),
+          seq(
+            // Integer
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // BinaryInteger
+              seq(
+                // BinPrefix
+                choice(
+                  "0b",
+                  "0B",
+                ),
+                // BinaryDigitsNoSingleUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  seq(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // HexadecimalInteger
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                // HexDigitsNoSingleUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // FloatSuffix
+            choice(
+              "f",
+              "F",
+            ),
+            // ImaginarySuffix
+            "i",
+          ),
+          seq(
+            // Integer
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // BinaryInteger
+              seq(
+                // BinPrefix
+                choice(
+                  "0b",
+                  "0B",
+                ),
+                // BinaryDigitsNoSingleUS
+                choice(
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  seq(
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                  ),
+                  seq(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // BinaryDigit
+                    choice(
+                      "0",
+                      "1",
+                    ),
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // HexadecimalInteger
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                // HexDigitsNoSingleUS
+                choice(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // RealSuffix
+            "L",
+            // ImaginarySuffix
+            "i",
+          ),
         ),
       ),
 
     _float: $ =>
-      choice(
-        $._decimal_float,
-        $._hex_float,
+      token(
+        // Float
+        choice(
+          // DecimalFloat
+          choice(
+            seq(
+              // LeadingDecimal
+              choice(
+                // DecimalInteger
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  seq(
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  "0",
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              ".",
+            ),
+            seq(
+              // LeadingDecimal
+              choice(
+                // DecimalInteger
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  seq(
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  "0",
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              ".",
+              // DecimalDigits
+              repeat1(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+              ),
+            ),
+            seq(
+              // DecimalDigits
+              repeat1(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+              ),
+              ".",
+              // DecimalDigitsNoStartingUS
+              seq(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                optional(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // DecimalExponent
+              seq(
+                // DecimalExponentStart
+                choice(
+                  "e",
+                  "E",
+                  "e+",
+                  "E+",
+                  "e-",
+                  "E-",
+                ),
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            seq(
+              ".",
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            seq(
+              ".",
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // DecimalExponent
+              seq(
+                // DecimalExponentStart
+                choice(
+                  "e",
+                  "E",
+                  "e+",
+                  "E+",
+                  "e-",
+                  "E-",
+                ),
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            seq(
+              // LeadingDecimal
+              choice(
+                // DecimalInteger
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  seq(
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  "0",
+                  // DecimalDigitsNoSingleUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      // DecimalDigitsUS
+                      repeat1(
+                        // DecimalDigitUS
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // DecimalExponent
+              seq(
+                // DecimalExponentStart
+                choice(
+                  "e",
+                  "E",
+                  "e+",
+                  "E+",
+                  "e-",
+                  "E-",
+                ),
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // HexFloat
+          choice(
+            seq(
+              // HexPrefix
+              choice(
+                "0x",
+                "0X",
+              ),
+              // HexDigitsNoSingleUS
+              choice(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                seq(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                ),
+              ),
+              ".",
+              // HexDigitsNoStartingUS
+              seq(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                optional(
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // HexExponent
+              seq(
+                // HexExponentStart
+                choice(
+                  "p",
+                  "P",
+                  "p+",
+                  "P+",
+                  "p-",
+                  "P-",
+                ),
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            seq(
+              // HexPrefix
+              choice(
+                "0x",
+                "0X",
+              ),
+              ".",
+              // HexDigitsNoStartingUS
+              seq(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                optional(
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              // HexExponent
+              seq(
+                // HexExponentStart
+                choice(
+                  "p",
+                  "P",
+                  "p+",
+                  "P+",
+                  "p-",
+                  "P-",
+                ),
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            seq(
+              // HexPrefix
+              choice(
+                "0x",
+                "0X",
+              ),
+              // HexDigitsNoSingleUS
+              choice(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                seq(
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // HexDigitsUS
+                  repeat1(
+                    // HexDigitUS
+                    choice(
+                      // HexDigit
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        // HexLetter
+                        choice(
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // HexDigit
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // HexLetter
+                    choice(
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                  ),
+                ),
+              ),
+              // HexExponent
+              seq(
+                // HexExponentStart
+                choice(
+                  "p",
+                  "P",
+                  "p+",
+                  "P+",
+                  "p-",
+                  "P-",
+                ),
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     _decimal_float: $ =>
-      choice(
-        seq(
-          $._leading_decimal,
-          ".",
-        ),
-        seq(
-          $._leading_decimal,
-          ".",
-          $._decimal_digits,
-        ),
-        seq(
-          $._decimal_digits,
-          ".",
-          $._decimal_digits_no_starting_us,
-          $._decimal_exponent,
-        ),
-        seq(
-          ".",
-          $._decimal_integer,
-        ),
-        seq(
-          ".",
-          $._decimal_integer,
-          $._decimal_exponent,
-        ),
-        seq(
-          $._leading_decimal,
-          $._decimal_exponent,
+      token(
+        // DecimalFloat
+        choice(
+          seq(
+            // LeadingDecimal
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                "0",
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            ".",
+          ),
+          seq(
+            // LeadingDecimal
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                "0",
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            ".",
+            // DecimalDigits
+            repeat1(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+            ),
+          ),
+          seq(
+            // DecimalDigits
+            repeat1(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+            ),
+            ".",
+            // DecimalDigitsNoStartingUS
+            seq(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              optional(
+                // DecimalDigitsUS
+                repeat1(
+                  // DecimalDigitUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+            ),
+            // DecimalExponent
+            seq(
+              // DecimalExponentStart
+              choice(
+                "e",
+                "E",
+                "e+",
+                "E+",
+                "e-",
+                "E-",
+              ),
+              // DecimalDigitsNoSingleUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                seq(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          seq(
+            ".",
+            // DecimalInteger
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+              seq(
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                // DecimalDigitsUS
+                repeat1(
+                  // DecimalDigitUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          seq(
+            ".",
+            // DecimalInteger
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+              seq(
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                // DecimalDigitsUS
+                repeat1(
+                  // DecimalDigitUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+            ),
+            // DecimalExponent
+            seq(
+              // DecimalExponentStart
+              choice(
+                "e",
+                "E",
+                "e+",
+                "E+",
+                "e-",
+                "E-",
+              ),
+              // DecimalDigitsNoSingleUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                seq(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          seq(
+            // LeadingDecimal
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                "0",
+                // DecimalDigitsNoSingleUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // DecimalExponent
+            seq(
+              // DecimalExponentStart
+              choice(
+                "e",
+                "E",
+                "e+",
+                "E+",
+                "e-",
+                "E-",
+              ),
+              // DecimalDigitsNoSingleUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                seq(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
 
     _decimal_exponent: $ =>
-      seq(
-        $._decimal_exponent_start,
-        $._decimal_digits_no_single_us,
+      token(
+        // DecimalExponent
+        seq(
+          // DecimalExponentStart
+          choice(
+            "e",
+            "E",
+            "e+",
+            "E+",
+            "e-",
+            "E-",
+          ),
+          // DecimalDigitsNoSingleUS
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            seq(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // DecimalDigitsUS
+              repeat1(
+                // DecimalDigitUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+            ),
+            seq(
+              // DecimalDigitsUS
+              repeat1(
+                // DecimalDigitUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     _decimal_exponent_start: $ =>
-      choice(
-        "e",
-        "E",
-        "e+",
-        "E+",
-        "e-",
-        "E-",
+      token(
+        // DecimalExponentStart
+        choice(
+          "e",
+          "E",
+          "e+",
+          "E+",
+          "e-",
+          "E-",
+        ),
       ),
 
     _hex_float: $ =>
-      choice(
-        seq(
-          $._hex_prefix,
-          $._hex_digits_no_single_us,
-          ".",
-          $._hex_digits_no_starting_us,
-          $._hex_exponent,
-        ),
-        seq(
-          $._hex_prefix,
-          ".",
-          $._hex_digits_no_starting_us,
-          $._hex_exponent,
-        ),
-        seq(
-          $._hex_prefix,
-          $._hex_digits_no_single_us,
-          $._hex_exponent,
+      token(
+        // HexFloat
+        choice(
+          seq(
+            // HexPrefix
+            choice(
+              "0x",
+              "0X",
+            ),
+            // HexDigitsNoSingleUS
+            choice(
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              seq(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+              seq(
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+            ),
+            ".",
+            // HexDigitsNoStartingUS
+            seq(
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              optional(
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+            ),
+            // HexExponent
+            seq(
+              // HexExponentStart
+              choice(
+                "p",
+                "P",
+                "p+",
+                "P+",
+                "p-",
+                "P-",
+              ),
+              // DecimalDigitsNoSingleUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                seq(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          seq(
+            // HexPrefix
+            choice(
+              "0x",
+              "0X",
+            ),
+            ".",
+            // HexDigitsNoStartingUS
+            seq(
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              optional(
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+            ),
+            // HexExponent
+            seq(
+              // HexExponentStart
+              choice(
+                "p",
+                "P",
+                "p+",
+                "P+",
+                "p-",
+                "P-",
+              ),
+              // DecimalDigitsNoSingleUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                seq(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          seq(
+            // HexPrefix
+            choice(
+              "0x",
+              "0X",
+            ),
+            // HexDigitsNoSingleUS
+            choice(
+              // HexDigit
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // HexLetter
+                choice(
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              seq(
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+              seq(
+                // HexDigitsUS
+                repeat1(
+                  // HexDigitUS
+                  choice(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+            ),
+            // HexExponent
+            seq(
+              // HexExponentStart
+              choice(
+                "p",
+                "P",
+                "p+",
+                "P+",
+                "p-",
+                "P-",
+              ),
+              // DecimalDigitsNoSingleUS
+              choice(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                seq(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
+                seq(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      "_",
+                    ),
+                  ),
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
 
     _hex_prefix: $ =>
-      choice(
-        "0x",
-        "0X",
+      token(
+        // HexPrefix
+        choice(
+          "0x",
+          "0X",
+        ),
       ),
 
     _hex_exponent: $ =>
-      seq(
-        $._hex_exponent_start,
-        $._decimal_digits_no_single_us,
+      token(
+        // HexExponent
+        seq(
+          // HexExponentStart
+          choice(
+            "p",
+            "P",
+            "p+",
+            "P+",
+            "p-",
+            "P-",
+          ),
+          // DecimalDigitsNoSingleUS
+          choice(
+            // DecimalDigit
+            choice(
+              "0",
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            seq(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              // DecimalDigitsUS
+              repeat1(
+                // DecimalDigitUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+            ),
+            seq(
+              // DecimalDigitsUS
+              repeat1(
+                // DecimalDigitUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
 
     _hex_exponent_start: $ =>
-      choice(
-        "p",
-        "P",
-        "p+",
-        "P+",
-        "p-",
-        "P-",
+      token(
+        // HexExponentStart
+        choice(
+          "p",
+          "P",
+          "p+",
+          "P+",
+          "p-",
+          "P-",
+        ),
       ),
 
     _suffix: $ =>
-      choice(
-        $._float_suffix,
-        $._real_suffix,
-        $._imaginary_suffix,
-        seq(
-          $._float_suffix,
-          $._imaginary_suffix,
-        ),
-        seq(
-          $._real_suffix,
-          $._imaginary_suffix,
+      token(
+        // Suffix
+        choice(
+          // FloatSuffix
+          choice(
+            "f",
+            "F",
+          ),
+          // RealSuffix
+          "L",
+          // ImaginarySuffix
+          "i",
+          seq(
+            // FloatSuffix
+            choice(
+              "f",
+              "F",
+            ),
+            // ImaginarySuffix
+            "i",
+          ),
+          seq(
+            // RealSuffix
+            "L",
+            // ImaginarySuffix
+            "i",
+          ),
         ),
       ),
 
     _float_suffix: $ =>
-      choice(
-        "f",
-        "F",
+      token(
+        // FloatSuffix
+        choice(
+          "f",
+          "F",
+        ),
       ),
 
     _real_suffix: $ =>
-      "L",
+      token(
+        // RealSuffix
+        "L",
+      ),
 
     _imaginary_suffix: $ =>
-      "i",
+      token(
+        // ImaginarySuffix
+        "i",
+      ),
 
     _leading_decimal: $ =>
-      choice(
-        $._decimal_integer,
-        seq(
-          "0",
-          $._decimal_digits_no_single_us,
+      token(
+        // LeadingDecimal
+        choice(
+          // DecimalInteger
+          choice(
+            "0",
+            // NonZeroDigit
+            choice(
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+            ),
+            seq(
+              // NonZeroDigit
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+              // DecimalDigitsUS
+              repeat1(
+                // DecimalDigitUS
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  "_",
+                ),
+              ),
+            ),
+          ),
+          seq(
+            "0",
+            // DecimalDigitsNoSingleUS
+            choice(
+              // DecimalDigit
+              choice(
+                "0",
+                // NonZeroDigit
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+              ),
+              seq(
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+                // DecimalDigitsUS
+                repeat1(
+                  // DecimalDigitUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+              ),
+              seq(
+                // DecimalDigitsUS
+                repeat1(
+                  // DecimalDigitUS
+                  choice(
+                    // DecimalDigit
+                    choice(
+                      "0",
+                      // NonZeroDigit
+                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    "_",
+                  ),
+                ),
+                // DecimalDigit
+                choice(
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
 
@@ -939,12 +16640,19 @@ module.exports = grammar({
     // ---
 
     _filespec: $ =>
-      seq(
-        "\"",
-        optional(
-          $._characters,
+      token(
+        // Filespec
+        seq(
+          "\"",
+          optional(
+            // Characters
+            repeat1(
+              // Character
+              /[\s\S]/,
+            ),
+          ),
+          "\"",
         ),
-        "\"",
       ),
 
     // ------------------------------------------------------------------------
@@ -5978,10 +21686,48 @@ module.exports = grammar({
     // ------------------------------------------------------------------------
 
     _named_character_entity: $ =>
-      seq(
-        "&",
-        $._identifier,
-        ";",
+      token(
+        // NamedCharacterEntity
+        seq(
+          "&",
+          // Identifier
+          seq(
+            // IdentifierStart
+            choice(
+              "_",
+              /\pLetter/,
+              /\pUniversalAlpha/,
+            ),
+            optional(
+              // IdentifierChars
+              repeat1(
+                // IdentifierChar
+                choice(
+                  // IdentifierStart
+                  choice(
+                    "_",
+                    /\pLetter/,
+                    /\pUniversalAlpha/,
+                  ),
+                  "0",
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                ),
+              ),
+            ),
+          ),
+          ";",
+        ),
       ),
   }
 });
