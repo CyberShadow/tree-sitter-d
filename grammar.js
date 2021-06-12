@@ -484,7 +484,8 @@ module.exports = grammar({
               // WysiwygCharacter
               choice(
                 // Character
-                /[\s\S]/,
+                /[^"]/,
+               /*
                 // EndOfLine
                 choice(
                   "\r",
@@ -502,6 +503,7 @@ module.exports = grammar({
                     "\x1A",
                   ),
                 ),
+               */
               ),
             ),
           ),
