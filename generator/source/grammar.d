@@ -1,6 +1,7 @@
 import std.algorithm.comparison;
 import std.algorithm.iteration;
 import std.algorithm.searching;
+import std.array;
 import std.conv;
 import std.exception;
 import std.format;
@@ -20,6 +21,7 @@ struct Grammar
 	struct Reference { string name; }
 	struct Choice { Node[] nodes; }
 	struct Seq { Node[] nodes; }
+	struct Repeat { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
 	struct Repeat1 { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
 	struct Optional { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
 	// https://issues.dlang.org/show_bug.cgi?id=22003
@@ -29,6 +31,7 @@ struct Grammar
 		LiteralToken,
 		Reference,
 		Choice,
+		Repeat,
 		Repeat1,
 		Seq,
 		Optional,
@@ -667,6 +670,7 @@ struct Grammar
 				(ref Reference    v) { enforce(v.name in defs, "Unknown reference: " ~ v.name); },
 				(ref Choice       v) { v.nodes.each!scan(); },
 				(ref Seq          v) { v.nodes.each!scan(); },
+				(ref Repeat       v) { v.node .each!scan(); },
 				(ref Repeat1      v) { v.node .each!scan(); },
 				(ref Optional     v) { v.node .each!scan(); },
 			);
@@ -689,6 +693,7 @@ struct Grammar
 				(ref Reference    v) {},
 				(ref Choice       v) { v.nodes.each!optimizeNode(); },
 				(ref Seq          v) { v.nodes.each!optimizeNode(); },
+				(ref Repeat       v) { v.node .each!optimizeNode(); },
 				(ref Repeat1      v) { v.node .each!optimizeNode(); },
 				(ref Optional     v) { v.node .each!optimizeNode(); },
 			);
@@ -701,6 +706,7 @@ struct Grammar
 				(ref Reference    v) => node,
 				(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
 				(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
+				(ref Repeat       v) => node,
 				(ref Repeat1      v) => node,
 				(ref Optional     v) => node,
 			);
@@ -709,23 +715,36 @@ struct Grammar
 			node.value.match!(
 				(ref Choice choice)
 				{
-					if (choice.nodes.length != 2)
+					if (choice.nodes.length < 2)
 						return;
-					choice.nodes[1].match!(
-						(ref Seq seq)
-						{
-							if (seq.nodes.length != 2)
-								return;
-							if (seq.nodes[0] != choice.nodes[0])
-								return;
-							node = Node(NodeValue(Seq([
-								seq.nodes[0],
-								Node(NodeValue(Optional([
-									seq.nodes[1],
-								]))),
-							])));
-						},
-						(ref _) {});
+					auto prefix = choice.nodes[0].match!(
+						(ref Seq seq) => seq.nodes,
+						(_) => choice.nodes[0 .. 1],
+					);
+					if (!prefix)
+						return;
+
+					bool samePrefix = choice.nodes[1 .. $].map!((ref n) => n.match!(
+						(ref Seq seq) => seq.nodes.startsWith(prefix),
+						(_) => false,
+					)).all;
+					if (!samePrefix)
+						return;
+
+					node = Node(NodeValue(Seq(
+						prefix ~
+						Node(NodeValue(Optional([
+							Node(NodeValue(Choice(
+								choice.nodes[1 .. $].map!((ref n) => Node(NodeValue(Seq(
+									n.tryMatch!(
+										(ref Seq seq) => seq.nodes[prefix.length .. $],
+									)
+								))))
+								.array,
+							)))
+						])))
+					)));
+					optimizeNode(node);
 				},
 				(ref _) {},
 			);
@@ -755,6 +774,111 @@ struct Grammar
 										def.node = Node(NodeValue(Repeat1([
 											seq.nodes[0],
 										])));
+									},
+									(_) {}
+								);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+			}
+
+			// Transform x := seq(y, optional(seq(z, x))) into x := seq(y, repeat(seq(z, y)))
+			// (attempt to remove recursion)
+			{
+				def.node.match!(
+					(ref Seq seq1)
+					{
+						if (seq1.nodes.length < 2)
+							return;
+						seq1.nodes[$-1].match!(
+							(ref Optional optional)
+							{
+								optional.node[0].match!(
+									(ref Seq seq2)
+									{
+										if (seq2.nodes.length < 2)
+											return;
+										seq2.nodes[$-1].match!(
+											(ref Reference reference)
+											{
+												if (reference.name != name)
+													return;
+
+												def.node = Node(NodeValue(Seq(
+													seq1.nodes[0 .. $-1] ~
+													Node(NodeValue(Repeat([
+														Node(NodeValue(Seq(
+															seq2.nodes[0 .. $-1] ~
+															seq1.nodes[0 .. $-1],
+														))),
+													]))),
+												)));
+											},
+											(_) {}
+										);
+									},
+									(_) {}
+								);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+			}
+
+			// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
+			// (attempt to remove recursion)
+			{
+				def.node.match!(
+					(ref Seq seq1)
+					{
+						if (seq1.nodes.length < 2)
+							return;
+						auto y = seq1.nodes[0 .. $-1];
+						seq1.nodes[$-1].match!(
+							(ref Optional optional1)
+							{
+								optional1.node[0].match!(
+									(ref Seq seq2)
+									{
+										if (seq2.nodes.length < 2)
+											return;
+										auto z = seq2.nodes[0 .. $-1];
+										seq2.nodes[$-1].match!(
+											(ref Optional optional1)
+											{
+												optional1.node[0].match!(
+													(ref Reference reference)
+													{
+														if (reference.name != name)
+															return;
+														auto x = reference;
+
+														def.node = Node(NodeValue(Seq(
+															y ~
+															Node(NodeValue(Repeat([
+																Node(NodeValue(Seq(
+																	z ~
+																	y
+																)))
+															]))) ~
+															Node(NodeValue(Optional([
+																Node(NodeValue(Seq(
+																	z
+																)))
+															])))
+														)));
+														optimizeNode(def.node);
+													},
+													(_) {}
+												);
+											},
+											(_) {}
+										);
 									},
 									(_) {}
 								);
@@ -810,6 +934,7 @@ struct Grammar
 								(ref Reference    v) { enforce(defs[v.name].kind == Def.Kind.chars, "%s of kind %s references %s of kind %s".format(defName, def.kind, v.name, defs[v.name].kind)); return checkDef(v.name); },
 								(ref Choice       v) => v.nodes.map!scanNode().fold!((a, b) => State(a | b)),
 								(ref Seq          v) => v.nodes.map!scanNode().fold!concat,
+								(ref Repeat       v) => v.node[0].I!scanNode().I!(x => concat(x, x)),
 								(ref Repeat1      v) => v.node[0].I!scanNode().I!(x => concat(x, x)),
 								(ref Optional     v) => v.node[0].I!scanNode(),
 							);
@@ -832,6 +957,7 @@ struct Grammar
 							(ref Reference    v) {},
 							(ref Choice       v) { v.nodes.each!scanNode(); },
 							(ref Seq          v) { v.nodes.each!scanNode(); },
+							(ref Repeat       v) { v.node .each!scanNode(); },
 							(ref Repeat1      v) { v.node .each!scanNode(); },
 							(ref Optional     v) { v.node .each!scanNode(); },
 						);
@@ -864,6 +990,7 @@ struct Grammar
 					(ref Reference    v) { scanDef(v.name); },
 					(ref Choice       v) { v.nodes.each!scanNode(); },
 					(ref Seq          v) { v.nodes.each!scanNode(); },
+					(ref Repeat       v) { v.node .each!scanNode(); },
 					(ref Repeat1      v) { v.node .each!scanNode(); },
 					(ref Optional     v) { v.node .each!scanNode(); },
 				);
@@ -896,6 +1023,7 @@ struct Grammar
 					(ref Reference    v) => 1,
 					(ref Choice       v) => v.nodes.map!scanNode().reduce!max(),
 					(ref Seq          v) => v.nodes.map!scanNode().sum(),
+					(ref Repeat       v) => v.node[0].I!scanNode() * 2,
 					(ref Repeat1      v) => v.node[0].I!scanNode() * 2,
 					(ref Optional     v) => v.node[0].I!scanNode(),
 				);

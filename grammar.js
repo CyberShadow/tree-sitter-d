@@ -8050,22 +8050,24 @@ module.exports = grammar({
       ),
 
     import_bind_list: $ =>
-      choice(
+      seq(
         $.import_bind,
-        seq(
-          $.import_bind,
-          ",",
-          $.import_bind_list,
+        repeat(
+          seq(
+            ",",
+            $.import_bind,
+          ),
         ),
       ),
 
     import_bind: $ =>
-      choice(
+      seq(
         $.identifier,
-        seq(
-          $.identifier,
-          "=",
-          $.identifier,
+        optional(
+          seq(
+            "=",
+            $.identifier,
+          ),
         ),
       ),
 
@@ -8116,12 +8118,13 @@ module.exports = grammar({
       ),
 
     declarators: $ =>
-      choice(
+      seq(
         $.declarator_initializer,
-        seq(
-          $.declarator_initializer,
-          ",",
-          $.declarator_identifier_list,
+        optional(
+          seq(
+            ",",
+            $.declarator_identifier_list,
+          ),
         ),
       ),
 
@@ -8145,12 +8148,13 @@ module.exports = grammar({
       ),
 
     declarator_identifier_list: $ =>
-      choice(
+      seq(
         $._declarator_identifier,
-        seq(
-          $._declarator_identifier,
-          ",",
-          $.declarator_identifier_list,
+        repeat(
+          seq(
+            ",",
+            $._declarator_identifier,
+          ),
         ),
       ),
 
@@ -8161,15 +8165,16 @@ module.exports = grammar({
       ),
 
     var_declarator_identifier: $ =>
-      choice(
+      seq(
         $.identifier,
-        seq(
-          $.identifier,
-          optional(
-            $.template_parameters,
+        optional(
+          seq(
+            optional(
+              $.template_parameters,
+            ),
+            "=",
+            $._initializer,
           ),
-          "=",
-          $._initializer,
         ),
       ),
 
@@ -8368,16 +8373,16 @@ module.exports = grammar({
       ),
 
     array_member_initializations: $ =>
-      choice(
+      seq(
         $.array_member_initialization,
-        seq(
-          $.array_member_initialization,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $.array_member_initialization,
+          ),
         ),
-        seq(
-          $.array_member_initialization,
+        optional(
           ",",
-          $.array_member_initializations,
         ),
       ),
 
@@ -8401,16 +8406,16 @@ module.exports = grammar({
       ),
 
     struct_member_initializers: $ =>
-      choice(
+      seq(
         $.struct_member_initializer,
-        seq(
-          $.struct_member_initializer,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $.struct_member_initializer,
+          ),
         ),
-        seq(
-          $.struct_member_initializer,
+        optional(
           ",",
-          $.struct_member_initializers,
         ),
       ),
 
@@ -8865,42 +8870,44 @@ module.exports = grammar({
       ),
 
     namespace_list: $ =>
-      choice(
+      seq(
         $.conditional_expression,
-        seq(
-          $.conditional_expression,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $.conditional_expression,
+          ),
         ),
-        seq(
-          $.conditional_expression,
+        optional(
           ",",
-          $.namespace_list,
         ),
       ),
 
     // ---
 
     align_attribute: $ =>
-      choice(
+      seq(
         "align",
-        seq(
-          "align",
-          "(",
-          $.assign_expression,
-          ")",
+        optional(
+          seq(
+            "(",
+            $.assign_expression,
+            ")",
+          ),
         ),
       ),
 
     // ---
 
     deprecated_attribute: $ =>
-      choice(
+      seq(
         "deprecated",
-        seq(
-          "deprecated",
-          "(",
-          $.assign_expression,
-          ")",
+        optional(
+          seq(
+            "(",
+            $.assign_expression,
+            ")",
+          ),
         ),
       ),
 
@@ -9013,91 +9020,82 @@ module.exports = grammar({
     // ---
 
     assign_expression: $ =>
-      choice(
+      seq(
         $.conditional_expression,
-        seq(
-          $.conditional_expression,
-          "=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "+=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "-=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "*=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "/=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "%=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "&=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "|=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "^=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "~=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "<<=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          ">>=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          ">>>=",
-          $.assign_expression,
-        ),
-        seq(
-          $.conditional_expression,
-          "^^=",
-          $.assign_expression,
+        optional(
+          choice(
+            seq(
+              "=",
+              $.assign_expression,
+            ),
+            seq(
+              "+=",
+              $.assign_expression,
+            ),
+            seq(
+              "-=",
+              $.assign_expression,
+            ),
+            seq(
+              "*=",
+              $.assign_expression,
+            ),
+            seq(
+              "/=",
+              $.assign_expression,
+            ),
+            seq(
+              "%=",
+              $.assign_expression,
+            ),
+            seq(
+              "&=",
+              $.assign_expression,
+            ),
+            seq(
+              "|=",
+              $.assign_expression,
+            ),
+            seq(
+              "^=",
+              $.assign_expression,
+            ),
+            seq(
+              "~=",
+              $.assign_expression,
+            ),
+            seq(
+              "<<=",
+              $.assign_expression,
+            ),
+            seq(
+              ">>=",
+              $.assign_expression,
+            ),
+            seq(
+              ">>>=",
+              $.assign_expression,
+            ),
+            seq(
+              "^^=",
+              $.assign_expression,
+            ),
+          ),
         ),
       ),
 
     // ---
 
     conditional_expression: $ =>
-      choice(
+      seq(
         $.or_or_expression,
-        seq(
-          $.or_or_expression,
-          "?",
-          $._expression,
-          ":",
-          $.conditional_expression,
+        repeat(
+          seq(
+            "?",
+            $._expression,
+            ":",
+            $.or_or_expression,
+          ),
         ),
       ),
 
@@ -9430,16 +9428,16 @@ module.exports = grammar({
       ),
 
     argument_list: $ =>
-      choice(
+      seq(
         $.assign_expression,
-        seq(
-          $.assign_expression,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $.assign_expression,
+          ),
         ),
-        seq(
-          $.assign_expression,
+        optional(
           ",",
-          $.argument_list,
         ),
       ),
 
@@ -9476,12 +9474,13 @@ module.exports = grammar({
     // ---
 
     pow_expression: $ =>
-      choice(
+      seq(
         $.postfix_expression,
-        seq(
-          $.postfix_expression,
-          "^^",
-          $.unary_expression,
+        optional(
+          seq(
+            "^^",
+            $.unary_expression,
+          ),
         ),
       ),
 
@@ -9567,24 +9566,25 @@ module.exports = grammar({
       ),
 
     slice: $ =>
-      choice(
+      seq(
         $.assign_expression,
-        seq(
-          $.assign_expression,
-          ",",
-          $.slice,
-        ),
-        seq(
-          $.assign_expression,
-          "..",
-          $.assign_expression,
-        ),
-        seq(
-          $.assign_expression,
-          "..",
-          $.assign_expression,
-          ",",
-          $.slice,
+        optional(
+          choice(
+            seq(
+              ",",
+              $.slice,
+            ),
+            seq(
+              "..",
+              $.assign_expression,
+            ),
+            seq(
+              "..",
+              $.assign_expression,
+              ",",
+              $.slice,
+            ),
+          ),
         ),
       ),
 
@@ -9695,12 +9695,13 @@ module.exports = grammar({
       ),
 
     key_value_pairs: $ =>
-      choice(
+      seq(
         $.key_value_pair,
-        seq(
-          $.key_value_pair,
-          ",",
-          $.key_value_pairs,
+        repeat(
+          seq(
+            ",",
+            $.key_value_pair,
+          ),
         ),
       ),
 
@@ -10071,14 +10072,10 @@ module.exports = grammar({
     // ---
 
     labeled_statement: $ =>
-      choice(
-        seq(
-          $.identifier,
-          ":",
-        ),
-        seq(
-          $.identifier,
-          ":",
+      seq(
+        $.identifier,
+        ":",
+        optional(
           $._statement,
         ),
       ),
@@ -10119,22 +10116,17 @@ module.exports = grammar({
     // ---
 
     if_statement: $ =>
-      choice(
-        seq(
-          "if",
-          "(",
-          $.if_condition,
-          ")",
-          $._then_statement,
-        ),
-        seq(
-          "if",
-          "(",
-          $.if_condition,
-          ")",
-          $._then_statement,
-          "else",
-          $._else_statement,
+      seq(
+        "if",
+        "(",
+        $.if_condition,
+        ")",
+        $._then_statement,
+        optional(
+          seq(
+            "else",
+            $._else_statement,
+          ),
         ),
       ),
 
@@ -10249,12 +10241,13 @@ module.exports = grammar({
       ),
 
     foreach_type_list: $ =>
-      choice(
+      seq(
         $.foreach_type,
-        seq(
-          $.foreach_type,
-          ",",
-          $.foreach_type_list,
+        repeat(
+          seq(
+            ",",
+            $.foreach_type,
+          ),
         ),
       ),
 
@@ -10605,14 +10598,10 @@ module.exports = grammar({
       ),
 
     asm_instruction_list: $ =>
-      choice(
-        seq(
-          $.asm_instruction,
-          ";",
-        ),
-        seq(
-          $.asm_instruction,
-          ";",
+      seq(
+        $.asm_instruction,
+        ";",
+        optional(
           $.asm_instruction_list,
         ),
       ),
@@ -10765,16 +10754,14 @@ module.exports = grammar({
       ),
 
     base_class_list: $ =>
-      choice(
-        seq(
-          ":",
-          $._super_class_or_interface,
-        ),
-        seq(
-          ":",
-          $._super_class_or_interface,
-          ",",
-          $.interfaces,
+      seq(
+        ":",
+        $._super_class_or_interface,
+        optional(
+          seq(
+            ",",
+            $.interfaces,
+          ),
         ),
       ),
 
@@ -10782,12 +10769,13 @@ module.exports = grammar({
       $.basic_type,
 
     interfaces: $ =>
-      choice(
+      seq(
         $._interface,
-        seq(
-          $._interface,
-          ",",
-          $.interfaces,
+        repeat(
+          seq(
+            ",",
+            $._interface,
+          ),
         ),
       ),
 
@@ -11056,16 +11044,16 @@ module.exports = grammar({
       ),
 
     enum_members: $ =>
-      choice(
+      seq(
         $.enum_member,
-        seq(
-          $.enum_member,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $.enum_member,
+          ),
         ),
-        seq(
-          $.enum_member,
+        optional(
           ",",
-          $.enum_members,
         ),
       ),
 
@@ -11085,20 +11073,16 @@ module.exports = grammar({
       ),
 
     enum_member: $ =>
-      choice(
-        seq(
-          optional(
-            $.enum_member_attributes,
-          ),
-          $.identifier,
+      seq(
+        optional(
+          $.enum_member_attributes,
         ),
-        seq(
-          optional(
-            $.enum_member_attributes,
+        $.identifier,
+        optional(
+          seq(
+            "=",
+            $.assign_expression,
           ),
-          $.identifier,
-          "=",
-          $.assign_expression,
         ),
       ),
 
@@ -11127,16 +11111,16 @@ module.exports = grammar({
       ),
 
     anonymous_enum_members: $ =>
-      choice(
+      seq(
         $.anonymous_enum_member,
-        seq(
-          $.anonymous_enum_member,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $.anonymous_enum_member,
+          ),
         ),
-        seq(
-          $.anonymous_enum_member,
+        optional(
           ",",
-          $.anonymous_enum_members,
         ),
       ),
 
@@ -11511,16 +11495,16 @@ module.exports = grammar({
       ),
 
     template_parameter_list: $ =>
-      choice(
+      seq(
         $._template_parameter,
-        seq(
-          $._template_parameter,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $._template_parameter,
+          ),
         ),
-        seq(
-          $._template_parameter,
+        optional(
           ",",
-          $.template_parameter_list,
         ),
       ),
 
@@ -11558,16 +11542,16 @@ module.exports = grammar({
       ),
 
     template_argument_list: $ =>
-      choice(
+      seq(
         $._template_argument,
-        seq(
-          $._template_argument,
-          ",",
+        repeat(
+          seq(
+            ",",
+            $._template_argument,
+          ),
         ),
-        seq(
-          $._template_argument,
+        optional(
           ",",
-          $.template_argument_list,
         ),
       ),
 
@@ -11621,20 +11605,17 @@ module.exports = grammar({
     // ---
 
     template_type_parameter: $ =>
-      choice(
+      seq(
         $.identifier,
-        seq(
-          $.identifier,
-          $.template_type_parameter_specialization,
-        ),
-        seq(
-          $.identifier,
-          $.template_type_parameter_default,
-        ),
-        seq(
-          $.identifier,
-          $.template_type_parameter_specialization,
-          $.template_type_parameter_default,
+        optional(
+          choice(
+            $.template_type_parameter_specialization,
+            $.template_type_parameter_default,
+            seq(
+              $.template_type_parameter_specialization,
+              $.template_type_parameter_default,
+            ),
+          ),
         ),
       ),
 
@@ -11661,26 +11642,18 @@ module.exports = grammar({
     // ---
 
     template_value_parameter: $ =>
-      choice(
-        seq(
-          $.basic_type,
-          $._declarator,
-        ),
-        seq(
-          $.basic_type,
-          $._declarator,
-          $.template_value_parameter_specialization,
-        ),
-        seq(
-          $.basic_type,
-          $._declarator,
-          $.template_value_parameter_default,
-        ),
-        seq(
-          $.basic_type,
-          $._declarator,
-          $.template_value_parameter_specialization,
-          $.template_value_parameter_default,
+      seq(
+        $.basic_type,
+        $._declarator,
+        optional(
+          choice(
+            $.template_value_parameter_specialization,
+            $.template_value_parameter_default,
+            seq(
+              $.template_value_parameter_specialization,
+              $.template_value_parameter_default,
+            ),
+          ),
         ),
       ),
 
@@ -12002,16 +11975,14 @@ module.exports = grammar({
       ),
 
     conditional_statement: $ =>
-      choice(
-        seq(
-          $._condition,
-          $._no_scope_non_empty_statement,
-        ),
-        seq(
-          $._condition,
-          $._no_scope_non_empty_statement,
-          "else",
-          $._no_scope_non_empty_statement,
+      seq(
+        $._condition,
+        $._no_scope_non_empty_statement,
+        optional(
+          seq(
+            "else",
+            $._no_scope_non_empty_statement,
+          ),
         ),
       ),
 
@@ -12075,19 +12046,21 @@ module.exports = grammar({
     // ---
 
     debug_condition: $ =>
-      choice(
+      seq(
         "debug",
-        seq(
-          "debug",
-          "(",
-          $.integer_literal,
-          ")",
-        ),
-        seq(
-          "debug",
-          "(",
-          $.identifier,
-          ")",
+        optional(
+          choice(
+            seq(
+              "(",
+              $.integer_literal,
+              ")",
+            ),
+            seq(
+              "(",
+              $.identifier,
+              ")",
+            ),
+          ),
         ),
       ),
 
@@ -12244,12 +12217,13 @@ module.exports = grammar({
       ),
 
     traits_arguments: $ =>
-      choice(
+      seq(
         $._traits_argument,
-        seq(
-          $._traits_argument,
-          ",",
-          $.traits_arguments,
+        repeat(
+          seq(
+            ",",
+            $._traits_argument,
+          ),
         ),
       ),
 
@@ -12349,12 +12323,13 @@ module.exports = grammar({
       $.identifier,
 
     operands: $ =>
-      choice(
+      seq(
         $._operand,
-        seq(
-          $._operand,
-          ",",
-          $.operands,
+        repeat(
+          seq(
+            ",",
+            $._operand,
+          ),
         ),
       ),
 
@@ -12584,14 +12559,15 @@ module.exports = grammar({
       $.asm_exp,
 
     asm_exp: $ =>
-      choice(
+      seq(
         $.asm_log_or_exp,
-        seq(
-          $.asm_log_or_exp,
-          "?",
-          $.asm_exp,
-          ":",
-          $.asm_exp,
+        repeat(
+          seq(
+            "?",
+            $.asm_exp,
+            ":",
+            $.asm_log_or_exp,
+          ),
         ),
       ),
 
