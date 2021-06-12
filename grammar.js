@@ -578,10 +578,10 @@ module.exports = grammar({
                 /[\s\S]/,
                 // EscapeSequence
                 choice(
-                  "\\\\'",
-                  "\\\\\"",
-                  "\\\\?",
-                  "\\\\\\\\",
+                  "\\'",
+                  "\\\"",
+                  "\\?",
+                  "\\\\",
                   "\\0",
                   "\\a",
                   "\\b",
@@ -662,7 +662,7 @@ module.exports = grammar({
                     ),
                   ),
                   seq(
-                    "\\\\",
+                    "\\",
                     // OctalDigit
                     choice(
                       "0",
@@ -676,7 +676,7 @@ module.exports = grammar({
                     ),
                   ),
                   seq(
-                    "\\\\",
+                    "\\",
                     // OctalDigit
                     choice(
                       "0",
@@ -701,7 +701,7 @@ module.exports = grammar({
                     ),
                   ),
                   seq(
-                    "\\\\",
+                    "\\",
                     // OctalDigit
                     choice(
                       "0",
@@ -1151,7 +1151,7 @@ module.exports = grammar({
                     ),
                   ),
                   seq(
-                    "\\\\",
+                    "\\",
                     // NamedCharacterEntity
                     seq(
                       "&",
@@ -1476,10 +1476,10 @@ module.exports = grammar({
             /[\s\S]/,
             // EscapeSequence
             choice(
-              "\\\\'",
-              "\\\\\"",
-              "\\\\?",
-              "\\\\\\\\",
+              "\\'",
+              "\\\"",
+              "\\?",
+              "\\\\",
               "\\0",
               "\\a",
               "\\b",
@@ -1560,7 +1560,7 @@ module.exports = grammar({
                 ),
               ),
               seq(
-                "\\\\",
+                "\\",
                 // OctalDigit
                 choice(
                   "0",
@@ -1574,7 +1574,7 @@ module.exports = grammar({
                 ),
               ),
               seq(
-                "\\\\",
+                "\\",
                 // OctalDigit
                 choice(
                   "0",
@@ -1599,7 +1599,7 @@ module.exports = grammar({
                 ),
               ),
               seq(
-                "\\\\",
+                "\\",
                 // OctalDigit
                 choice(
                   "0",
@@ -2049,7 +2049,7 @@ module.exports = grammar({
                 ),
               ),
               seq(
-                "\\\\",
+                "\\",
                 // NamedCharacterEntity
                 seq(
                   "&",

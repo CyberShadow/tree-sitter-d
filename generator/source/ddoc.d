@@ -369,7 +369,7 @@ string toString(in Node[] d)
 	foreach (ref node; d)
 	{
 		if (node.type == Node.Type.text)
-			s ~= node.text;
+			s ~= node.text.replace(`\\`, `\`);
 		else
 		if (node.isCallToEmpty("AMP"))
 			s ~= "&";
