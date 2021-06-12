@@ -190,11 +190,64 @@ module.exports = grammar({
   ],
 
   rules: {
-    source_file: $ => $.module,
 
     // ------------------------------------------------------------------------
     // https://dlang.org/spec/lex.html
     // ------------------------------------------------------------------------
+
+    source_file: $ =>
+      choice(
+        seq(
+          $.byte_order_mark,
+          optional(
+            $.module,
+          ),
+        ),
+        seq(
+          $.shebang,
+          optional(
+            $.module,
+          ),
+        ),
+        optional(
+          $.module,
+        ),
+      ),
+
+    // ---
+
+    byte_order_mark: $ =>
+      token(
+        // ByteOrderMark
+        "\uFEFF",
+      ),
+
+    shebang: $ =>
+      token(
+        // Shebang
+        seq(
+          "#!",
+          optional(
+            // Characters
+            repeat1(
+              // Character
+              /[\s\S]/,
+            ),
+          ),
+          // EndOfShebang
+          choice(
+            "\n",
+            // EndOfFile
+            choice(
+              // /$/m,
+              "\0",
+              "\x1A",
+            ),
+          ),
+        ),
+      ),
+
+    // ---
 
     _end_of_line: $ =>
       token(

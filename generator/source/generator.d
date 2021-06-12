@@ -99,7 +99,7 @@ void program()
 			scan(node);
 	}
 
-	grammar.analyze(["Module"] ~ extras);
+	grammar.analyze(["SourceFile"] ~ extras);
 
 	foreach (defName; ["WhiteSpace", "EndOfLine"])
 		grammar.defs[defName].hidden = true;

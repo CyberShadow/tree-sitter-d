@@ -433,6 +433,7 @@ struct Grammar
 						`i`,
 						`&`,
 						`;`,
+						`#!`,
 					), "Unknown B: " ~ text);
 					seqNodes ~= Node(NodeValue(LiteralChars(text)));
 				}

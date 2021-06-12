@@ -33,7 +33,6 @@ module.exports = grammar({
 %|%)  ],
 
   rules: {
-    source_file: $ => $.module,
 EOF", extras.map!(extra => convertRuleName(extra)));
 	}
 
