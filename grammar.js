@@ -8195,13 +8195,14 @@ module.exports = grammar({
     array_member_initializations: $ =>
       seq(
         $.array_member_initialization,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.array_member_initializations,
-            ),
+            $.array_member_initialization,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 
@@ -8227,13 +8228,14 @@ module.exports = grammar({
     struct_member_initializers: $ =>
       seq(
         $.struct_member_initializer,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.struct_member_initializers,
-            ),
+            $.struct_member_initializer,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 
@@ -8690,13 +8692,14 @@ module.exports = grammar({
     namespace_list: $ =>
       seq(
         $.conditional_expression,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.namespace_list,
-            ),
+            $.conditional_expression,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 
@@ -9247,13 +9250,14 @@ module.exports = grammar({
     argument_list: $ =>
       seq(
         $.assign_expression,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.argument_list,
-            ),
+            $.assign_expression,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 
@@ -10862,13 +10866,14 @@ module.exports = grammar({
     enum_members: $ =>
       seq(
         $.enum_member,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.enum_members,
-            ),
+            $.enum_member,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 
@@ -10928,13 +10933,14 @@ module.exports = grammar({
     anonymous_enum_members: $ =>
       seq(
         $.anonymous_enum_member,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.anonymous_enum_members,
-            ),
+            $.anonymous_enum_member,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 
@@ -11311,13 +11317,14 @@ module.exports = grammar({
     template_parameter_list: $ =>
       seq(
         $._template_parameter,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.template_parameter_list,
-            ),
+            $._template_parameter,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 
@@ -11357,13 +11364,14 @@ module.exports = grammar({
     template_argument_list: $ =>
       seq(
         $._template_argument,
-        optional(
+        repeat(
           seq(
             ",",
-            optional(
-              $.template_argument_list,
-            ),
+            $._template_argument,
           ),
+        ),
+        optional(
+          ",",
         ),
       ),
 

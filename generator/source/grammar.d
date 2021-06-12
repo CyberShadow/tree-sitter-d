@@ -829,6 +829,66 @@ struct Grammar
 					(_) {}
 				);
 			}
+
+			// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
+			// (attempt to remove recursion)
+			{
+				def.node.match!(
+					(ref Seq seq1)
+					{
+						if (seq1.nodes.length < 2)
+							return;
+						auto y = seq1.nodes[0 .. $-1];
+						seq1.nodes[$-1].match!(
+							(ref Optional optional1)
+							{
+								optional1.node[0].match!(
+									(ref Seq seq2)
+									{
+										if (seq2.nodes.length < 2)
+											return;
+										auto z = seq2.nodes[0 .. $-1];
+										seq2.nodes[$-1].match!(
+											(ref Optional optional1)
+											{
+												optional1.node[0].match!(
+													(ref Reference reference)
+													{
+														if (reference.name != name)
+															return;
+														auto x = reference;
+
+														def.node = Node(NodeValue(Seq(
+															y ~
+															Node(NodeValue(Repeat([
+																Node(NodeValue(Seq(
+																	z ~
+																	y
+																)))
+															]))) ~
+															Node(NodeValue(Optional([
+																Node(NodeValue(Seq(
+																	z
+																)))
+															])))
+														)));
+														optimizeNode(def.node);
+													},
+													(_) {}
+												);
+											},
+											(_) {}
+										);
+									},
+									(_) {}
+								);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+			}
 		}
 	}
 
