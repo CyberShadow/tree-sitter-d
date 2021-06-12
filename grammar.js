@@ -1,6 +1,8 @@
 module.exports = grammar({
   name: 'd',
 
+  word: $ => $.identifier,
+
   extras: $ => [
     $.white_space,
     $.end_of_line,

@@ -26,6 +26,8 @@ struct Writer
 module.exports = grammar({
   name: 'd',
 
+  word: $ => $.identifier,
+
   extras: $ => [
 %-(    $.%s,
 %|%)  ],
