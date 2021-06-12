@@ -4,8 +4,8 @@ module.exports = grammar({
   word: $ => $.identifier,
 
   extras: $ => [
-    $.white_space,
-    $.end_of_line,
+    $._white_space,
+    $._end_of_line,
     $.comment,
     $.special_token_sequence,
   ],
@@ -17,7 +17,7 @@ module.exports = grammar({
     // https://dlang.org/spec/lex.html
     // ------------------------------------------------------------------------
 
-    end_of_line: $ =>
+    _end_of_line: $ =>
       token(
         // EndOfLine
         choice(
@@ -40,7 +40,7 @@ module.exports = grammar({
 
     // ---
 
-    white_space: $ =>
+    _white_space: $ =>
       token(
         // WhiteSpace
         repeat1(
@@ -7645,14 +7645,14 @@ module.exports = grammar({
           "#",
           "line",
           $.integer_literal,
-          $.end_of_line,
+          $._end_of_line,
         ),
         seq(
           "#",
           "line",
           $.integer_literal,
           $.filespec,
-          $.end_of_line,
+          $._end_of_line,
         ),
       ),
 

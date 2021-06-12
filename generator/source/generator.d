@@ -101,6 +101,9 @@ void program()
 
 	grammar.analyze(["Module"] ~ extras);
 
+	foreach (defName; ["WhiteSpace", "EndOfLine"])
+		grammar.defs[defName].hidden = true;
+
 	auto writer = Writer("../grammar.js", grammar, extras);
 
 	foreach (file; files)
