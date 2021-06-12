@@ -240,7 +240,7 @@ module.exports = grammar({
             // EndOfFile
             choice(
               // /$/m,
-              "\0",
+              // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
               "\x1A",
             ),
           ),
@@ -264,7 +264,7 @@ module.exports = grammar({
           // EndOfFile
           choice(
             // /$/m,
-            "\0",
+            // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
             "\x1A",
           ),
         ),
@@ -327,7 +327,7 @@ module.exports = grammar({
               // EndOfFile
               choice(
                 // /$/m,
-                "\0",
+                // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
                 "\x1A",
               ),
             ),
@@ -497,7 +497,7 @@ module.exports = grammar({
                   // EndOfFile
                   choice(
                     // /$/m,
-                    "\0",
+                    // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
                     "\x1A",
                   ),
                 ),
@@ -541,7 +541,7 @@ module.exports = grammar({
                   // EndOfFile
                   choice(
                     // /$/m,
-                    "\0",
+                    // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
                     "\x1A",
                   ),
                 ),
@@ -1204,7 +1204,7 @@ module.exports = grammar({
                   // EndOfFile
                   choice(
                     // /$/m,
-                    "\0",
+                    // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
                     "\x1A",
                   ),
                 ),
@@ -1290,7 +1290,7 @@ module.exports = grammar({
                   // EndOfFile
                   choice(
                     // /$/m,
-                    "\0",
+                    // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
                     "\x1A",
                   ),
                 ),
@@ -1377,7 +1377,7 @@ module.exports = grammar({
                   // EndOfFile
                   choice(
                     // /$/m,
-                    "\0",
+                    // "\0", // https://github.com/tree-sitter/tree-sitter/issues/1167
                     "\x1A",
                   ),
                 ),
