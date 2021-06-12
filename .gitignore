@@ -1,2 +1,7 @@
+# npm install
 /node_modules/
+
+# tree-sitter generate
 /src/
+/bindings/
+/Cargo.toml
