@@ -6,7 +6,12 @@ module.exports = grammar({
   extras: $ => [
     $._white_space,
     $._end_of_line,
-    $.comment,
+
+    // $.comment, // https://github.com/tree-sitter/tree-sitter/issues/1168
+    $.block_comment,
+    $.line_comment,
+    // $.nesting_block_comment,
+
     $.special_token_sequence,
   ],
 
@@ -289,9 +294,14 @@ module.exports = grammar({
     // ---
 
     comment: $ =>
+      choice(
+        $.block_comment,
+        $.line_comment,
+        // $.nesting_block_comment,
+      ),
+
+    block_comment: $ =>
       token(
-        // Comment
-        choice(
           // BlockComment
           seq(
             "/*",
@@ -304,6 +314,10 @@ module.exports = grammar({
             ),
             "*/",
           ),
+      ),
+
+    line_comment: $ =>
+      token(
           // LineComment
           seq(
             "//",
@@ -332,23 +346,6 @@ module.exports = grammar({
               ),
             ),
           ),
-          // NestingBlockComment
-          seq(
-            "/+",
-            optional(
-              // NestingBlockCommentCharacters
-              repeat1(
-                // NestingBlockCommentCharacter
-                choice(
-                  // Character
-                  /[\s\S]/,
-                  // /* recursion */, // TODO
-                ),
-              ),
-            ),
-            "+/",
-          ),
-        ),
       ),
 
     // ---
