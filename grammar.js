@@ -10,9 +10,13 @@ module.exports = grammar({
     // $.comment, // https://github.com/tree-sitter/tree-sitter/issues/1168
     $.block_comment,
     $.line_comment,
-    // $.nesting_block_comment,
+    $.nesting_block_comment,
 
     $.special_token_sequence,
+  ],
+
+  externals: $ => [
+    $.nesting_block_comment,
   ],
 
   conflicts: $ => [
@@ -297,7 +301,7 @@ module.exports = grammar({
       choice(
         $.block_comment,
         $.line_comment,
-        // $.nesting_block_comment,
+        $.nesting_block_comment,
       ),
 
     block_comment: $ =>

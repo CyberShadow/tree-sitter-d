@@ -2,6 +2,8 @@
 /node_modules/
 
 # tree-sitter generate
-/src/
+!/src/
+/src/*
+!/src/scanner.c
 /bindings/
 /Cargo.toml

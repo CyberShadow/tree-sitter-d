@@ -30,3 +30,24 @@ BlockComment
   (block_comment)
   (block_comment)
   (block_comment))
+
+====================
+NestingBlockComment
+====================
+
+/+ this is a comment +/
+
+/+ /+ nesting! +/ +/
+
+/+ /* +/
+/+ */ +/
+/+ // +/
+
+---
+
+(source_file
+  (nesting_block_comment)
+  (nesting_block_comment)
+  (nesting_block_comment)
+  (nesting_block_comment)
+  (nesting_block_comment))
