@@ -10,6 +10,185 @@ module.exports = grammar({
     $.special_token_sequence,
   ],
 
+  conflicts: $ => [
+    // These are probably correct:
+
+    // CaseStatement / CaseRangeStatement disambiguation requires lookahead:
+    [$.argument_list, $._first_exp],
+
+    // ---------------------------
+    // TODO review grammar:
+
+    [$.qualified_identifier],
+
+    [$.storage_class, $.attribute],
+    [$.storage_class, $.enum_declaration],
+    [$.storage_class, $.function_attribute_kwd],
+    [$.storage_class, $.at_attribute],
+    [$.storage_class, $.type_ctor],
+    [$.storage_class, $.type_ctor, $.attribute],
+    [$.storage_class, $.attribute, $.synchronized_statement],
+
+    [$.attribute, $.storage_class, $.shared_static_constructor, $.shared_static_destructor],
+    [$.attribute, $.static_destructor],
+    [$.attribute, $.import_declaration],
+    [$.attribute, $.static_constructor],
+    [$.attribute, $._module_attribute],
+    [$.at_attribute, $._module_attribute],
+    [$.attribute, $.synchronized_statement],
+
+    [$._decl_def, $._declaration],
+    [$.alias_assignment, $.qualified_identifier],
+    [$.template_instance, $.mixin_qualified_identifier],
+
+    [$.auto_assignment, $.qualified_identifier, $.auto_func_declaration],
+    [$.var_declarator, $.func_declarator],
+
+    [$.primary_expression, $.qualified_identifier],
+    [$.primary_expression, $.qualified_identifier, $.symbol_tail],
+    [$.primary_expression, $.template_instance],
+    [$.primary_expression, $.basic_type],
+
+    [$.type_ctor, $.variadic_arguments_attribute],
+    [$.in_out, $.variadic_arguments_attribute],
+    [$.parameter, $.parameter_attributes],
+    [$.parameter_attributes],
+
+    [$.enum_members, $.anonymous_enum_member],
+
+    [$.storage_class, $.synchronized_statement],
+
+    [$._declaration, $._non_empty_statement_no_case_no_default], // ???
+
+    [$.qualified_identifier, $.template_sequence_parameter],
+    [$.qualified_identifier, $.template_type_parameter],
+    [$.qualified_identifier, $.template_instance],
+
+    [$.unary_expression, $.parameter],
+
+    [$.new_expression],
+    [$.type],
+    [$.basic_type],
+
+    [$.attribute, $.pragma_statement],
+
+    [$.attribute, $.return_statement],
+
+    [$.primary_expression, $.postblit, $.constructor, $.constructor_template],
+
+    // TODO fix grammar?
+    [$._decl_def, $._declaration_statement],
+    [$._decl_def, $._non_empty_statement_no_case_no_default],
+    [$._decl_def, $._non_empty_statement_no_case_no_default, $._declaration],
+
+    [$.foreach_type_list, $.range_foreach], // TODO fix grammar
+    [$.foreach_type_attributes],
+
+    [$.parameter, $.template_value_parameter],
+
+    [$.conditional_declaration], // TODO else precedence
+
+    [$.assign_expression], // TODO precedence
+    [$.conditional_expression, $.or_or_expression], // TODO precedence
+    [$.conditional_expression], // TODO precedence
+    [$.or_or_expression, $.and_and_expression], // TODO precedence
+    [$.and_and_expression, $.or_expression], // TODO precedence
+
+    // TODO review these
+    [$.or_expression, $.xor_expression],
+    [$.xor_expression, $.and_expression],
+    [$._cmp_expression, $.rel_expression, $.shift_expression],
+    [$._cmp_expression, $.rel_expression],
+    [$._cmp_expression, $.identity_expression, $.in_expression],
+    [$._cmp_expression, $.equal_expression],
+    [$._cmp_expression, $.in_expression],
+    [$._cmp_expression, $.identity_expression],
+    [$.shift_expression, $.add_expression],
+    [$.shift_expression, $.cat_expression],
+    [$.add_expression, $.mul_expression],
+    [$.pow_expression, $.postfix_expression],
+    [$.pow_expression, $.index_expression, $.slice_expression],
+    [$.pow_expression],
+    [$._super_class_or_interface, $._interface],
+    [$.postfix_expression, $.template_instance],
+    [$.argument_list, $.slice],
+    [$.primary_expression, $.symbol_tail],
+    [$.primary_expression, $.with_statement, $.symbol_tail],
+    [$.type_suffix, $.unary_expression],
+    [$.alt_declarator_inner, $.qualified_identifier, $.primary_expression],
+    [$.alt_declarator_inner, $.primary_expression],
+    [$.alt_declarator, $.qualified_identifier, $.primary_expression],
+    [$.specified_function_body, $.missing_function_body],
+    [$.primary_expression, $.destructor],
+    [$.declaration_block, $.block_statement],
+    [$.parameter_with_member_attributes, $.deallocator],
+    [$.conditional_statement],
+    [$.static_constructor, $.missing_function_body],
+    [$.postblit, $.missing_function_body],
+    [$.array_initializer, $.array_literal],
+    [$._exp_initializer, $.argument_list],
+    [$.array_member_initialization, $._key_expression],
+    [$.struct_initializer, $.block_statement],
+    [$._exp_initializer, $.comma_expression],
+    [$.mixin_type, $.mixin_expression],
+    [$.qualified_identifier, $.symbol_tail],
+    [$.asm_rel_exp, $.asm_shift_exp],
+    [$.mixin_expression, $.mixin_statement],
+    [$.primary_expression, $.synchronized_statement],
+    [$.try_statement],
+    [$.type_suffix, $.array_literal],
+    [$.type_suffix, $.argument_list],
+    [$.shared_static_constructor, $.missing_function_body],
+    [$.static_destructor, $.missing_function_body],
+    [$.parameter, $.template_value_parameter_default],
+    [$.primary_expression, $.template_value_parameter_default],
+    [$.unary_expression, $.template_instance],
+    [$.rel_expression, $.shift_expression],
+    [$.equal_expression, $.shift_expression],
+    [$.in_expression, $.shift_expression],
+    [$.identity_expression, $.shift_expression],
+    [$.cat_expression, $.mul_expression],
+    [$.slice],
+    [$.asm_exp, $.asm_log_or_exp],
+    [$.asm_exp],
+    [$.asm_log_or_exp, $.asm_log_and_exp],
+    [$.asm_log_and_exp, $.asm_or_exp],
+    [$.asm_or_exp, $.asm_xor_exp],
+    [$.asm_xor_exp, $.asm_and_exp],
+    [$.asm_and_exp, $.asm_equal_exp],
+    [$.asm_equal_exp, $.asm_rel_exp],
+    [$.asm_shift_exp, $.asm_add_exp],
+    [$.asm_add_exp, $.asm_mul_exp],
+    [$.asm_mul_exp, $.asm_br_exp],
+    [$.mixin_declaration, $.mixin_expression, $.mixin_statement],
+    [$.shared_static_destructor, $.missing_function_body],
+    [$.asm_primary_exp],
+    [$.if_statement],
+    [$.mixin_declaration, $.mixin_statement],
+    [$.alt_declarator_suffix, $.qualified_identifier],
+
+    [$.storage_classes],
+    [$.type_ctors],
+    [$.type_ctors, $.in_out],
+    [$.function_contracts],
+    [$.decl_defs],
+    [$.type_suffixes],
+    [$.statement_list_no_case_no_default],
+    [$.catches],
+
+    [$.pragma_statement, $.empty_statement],
+    [$.empty_declaration, $.empty_statement],
+
+    [$.static_foreach_declaration],
+    [$.debug_condition],
+    [$._scope_block_statement, $._function_literal_body],
+    [$.labeled_statement],
+    [$._scope_statement, $._function_literal_body],
+    [$._no_scope_statement, $._function_literal_body],
+    [$._no_scope_non_empty_statement, $._function_literal_body],
+    [$.struct_member_initializer, $.labeled_statement],
+  ],
+
   rules: {
     source_file: $ => $.module,
 
@@ -31,7 +210,7 @@ module.exports = grammar({
           "\u2029",
           // EndOfFile
           choice(
-            /$/m,
+            // /$/m,
             "\0",
             "\x1A",
           ),
@@ -94,7 +273,7 @@ module.exports = grammar({
               "\u2029",
               // EndOfFile
               choice(
-                /$/m,
+                // /$/m,
                 "\0",
                 "\x1A",
               ),
@@ -110,7 +289,7 @@ module.exports = grammar({
                 choice(
                   // Character
                   /[\s\S]/,
-                  /* recursion */,
+                  // /* recursion */, // TODO
                 ),
               ),
             ),
@@ -264,7 +443,7 @@ module.exports = grammar({
                   "\u2029",
                   // EndOfFile
                   choice(
-                    /$/m,
+                    // /$/m,
                     "\0",
                     "\x1A",
                   ),
@@ -308,7 +487,7 @@ module.exports = grammar({
                   "\u2029",
                   // EndOfFile
                   choice(
-                    /$/m,
+                    // /$/m,
                     "\0",
                     "\x1A",
                   ),
@@ -971,7 +1150,7 @@ module.exports = grammar({
                   "\u2029",
                   // EndOfFile
                   choice(
-                    /$/m,
+                    // /$/m,
                     "\0",
                     "\x1A",
                   ),
@@ -1057,7 +1236,7 @@ module.exports = grammar({
                   "\u2029",
                   // EndOfFile
                   choice(
-                    /$/m,
+                    // /$/m,
                     "\0",
                     "\x1A",
                   ),
@@ -1144,7 +1323,7 @@ module.exports = grammar({
                   "\u2029",
                   // EndOfFile
                   choice(
-                    /$/m,
+                    // /$/m,
                     "\0",
                     "\x1A",
                   ),
