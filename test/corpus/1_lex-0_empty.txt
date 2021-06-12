@@ -5,3 +5,14 @@ the empty file
 ---
 
 (source_file)
+
+====================
+Shebang
+====================
+
+#!/usr/bin/dmd -run
+
+---
+
+(source_file
+  (shebang))
