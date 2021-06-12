@@ -1,0 +1,32 @@
+====================
+LineComment
+====================
+
+// this is a comment
+
+---
+
+(source_file
+  (comment))
+
+====================
+BlockComment
+====================
+
+/* this is a comment */
+
+/* multi
+   line
+   comment */
+
+/* no nesting /* */
+
+/* no interior line comments // */
+
+---
+
+(source_file
+  (comment)
+  (comment)
+  (comment)
+  (comment))

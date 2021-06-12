@@ -299,7 +299,7 @@ module.exports = grammar({
               // Characters
               repeat1(
                 // Character
-                /[\s\S]/,
+                /[^*]|[*][^/]/,
               ),
             ),
             "*/",
@@ -311,7 +311,7 @@ module.exports = grammar({
               // Characters
               repeat1(
                 // Character
-                /[\s\S]/,
+                /./,
               ),
             ),
             // EndOfLine
