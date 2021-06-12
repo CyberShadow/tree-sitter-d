@@ -16,6 +16,7 @@
     "tree-sitter-cli": "^0.19.5"
   },
   "scripts": {
+    "generate": "tree-sitter generate",
     "test": "tree-sitter test"
   },
   "repository": {
