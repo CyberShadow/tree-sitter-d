@@ -1,6 +1,7 @@
 import std.algorithm.comparison;
 import std.algorithm.iteration;
 import std.algorithm.searching;
+import std.array;
 import std.conv;
 import std.exception;
 import std.format;
@@ -709,23 +710,36 @@ struct Grammar
 			node.value.match!(
 				(ref Choice choice)
 				{
-					if (choice.nodes.length != 2)
+					if (choice.nodes.length < 2)
 						return;
-					choice.nodes[1].match!(
-						(ref Seq seq)
-						{
-							if (seq.nodes.length != 2)
-								return;
-							if (seq.nodes[0] != choice.nodes[0])
-								return;
-							node = Node(NodeValue(Seq([
-								seq.nodes[0],
-								Node(NodeValue(Optional([
-									seq.nodes[1],
-								]))),
-							])));
-						},
-						(ref _) {});
+					auto prefix = choice.nodes[0].match!(
+						(ref Seq seq) => seq.nodes,
+						(_) => choice.nodes[0 .. 1],
+					);
+					if (!prefix)
+						return;
+
+					bool samePrefix = choice.nodes[1 .. $].map!((ref n) => n.match!(
+						(ref Seq seq) => seq.nodes.startsWith(prefix),
+						(_) => false,
+					)).all;
+					if (!samePrefix)
+						return;
+
+					node = Node(NodeValue(Seq(
+						prefix ~
+						Node(NodeValue(Optional([
+							Node(NodeValue(Choice(
+								choice.nodes[1 .. $].map!((ref n) => Node(NodeValue(Seq(
+									n.tryMatch!(
+										(ref Seq seq) => seq.nodes[prefix.length .. $],
+									)
+								))))
+								.array,
+							)))
+						])))
+					)));
+					optimizeNode(node);
 				},
 				(ref _) {},
 			);
