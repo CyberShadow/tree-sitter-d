@@ -7872,10 +7872,10 @@ module.exports = grammar({
     import_bind_list: $ =>
       seq(
         $.import_bind,
-        optional(
+        repeat(
           seq(
             ",",
-            $.import_bind_list,
+            $.import_bind,
           ),
         ),
       ),
@@ -7970,10 +7970,10 @@ module.exports = grammar({
     declarator_identifier_list: $ =>
       seq(
         $._declarator_identifier,
-        optional(
+        repeat(
           seq(
             ",",
-            $.declarator_identifier_list,
+            $._declarator_identifier,
           ),
         ),
       ),
@@ -8906,12 +8906,12 @@ module.exports = grammar({
     conditional_expression: $ =>
       seq(
         $.or_or_expression,
-        optional(
+        repeat(
           seq(
             "?",
             $._expression,
             ":",
-            $.conditional_expression,
+            $.or_or_expression,
           ),
         ),
       ),
@@ -9513,10 +9513,10 @@ module.exports = grammar({
     key_value_pairs: $ =>
       seq(
         $.key_value_pair,
-        optional(
+        repeat(
           seq(
             ",",
-            $.key_value_pairs,
+            $.key_value_pair,
           ),
         ),
       ),
@@ -10059,10 +10059,10 @@ module.exports = grammar({
     foreach_type_list: $ =>
       seq(
         $.foreach_type,
-        optional(
+        repeat(
           seq(
             ",",
-            $.foreach_type_list,
+            $.foreach_type,
           ),
         ),
       ),
@@ -10587,10 +10587,10 @@ module.exports = grammar({
     interfaces: $ =>
       seq(
         $._interface,
-        optional(
+        repeat(
           seq(
             ",",
-            $.interfaces,
+            $._interface,
           ),
         ),
       ),
@@ -12031,10 +12031,10 @@ module.exports = grammar({
     traits_arguments: $ =>
       seq(
         $._traits_argument,
-        optional(
+        repeat(
           seq(
             ",",
-            $.traits_arguments,
+            $._traits_argument,
           ),
         ),
       ),
@@ -12137,10 +12137,10 @@ module.exports = grammar({
     operands: $ =>
       seq(
         $._operand,
-        optional(
+        repeat(
           seq(
             ",",
-            $.operands,
+            $._operand,
           ),
         ),
       ),
@@ -12373,12 +12373,12 @@ module.exports = grammar({
     asm_exp: $ =>
       seq(
         $.asm_log_or_exp,
-        optional(
+        repeat(
           seq(
             "?",
             $.asm_exp,
             ":",
-            $.asm_exp,
+            $.asm_log_or_exp,
           ),
         ),
       ),

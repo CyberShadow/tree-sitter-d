@@ -784,6 +784,51 @@ struct Grammar
 					(_) {}
 				);
 			}
+
+			// Transform x := seq(y, optional(seq(z, x))) into x := seq(y, repeat(seq(z, y)))
+			// (attempt to remove recursion)
+			{
+				def.node.match!(
+					(ref Seq seq1)
+					{
+						if (seq1.nodes.length < 2)
+							return;
+						seq1.nodes[$-1].match!(
+							(ref Optional optional)
+							{
+								optional.node[0].match!(
+									(ref Seq seq2)
+									{
+										if (seq2.nodes.length < 2)
+											return;
+										seq2.nodes[$-1].match!(
+											(ref Reference reference)
+											{
+												if (reference.name != name)
+													return;
+
+												def.node = Node(NodeValue(Seq(
+													seq1.nodes[0 .. $-1] ~
+													Node(NodeValue(Repeat([
+														Node(NodeValue(Seq(
+															seq2.nodes[0 .. $-1] ~
+															seq1.nodes[0 .. $-1],
+														))),
+													]))),
+												)));
+											},
+											(_) {}
+										);
+									},
+									(_) {}
+								);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+			}
 		}
 	}
 
