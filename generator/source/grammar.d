@@ -652,6 +652,7 @@ struct Grammar
 		scanUsed(roots);
 	}
 
+	// Ensure that all referenced grammar definitions are defined.
 	private void checkReferences()
 	{
 		void scan(Node node)
@@ -671,6 +672,8 @@ struct Grammar
 			scan(def.node);
 	}
 
+	// Fold away unnecessary grammar nodes, or refactor into simpler constructs which
+	// are available in tree-sitter but not used in the D grammar specification.
 	private void optimize()
 	{
 		void optimizeNode(ref Node node)
@@ -762,6 +765,7 @@ struct Grammar
 		}
 	}
 
+	// Verify our assertions about definitions of the respective kind.
 	private void checkKinds()
 	{
 		foreach (defName, ref def; defs)
@@ -835,6 +839,8 @@ struct Grammar
 			}
 	}
 
+	// Recursively visit definitions starting from `roots` to find
+	// which ones are used and should be generated grammar.
 	private void scanUsed(string[] roots)
 	{
 		void scanDef(string defName)
