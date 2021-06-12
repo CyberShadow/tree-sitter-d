@@ -122,7 +122,7 @@ module.exports = grammar({
     token_no_braces: $ =>
       choice(
         $.identifier,
-        $.string_literal,
+        $._string_literal,
         $.character_literal,
         $.integer_literal,
         $.float_literal,
@@ -226,7 +226,7 @@ module.exports = grammar({
 
     // ---
 
-    string_literal: $ =>
+    _string_literal: $ =>
       choice(
         $.wysiwyg_string,
         $.alternate_wysiwyg_string,
@@ -7693,7 +7693,7 @@ module.exports = grammar({
     decl_def: $ =>
       choice(
         $.attribute_specifier,
-        $.declaration,
+        $._declaration,
         $.constructor,
         $.destructor,
         $.postblit,
@@ -7731,10 +7731,10 @@ module.exports = grammar({
 
     module_attributes: $ =>
       repeat1(
-        $.module_attribute,
+        $._module_attribute,
       ),
 
-    module_attribute: $ =>
+    _module_attribute: $ =>
       choice(
         $.deprecated_attribute,
         $.user_defined_attribute,
@@ -7742,28 +7742,28 @@ module.exports = grammar({
 
     module_fully_qualified_name: $ =>
       choice(
-        $.module_name,
+        $._module_name,
         seq(
           $.packages,
           ".",
-          $.module_name,
+          $._module_name,
         ),
       ),
 
-    module_name: $ =>
+    _module_name: $ =>
       $.identifier,
 
     packages: $ =>
       choice(
-        $.package_name,
+        $._package_name,
         seq(
           $.packages,
           ".",
-          $.package_name,
+          $._package_name,
         ),
       ),
 
-    package_name: $ =>
+    _package_name: $ =>
       $.identifier,
 
     // ---
@@ -7798,7 +7798,7 @@ module.exports = grammar({
       choice(
         $.module_fully_qualified_name,
         seq(
-          $.module_alias_identifier,
+          $._module_alias_identifier,
           "=",
           $.module_fully_qualified_name,
         ),
@@ -7831,7 +7831,7 @@ module.exports = grammar({
         ),
       ),
 
-    module_alias_identifier: $ =>
+    _module_alias_identifier: $ =>
       $.identifier,
 
     // ---
@@ -7849,12 +7849,12 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html
     // ------------------------------------------------------------------------
 
-    declaration: $ =>
+    _declaration: $ =>
       choice(
         $.func_declaration,
         $.var_declarations,
         $.alias_declaration,
-        $.aggregate_declaration,
+        $._aggregate_declaration,
         $.enum_declaration,
         $.import_declaration,
         $.conditional_declaration,
@@ -7896,27 +7896,27 @@ module.exports = grammar({
             $.template_parameters,
           ),
           "=",
-          $.initializer,
+          $._initializer,
         ),
         $.alt_declarator,
         seq(
           $.alt_declarator,
           "=",
-          $.initializer,
+          $._initializer,
         ),
       ),
 
     declarator_identifier_list: $ =>
       choice(
-        $.declarator_identifier,
+        $._declarator_identifier,
         seq(
-          $.declarator_identifier,
+          $._declarator_identifier,
           ",",
           $.declarator_identifier_list,
         ),
       ),
 
-    declarator_identifier: $ =>
+    _declarator_identifier: $ =>
       choice(
         $.var_declarator_identifier,
         $.alt_declarator_identifier,
@@ -7931,7 +7931,7 @@ module.exports = grammar({
             $.template_parameters,
           ),
           "=",
-          $.initializer,
+          $._initializer,
         ),
       ),
 
@@ -7951,7 +7951,7 @@ module.exports = grammar({
             $.alt_declarator_suffixes,
           ),
           "=",
-          $.initializer,
+          $._initializer,
         ),
         seq(
           optional(
@@ -7967,11 +7967,11 @@ module.exports = grammar({
           $.identifier,
           $.alt_declarator_suffixes,
           "=",
-          $.initializer,
+          $._initializer,
         ),
       ),
 
-    declarator: $ =>
+    _declarator: $ =>
       choice(
         $.var_declarator,
         $.alt_declarator,
@@ -8104,20 +8104,20 @@ module.exports = grammar({
 
     // ---
 
-    initializer: $ =>
+    _initializer: $ =>
       choice(
         $.void_initializer,
-        $.non_void_initializer,
+        $._non_void_initializer,
       ),
 
-    non_void_initializer: $ =>
+    _non_void_initializer: $ =>
       choice(
-        $.exp_initializer,
+        $._exp_initializer,
         $.array_initializer,
         $.struct_initializer,
       ),
 
-    exp_initializer: $ =>
+    _exp_initializer: $ =>
       $.assign_expression,
 
     array_initializer: $ =>
@@ -8145,11 +8145,11 @@ module.exports = grammar({
 
     array_member_initialization: $ =>
       choice(
-        $.non_void_initializer,
+        $._non_void_initializer,
         seq(
           $.assign_expression,
           ":",
-          $.non_void_initializer,
+          $._non_void_initializer,
         ),
       ),
 
@@ -8178,11 +8178,11 @@ module.exports = grammar({
 
     struct_member_initializer: $ =>
       choice(
-        $.non_void_initializer,
+        $._non_void_initializer,
         seq(
           $.identifier,
           ":",
-          $.non_void_initializer,
+          $._non_void_initializer,
         ),
       ),
 
@@ -8212,7 +8212,7 @@ module.exports = grammar({
           $.template_parameters,
         ),
         "=",
-        $.initializer,
+        $._initializer,
       ),
 
     // ---
@@ -8354,11 +8354,11 @@ module.exports = grammar({
       seq(
         "__vector",
         "(",
-        $.vector_base_type,
+        $._vector_base_type,
         ")",
       ),
 
-    vector_base_type: $ =>
+    _vector_base_type: $ =>
       $.type,
 
     fundamental_type: $ =>
@@ -8471,7 +8471,7 @@ module.exports = grammar({
         seq(
           "typeof",
           "(",
-          $.expression,
+          $._expression,
           ")",
         ),
         seq(
@@ -8759,7 +8759,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html
     // ------------------------------------------------------------------------
 
-    expression: $ =>
+    _expression: $ =>
       $.comma_expression,
 
     comma_expression: $ =>
@@ -8857,7 +8857,7 @@ module.exports = grammar({
         seq(
           $.or_or_expression,
           "?",
-          $.expression,
+          $._expression,
           ":",
           $.conditional_expression,
         ),
@@ -8915,17 +8915,17 @@ module.exports = grammar({
 
     and_expression: $ =>
       choice(
-        $.cmp_expression,
+        $._cmp_expression,
         seq(
           $.and_expression,
           "&",
-          $.cmp_expression,
+          $._cmp_expression,
         ),
       ),
 
     // ---
 
-    cmp_expression: $ =>
+    _cmp_expression: $ =>
       choice(
         $.shift_expression,
         $.equal_expression,
@@ -9418,7 +9418,7 @@ module.exports = grammar({
         $.is_expression,
         seq(
           "(",
-          $.expression,
+          $._expression,
           ")",
         ),
         $.special_keyword,
@@ -9429,10 +9429,10 @@ module.exports = grammar({
 
     string_literals: $ =>
       choice(
-        $.string_literal,
+        $._string_literal,
         seq(
           $.string_literals,
-          $.string_literal,
+          $._string_literal,
         ),
       ),
 
@@ -9468,15 +9468,15 @@ module.exports = grammar({
 
     key_value_pair: $ =>
       seq(
-        $.key_expression,
+        $._key_expression,
         ":",
-        $.value_expression,
+        $._value_expression,
       ),
 
-    key_expression: $ =>
+    _key_expression: $ =>
       $.assign_expression,
 
-    value_expression: $ =>
+    _value_expression: $ =>
       $.assign_expression,
 
     // ---
@@ -9516,7 +9516,7 @@ module.exports = grammar({
           $.parameter_with_member_attributes,
           $.function_literal_body2,
         ),
-        $.function_literal_body,
+        $._function_literal_body,
         seq(
           $.identifier,
           "=>",
@@ -9546,7 +9546,7 @@ module.exports = grammar({
           "=>",
           $.assign_expression,
         ),
-        $.function_literal_body,
+        $._function_literal_body,
       ),
 
     // ---
@@ -9610,7 +9610,7 @@ module.exports = grammar({
         seq(
           "typeid",
           "(",
-          $.expression,
+          $._expression,
           ")",
         ),
       ),
@@ -9751,42 +9751,42 @@ module.exports = grammar({
     statement: $ =>
       choice(
         ";",
-        $.non_empty_statement,
-        $.scope_block_statement,
+        $._non_empty_statement,
+        $._scope_block_statement,
       ),
 
-    no_scope_non_empty_statement: $ =>
+    _no_scope_non_empty_statement: $ =>
       choice(
-        $.non_empty_statement,
+        $._non_empty_statement,
         $.block_statement,
       ),
 
     no_scope_statement: $ =>
       choice(
         ";",
-        $.non_empty_statement,
+        $._non_empty_statement,
         $.block_statement,
       ),
 
-    non_empty_or_scope_block_statement: $ =>
+    _non_empty_or_scope_block_statement: $ =>
       choice(
-        $.non_empty_statement,
-        $.scope_block_statement,
+        $._non_empty_statement,
+        $._scope_block_statement,
       ),
 
-    non_empty_statement: $ =>
+    _non_empty_statement: $ =>
       choice(
-        $.non_empty_statement_no_case_no_default,
+        $._non_empty_statement_no_case_no_default,
         $.case_statement,
         $.case_range_statement,
         $.default_statement,
       ),
 
-    non_empty_statement_no_case_no_default: $ =>
+    _non_empty_statement_no_case_no_default: $ =>
       choice(
         $.labeled_statement,
         $.expression_statement,
-        $.declaration_statement,
+        $._declaration_statement,
         $.if_statement,
         $.while_statement,
         $.do_statement,
@@ -9816,15 +9816,15 @@ module.exports = grammar({
 
     // ---
 
-    scope_statement: $ =>
+    _scope_statement: $ =>
       choice(
-        $.non_empty_statement,
+        $._non_empty_statement,
         $.block_statement,
       ),
 
     // ---
 
-    scope_block_statement: $ =>
+    _scope_block_statement: $ =>
       $.block_statement,
 
     // ---
@@ -9866,14 +9866,14 @@ module.exports = grammar({
 
     expression_statement: $ =>
       seq(
-        $.expression,
+        $._expression,
         ";",
       ),
 
     // ---
 
-    declaration_statement: $ =>
-      $.declaration,
+    _declaration_statement: $ =>
+      $._declaration,
 
     // ---
 
@@ -9884,50 +9884,50 @@ module.exports = grammar({
           "(",
           $.if_condition,
           ")",
-          $.then_statement,
+          $._then_statement,
         ),
         seq(
           "if",
           "(",
           $.if_condition,
           ")",
-          $.then_statement,
+          $._then_statement,
           "else",
-          $.else_statement,
+          $._else_statement,
         ),
       ),
 
     if_condition: $ =>
       choice(
-        $.expression,
+        $._expression,
         seq(
           "auto",
           $.identifier,
           "=",
-          $.expression,
+          $._expression,
         ),
         seq(
           $.type_ctors,
           $.identifier,
           "=",
-          $.expression,
+          $._expression,
         ),
         seq(
           optional(
             $.type_ctors,
           ),
           $.basic_type,
-          $.declarator,
+          $._declarator,
           "=",
-          $.expression,
+          $._expression,
         ),
       ),
 
-    then_statement: $ =>
-      $.scope_statement,
+    _then_statement: $ =>
+      $._scope_statement,
 
-    else_statement: $ =>
-      $.scope_statement,
+    _else_statement: $ =>
+      $._scope_statement,
 
     // ---
 
@@ -9937,7 +9937,7 @@ module.exports = grammar({
         "(",
         $.if_condition,
         ")",
-        $.scope_statement,
+        $._scope_statement,
       ),
 
     // ---
@@ -9945,10 +9945,10 @@ module.exports = grammar({
     do_statement: $ =>
       seq(
         "do",
-        $.scope_statement,
+        $._scope_statement,
         "while",
         "(",
-        $.expression,
+        $._expression,
         ")",
         ";",
       ),
@@ -9961,27 +9961,27 @@ module.exports = grammar({
         "(",
         $.initialize,
         optional(
-          $.test,
+          $._test,
         ),
         ";",
         optional(
-          $.increment,
+          $._increment,
         ),
         ")",
-        $.scope_statement,
+        $._scope_statement,
       ),
 
     initialize: $ =>
       choice(
         ";",
-        $.no_scope_non_empty_statement,
+        $._no_scope_non_empty_statement,
       ),
 
-    test: $ =>
-      $.expression,
+    _test: $ =>
+      $._expression,
 
-    increment: $ =>
-      $.expression,
+    _increment: $ =>
+      $._expression,
 
     // ---
 
@@ -9991,14 +9991,14 @@ module.exports = grammar({
         "(",
         $.foreach_type_list,
         ";",
-        $.foreach_aggregate,
+        $._foreach_aggregate,
         ")",
       ),
 
     foreach_statement: $ =>
       seq(
         $.aggregate_foreach,
-        $.no_scope_non_empty_statement,
+        $._no_scope_non_empty_statement,
       ),
 
     foreach: $ =>
@@ -10024,7 +10024,7 @@ module.exports = grammar({
             $.foreach_type_attributes,
           ),
           $.basic_type,
-          $.declarator,
+          $._declarator,
         ),
         seq(
           optional(
@@ -10058,8 +10058,8 @@ module.exports = grammar({
         "enum",
       ),
 
-    foreach_aggregate: $ =>
-      $.expression,
+    _foreach_aggregate: $ =>
+      $._expression,
 
     // ---
 
@@ -10069,22 +10069,22 @@ module.exports = grammar({
         "(",
         $.foreach_type,
         ";",
-        $.lwr_expression,
+        $._lwr_expression,
         "..",
-        $.upr_expression,
+        $._upr_expression,
         ")",
       ),
 
-    lwr_expression: $ =>
-      $.expression,
+    _lwr_expression: $ =>
+      $._expression,
 
-    upr_expression: $ =>
-      $.expression,
+    _upr_expression: $ =>
+      $._expression,
 
     foreach_range_statement: $ =>
       seq(
         $.range_foreach,
-        $.scope_statement,
+        $._scope_statement,
       ),
 
     // ---
@@ -10093,9 +10093,9 @@ module.exports = grammar({
       seq(
         "switch",
         "(",
-        $.expression,
+        $._expression,
         ")",
-        $.scope_statement,
+        $._scope_statement,
       ),
 
     case_statement: $ =>
@@ -10103,35 +10103,35 @@ module.exports = grammar({
         "case",
         $.argument_list,
         ":",
-        $.scope_statement_list,
+        $._scope_statement_list,
       ),
 
     case_range_statement: $ =>
       seq(
         "case",
-        $.first_exp,
+        $._first_exp,
         ":",
         "..",
         "case",
-        $.last_exp,
+        $._last_exp,
         ":",
-        $.scope_statement_list,
+        $._scope_statement_list,
       ),
 
-    first_exp: $ =>
+    _first_exp: $ =>
       $.assign_expression,
 
-    last_exp: $ =>
+    _last_exp: $ =>
       $.assign_expression,
 
     default_statement: $ =>
       seq(
         "default",
         ":",
-        $.scope_statement_list,
+        $._scope_statement_list,
       ),
 
-    scope_statement_list: $ =>
+    _scope_statement_list: $ =>
       $.statement_list_no_case_no_default,
 
     statement_list_no_case_no_default: $ =>
@@ -10142,8 +10142,8 @@ module.exports = grammar({
     statement_no_case_no_default: $ =>
       choice(
         ";",
-        $.non_empty_statement_no_case_no_default,
-        $.scope_block_statement,
+        $._non_empty_statement_no_case_no_default,
+        $._scope_block_statement,
       ),
 
     // ---
@@ -10153,9 +10153,9 @@ module.exports = grammar({
         "final",
         "switch",
         "(",
-        $.expression,
+        $._expression,
         ")",
-        $.scope_statement,
+        $._scope_statement,
       ),
 
     // ---
@@ -10186,7 +10186,7 @@ module.exports = grammar({
       seq(
         "return",
         optional(
-          $.expression,
+          $._expression,
         ),
         ";",
       ),
@@ -10213,7 +10213,7 @@ module.exports = grammar({
         seq(
           "goto",
           "case",
-          $.expression,
+          $._expression,
           ";",
         ),
       ),
@@ -10225,23 +10225,23 @@ module.exports = grammar({
         seq(
           "with",
           "(",
-          $.expression,
+          $._expression,
           ")",
-          $.scope_statement,
+          $._scope_statement,
         ),
         seq(
           "with",
           "(",
           $.symbol,
           ")",
-          $.scope_statement,
+          $._scope_statement,
         ),
         seq(
           "with",
           "(",
           $.template_instance,
           ")",
-          $.scope_statement,
+          $._scope_statement,
         ),
       ),
 
@@ -10251,14 +10251,14 @@ module.exports = grammar({
       choice(
         seq(
           "synchronized",
-          $.scope_statement,
+          $._scope_statement,
         ),
         seq(
           "synchronized",
           "(",
-          $.expression,
+          $._expression,
           ")",
-          $.scope_statement,
+          $._scope_statement,
         ),
       ),
 
@@ -10268,18 +10268,18 @@ module.exports = grammar({
       choice(
         seq(
           "try",
-          $.scope_statement,
+          $._scope_statement,
           $.catches,
         ),
         seq(
           "try",
-          $.scope_statement,
+          $._scope_statement,
           $.catches,
           $.finally_statement,
         ),
         seq(
           "try",
-          $.scope_statement,
+          $._scope_statement,
           $.finally_statement,
         ),
       ),
@@ -10295,7 +10295,7 @@ module.exports = grammar({
         "(",
         $.catch_parameter,
         ")",
-        $.no_scope_non_empty_statement,
+        $._no_scope_non_empty_statement,
       ),
 
     catch_parameter: $ =>
@@ -10309,7 +10309,7 @@ module.exports = grammar({
     finally_statement: $ =>
       seq(
         "finally",
-        $.no_scope_non_empty_statement,
+        $._no_scope_non_empty_statement,
       ),
 
     // ---
@@ -10317,7 +10317,7 @@ module.exports = grammar({
     throw_statement: $ =>
       seq(
         "throw",
-        $.expression,
+        $._expression,
         ";",
       ),
 
@@ -10330,21 +10330,21 @@ module.exports = grammar({
           "(",
           "exit",
           ")",
-          $.non_empty_or_scope_block_statement,
+          $._non_empty_or_scope_block_statement,
         ),
         seq(
           "scope",
           "(",
           "success",
           ")",
-          $.non_empty_or_scope_block_statement,
+          $._non_empty_or_scope_block_statement,
         ),
         seq(
           "scope",
           "(",
           "failure",
           ")",
-          $.non_empty_or_scope_block_statement,
+          $._non_empty_or_scope_block_statement,
         ),
       ),
 
@@ -10391,7 +10391,7 @@ module.exports = grammar({
     // https://dlang.org/spec/struct.html
     // ------------------------------------------------------------------------
 
-    aggregate_declaration: $ =>
+    _aggregate_declaration: $ =>
       choice(
         $.class_declaration,
         $.interface_declaration,
@@ -10474,7 +10474,7 @@ module.exports = grammar({
           optional(
             $.member_function_attributes,
           ),
-          $.function_body,
+          $._function_body,
         ),
       ),
 
@@ -10527,30 +10527,30 @@ module.exports = grammar({
       choice(
         seq(
           ":",
-          $.super_class_or_interface,
+          $._super_class_or_interface,
         ),
         seq(
           ":",
-          $.super_class_or_interface,
+          $._super_class_or_interface,
           ",",
           $.interfaces,
         ),
       ),
 
-    super_class_or_interface: $ =>
+    _super_class_or_interface: $ =>
       $.basic_type,
 
     interfaces: $ =>
       choice(
-        $.interface,
+        $._interface,
         seq(
-          $.interface,
+          $._interface,
           ",",
           $.interfaces,
         ),
       ),
 
-    interface: $ =>
+    _interface: $ =>
       $.basic_type,
 
     // ---
@@ -10563,7 +10563,7 @@ module.exports = grammar({
           optional(
             $.member_function_attributes,
           ),
-          $.function_body,
+          $._function_body,
         ),
         $.constructor_template,
       ),
@@ -10579,7 +10579,7 @@ module.exports = grammar({
         optional(
           $.member_function_attributes,
         ),
-        $.function_body,
+        $._function_body,
       ),
 
     // ---
@@ -10604,7 +10604,7 @@ module.exports = grammar({
           optional(
             $.member_function_attributes,
           ),
-          $.function_body,
+          $._function_body,
         ),
       ),
 
@@ -10632,7 +10632,7 @@ module.exports = grammar({
           optional(
             $.member_function_attributes,
           ),
-          $.function_body,
+          $._function_body,
         ),
       ),
 
@@ -10660,7 +10660,7 @@ module.exports = grammar({
           optional(
             $.member_function_attributes,
           ),
-          $.function_body,
+          $._function_body,
         ),
       ),
 
@@ -10690,7 +10690,7 @@ module.exports = grammar({
           optional(
             $.member_function_attributes,
           ),
-          $.function_body,
+          $._function_body,
         ),
       ),
 
@@ -10700,7 +10700,7 @@ module.exports = grammar({
       seq(
         "new",
         $.parameters,
-        $.function_body,
+        $._function_body,
       ),
 
     // ---
@@ -10709,7 +10709,7 @@ module.exports = grammar({
       seq(
         "delete",
         $.parameters,
-        $.function_body,
+        $._function_body,
       ),
 
     // ---
@@ -10735,7 +10735,7 @@ module.exports = grammar({
           $.constructor_args,
         ),
         optional(
-          $.super_class_or_interface,
+          $._super_class_or_interface,
         ),
         optional(
           $.interfaces,
@@ -10795,13 +10795,13 @@ module.exports = grammar({
           "enum",
           $.identifier,
           ":",
-          $.enum_base_type,
+          $._enum_base_type,
           $.enum_body,
         ),
         $.anonymous_enum_declaration,
       ),
 
-    enum_base_type: $ =>
+    _enum_base_type: $ =>
       $.type,
 
     enum_body: $ =>
@@ -10866,7 +10866,7 @@ module.exports = grammar({
         seq(
           "enum",
           ":",
-          $.enum_base_type,
+          $._enum_base_type,
           "{",
           $.enum_members,
           "}",
@@ -10922,7 +10922,7 @@ module.exports = grammar({
           ),
           $.basic_type,
           $.func_declarator,
-          $.function_body,
+          $._function_body,
         ),
         $.auto_func_declaration,
       ),
@@ -10932,7 +10932,7 @@ module.exports = grammar({
         $.storage_classes,
         $.identifier,
         $.func_declarator_suffix,
-        $.function_body,
+        $._function_body,
       ),
 
     func_declarator: $ =>
@@ -10996,14 +10996,14 @@ module.exports = grammar({
             $.parameter_attributes,
           ),
           $.basic_type,
-          $.declarator,
+          $._declarator,
         ),
         seq(
           optional(
             $.parameter_attributes,
           ),
           $.basic_type,
-          $.declarator,
+          $._declarator,
           "...",
         ),
         seq(
@@ -11011,7 +11011,7 @@ module.exports = grammar({
             $.parameter_attributes,
           ),
           $.basic_type,
-          $.declarator,
+          $._declarator,
           "=",
           $.assign_expression,
         ),
@@ -11079,10 +11079,10 @@ module.exports = grammar({
 
     function_attributes: $ =>
       repeat1(
-        $.function_attribute,
+        $._function_attribute,
       ),
 
-    function_attribute: $ =>
+    _function_attribute: $ =>
       choice(
         $.function_attribute_kwd,
         $.property,
@@ -11100,19 +11100,19 @@ module.exports = grammar({
         "inout",
         "return",
         "shared",
-        $.function_attribute,
+        $._function_attribute,
       ),
 
     // ---
 
-    function_body: $ =>
+    _function_body: $ =>
       choice(
         $.specified_function_body,
         $.missing_function_body,
         $.shortened_function_body,
       ),
 
-    function_literal_body: $ =>
+    _function_literal_body: $ =>
       $.block_statement,
 
     specified_function_body: $ =>
@@ -11127,7 +11127,7 @@ module.exports = grammar({
           optional(
             $.function_contracts,
           ),
-          $.in_out_contract_expression,
+          $._in_out_contract_expression,
           optional(
             "do",
           ),
@@ -11137,7 +11137,7 @@ module.exports = grammar({
           optional(
             $.function_contracts,
           ),
-          $.in_out_statement,
+          $._in_out_statement,
           "do",
           $.block_statement,
         ),
@@ -11150,14 +11150,14 @@ module.exports = grammar({
           optional(
             $.function_contracts,
           ),
-          $.in_out_contract_expression,
+          $._in_out_contract_expression,
           ";",
         ),
         seq(
           optional(
             $.function_contracts,
           ),
-          $.in_out_statement,
+          $._in_out_statement,
         ),
       ),
 
@@ -11172,22 +11172,22 @@ module.exports = grammar({
 
     function_contracts: $ =>
       repeat1(
-        $.function_contract,
+        $._function_contract,
       ),
 
-    function_contract: $ =>
+    _function_contract: $ =>
       choice(
-        $.in_out_contract_expression,
-        $.in_out_statement,
+        $._in_out_contract_expression,
+        $._in_out_statement,
       ),
 
-    in_out_contract_expression: $ =>
+    _in_out_contract_expression: $ =>
       choice(
         $.in_contract_expression,
         $.out_contract_expression,
       ),
 
-    in_out_statement: $ =>
+    _in_out_statement: $ =>
       choice(
         $.in_statement,
         $.out_statement,
@@ -11271,19 +11271,19 @@ module.exports = grammar({
 
     template_parameter_list: $ =>
       choice(
-        $.template_parameter,
+        $._template_parameter,
         seq(
-          $.template_parameter,
+          $._template_parameter,
           ",",
         ),
         seq(
-          $.template_parameter,
+          $._template_parameter,
           ",",
           $.template_parameter_list,
         ),
       ),
 
-    template_parameter: $ =>
+    _template_parameter: $ =>
       choice(
         $.template_type_parameter,
         $.template_value_parameter,
@@ -11318,19 +11318,19 @@ module.exports = grammar({
 
     template_argument_list: $ =>
       choice(
-        $.template_argument,
+        $._template_argument,
         seq(
-          $.template_argument,
+          $._template_argument,
           ",",
         ),
         seq(
-          $.template_argument,
+          $._template_argument,
           ",",
           $.template_argument_list,
         ),
       ),
 
-    template_argument: $ =>
+    _template_argument: $ =>
       choice(
         $.type,
         $.assign_expression,
@@ -11367,7 +11367,7 @@ module.exports = grammar({
         $.identifier,
         $.fundamental_type,
         $.character_literal,
-        $.string_literal,
+        $._string_literal,
         $.integer_literal,
         $.float_literal,
         "true",
@@ -11423,21 +11423,21 @@ module.exports = grammar({
       choice(
         seq(
           $.basic_type,
-          $.declarator,
+          $._declarator,
         ),
         seq(
           $.basic_type,
-          $.declarator,
+          $._declarator,
           $.template_value_parameter_specialization,
         ),
         seq(
           $.basic_type,
-          $.declarator,
+          $._declarator,
           $.template_value_parameter_default,
         ),
         seq(
           $.basic_type,
-          $.declarator,
+          $._declarator,
           $.template_value_parameter_specialization,
           $.template_value_parameter_default,
         ),
@@ -11478,7 +11478,7 @@ module.exports = grammar({
         seq(
           "alias",
           $.basic_type,
-          $.declarator,
+          $._declarator,
           optional(
             $.template_alias_parameter_specialization,
           ),
@@ -11546,7 +11546,7 @@ module.exports = grammar({
           optional(
             $.constraint,
           ),
-          $.function_body,
+          $._function_body,
         ),
       ),
 
@@ -11660,7 +11660,7 @@ module.exports = grammar({
       seq(
         "if",
         "(",
-        $.expression,
+        $._expression,
         ")",
       ),
 
@@ -11733,24 +11733,24 @@ module.exports = grammar({
     conditional_declaration: $ =>
       choice(
         seq(
-          $.condition,
+          $._condition,
           $.declaration_block,
         ),
         seq(
-          $.condition,
+          $._condition,
           $.declaration_block,
           "else",
           $.declaration_block,
         ),
         seq(
-          $.condition,
+          $._condition,
           ":",
           optional(
             $.decl_defs,
           ),
         ),
         seq(
-          $.condition,
+          $._condition,
           $.declaration_block,
           "else",
           ":",
@@ -11763,20 +11763,20 @@ module.exports = grammar({
     conditional_statement: $ =>
       choice(
         seq(
-          $.condition,
-          $.no_scope_non_empty_statement,
+          $._condition,
+          $._no_scope_non_empty_statement,
         ),
         seq(
-          $.condition,
-          $.no_scope_non_empty_statement,
+          $._condition,
+          $._no_scope_non_empty_statement,
           "else",
-          $.no_scope_non_empty_statement,
+          $._no_scope_non_empty_statement,
         ),
       ),
 
     // ---
 
-    condition: $ =>
+    _condition: $ =>
       choice(
         $.version_condition,
         $.debug_condition,
@@ -11911,7 +11911,7 @@ module.exports = grammar({
     static_foreach_statement: $ =>
       seq(
         $.static_foreach,
-        $.no_scope_non_empty_statement,
+        $._no_scope_non_empty_statement,
       ),
 
     // ---
@@ -12004,15 +12004,15 @@ module.exports = grammar({
 
     traits_arguments: $ =>
       choice(
-        $.traits_argument,
+        $._traits_argument,
         seq(
-          $.traits_argument,
+          $._traits_argument,
           ",",
           $.traits_arguments,
         ),
       ),
 
-    traits_argument: $ =>
+    _traits_argument: $ =>
       choice(
         $.assign_expression,
         $.type,
@@ -12041,7 +12041,7 @@ module.exports = grammar({
         ),
         seq(
           "align",
-          $.integer_expression,
+          $._integer_expression,
         ),
         "even",
         "naked",
@@ -12075,43 +12075,43 @@ module.exports = grammar({
         ),
         seq(
           "db",
-          $.string_literal,
+          $._string_literal,
         ),
         seq(
           "ds",
-          $.string_literal,
+          $._string_literal,
         ),
         seq(
           "di",
-          $.string_literal,
+          $._string_literal,
         ),
         seq(
           "dl",
-          $.string_literal,
+          $._string_literal,
         ),
         seq(
           "dw",
-          $.string_literal,
+          $._string_literal,
         ),
         seq(
           "dq",
-          $.string_literal,
+          $._string_literal,
         ),
-        $.opcode,
+        $._opcode,
         seq(
-          $.opcode,
+          $._opcode,
           $.operands,
         ),
       ),
 
-    opcode: $ =>
+    _opcode: $ =>
       $.identifier,
 
     operands: $ =>
       choice(
-        $.operand,
+        $._operand,
         seq(
-          $.operand,
+          $._operand,
           ",",
           $.operands,
         ),
@@ -12119,7 +12119,7 @@ module.exports = grammar({
 
     // ---
 
-    integer_expression: $ =>
+    _integer_expression: $ =>
       choice(
         $.integer_literal,
         $.identifier,
@@ -12339,7 +12339,7 @@ module.exports = grammar({
 
     // ---
 
-    operand: $ =>
+    _operand: $ =>
       $.asm_exp,
 
     asm_exp: $ =>

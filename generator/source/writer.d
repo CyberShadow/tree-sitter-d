@@ -18,6 +18,8 @@ struct Writer
 
 	this(string fileName, Grammar grammar, const string[] extras)
 	{
+		this.grammar = grammar;
+
 		f.open(fileName, "wb");
 
 		f.writef(q"EOF
@@ -30,9 +32,7 @@ module.exports = grammar({
 
   rules: {
     source_file: $ => $.module,
-EOF", extras.map!convertRuleName);
-
-		this.grammar = grammar;
+EOF", extras.map!(extra => convertRuleName(extra)));
 	}
 
 	string currentFile;
@@ -97,9 +97,9 @@ EOF");
 	}
 
 private:
-	static string convertRuleName(string name)
+	string convertRuleName(string name)
 	{
-		return name.splitByCamelCase.map!toLower.join("_");
+		return (grammar.defs[name].hidden ? "_" : "") ~ name.splitByCamelCase.map!toLower.join("_");
 	}
 
 	void writeRuleBody(string defName)

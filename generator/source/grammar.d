@@ -50,6 +50,7 @@ struct Grammar
 		Kind kind;
 
 		bool used;
+		bool hidden;
 	}
 
 	Def[string] defs;
@@ -650,6 +651,7 @@ struct Grammar
 		optimize();
 		checkKinds();
 		scanUsed(roots);
+		scanHidden();
 	}
 
 	// Ensure that all referenced grammar definitions are defined.
@@ -870,5 +872,34 @@ struct Grammar
 
 		foreach (root; roots)
 			scanDef(root);
+	}
+
+	// Choose which definitions should be hidden (inlined) in the tree-sitter AST.
+	// In the generated grammar, such definitions' names begin with an underscore.
+	private void scanHidden()
+	{
+		foreach (defName, ref def; defs)
+		{
+			if (def.kind == Def.Kind.chars)
+				continue; // Always represents a token; referencees are inlined
+
+			// We make a definition hidden if it always contains at most one other definition.
+			// Definitions which directly contain tokens are never hidden.
+
+			size_t scanNode(ref Node node)
+			{
+				return node.value.match!(
+					(ref RegExp       v) => enforce(0),
+					(ref LiteralChars v) => enforce(0),
+					(ref LiteralToken v) => 2,
+					(ref Reference    v) => 1,
+					(ref Choice       v) => v.nodes.map!scanNode().reduce!max(),
+					(ref Seq          v) => v.nodes.map!scanNode().sum(),
+					(ref Repeat1      v) => v.node[0].I!scanNode() * 2,
+					(ref Optional     v) => v.node[0].I!scanNode(),
+				);
+			}
+			def.hidden = scanNode(def.node) <= 1;
+		}
 	}
 }
