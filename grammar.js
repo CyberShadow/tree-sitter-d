@@ -522,6 +522,7 @@ module.exports = grammar({
         // AlternateWysiwygString
         seq(
           "`",
+         /*
           optional(
             // WysiwygCharacters
             repeat1(
@@ -549,6 +550,8 @@ module.exports = grammar({
               ),
             ),
           ),
+         */
+          /[^`]*/,
           "`",
           optional(
             // StringPostfix
