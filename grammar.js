@@ -7687,10 +7687,10 @@ module.exports = grammar({
 
     decl_defs: $ =>
       repeat1(
-        $.decl_def,
+        $._decl_def,
       ),
 
-    decl_def: $ =>
+    _decl_def: $ =>
       choice(
         $.attribute_specifier,
         $._declaration,
@@ -7714,8 +7714,11 @@ module.exports = grammar({
         $.template_mixin_declaration,
         $.template_mixin,
         $.mixin_declaration,
-        ";",
+        $.empty_declaration,
       ),
+
+    empty_declaration: $ =>
+      ";",
 
     // ---
 
@@ -8578,7 +8581,7 @@ module.exports = grammar({
 
     declaration_block: $ =>
       choice(
-        $.decl_def,
+        $._decl_def,
         seq(
           "{",
           optional(
@@ -8733,7 +8736,7 @@ module.exports = grammar({
         ),
         seq(
           $.pragma,
-          $.no_scope_statement,
+          $._no_scope_statement,
         ),
       ),
 
@@ -9748,12 +9751,15 @@ module.exports = grammar({
     // https://dlang.org/spec/statement.html
     // ------------------------------------------------------------------------
 
-    statement: $ =>
+    _statement: $ =>
       choice(
-        ";",
+        $.empty_statement,
         $._non_empty_statement,
         $._scope_block_statement,
       ),
+
+    empty_statement: $ =>
+      ";",
 
     _no_scope_non_empty_statement: $ =>
       choice(
@@ -9761,9 +9767,9 @@ module.exports = grammar({
         $.block_statement,
       ),
 
-    no_scope_statement: $ =>
+    _no_scope_statement: $ =>
       choice(
-        ";",
+        $.empty_statement,
         $._non_empty_statement,
         $.block_statement,
       ),
@@ -9838,7 +9844,7 @@ module.exports = grammar({
         seq(
           $.identifier,
           ":",
-          $.statement,
+          $._statement,
         ),
       ),
 
@@ -9859,7 +9865,7 @@ module.exports = grammar({
 
     statement_list: $ =>
       repeat1(
-        $.statement,
+        $._statement,
       ),
 
     // ---
@@ -10136,12 +10142,12 @@ module.exports = grammar({
 
     statement_list_no_case_no_default: $ =>
       repeat1(
-        $.statement_no_case_no_default,
+        $._statement_no_case_no_default,
       ),
 
-    statement_no_case_no_default: $ =>
+    _statement_no_case_no_default: $ =>
       choice(
-        ";",
+        $.empty_statement,
         $._non_empty_statement_no_case_no_default,
         $._scope_block_statement,
       ),
