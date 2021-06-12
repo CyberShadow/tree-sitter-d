@@ -575,7 +575,7 @@ module.exports = grammar({
               // DoubleQuotedCharacter
               choice(
                 // Character
-                /[\s\S]/,
+                /[^"\\]/,
                 // EscapeSequence
                 choice(
                   "\\'",
@@ -1195,6 +1195,7 @@ module.exports = grammar({
                     ),
                   ),
                 ),
+               /*
                 // EndOfLine
                 choice(
                   "\r",
@@ -1212,6 +1213,7 @@ module.exports = grammar({
                     "\x1A",
                   ),
                 ),
+               */
               ),
             ),
           ),

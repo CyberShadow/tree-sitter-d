@@ -51,3 +51,57 @@ x!`
           (declarator_initializer
             (var_declarator
               (identifier))))))))
+
+====================
+DoubleQuotedString
+====================
+
+x!"Hello, world!" y;
+x!"\"" y;
+x!"
+" y;
+
+---
+
+(source_file
+  (module
+    (decl_defs
+
+      (var_declarations
+        (basic_type
+          (qualified_identifier
+            (template_instance
+              (identifier)
+              (template_arguments
+                (template_single_argument
+                  (double_quoted_string))))))
+        (declarators
+          (declarator_initializer
+            (var_declarator
+              (identifier)))))
+
+      (var_declarations
+        (basic_type
+          (qualified_identifier
+            (template_instance
+              (identifier)
+              (template_arguments
+                (template_single_argument
+                  (double_quoted_string))))))
+        (declarators
+          (declarator_initializer
+            (var_declarator
+              (identifier)))))
+
+      (var_declarations
+        (basic_type
+          (qualified_identifier
+            (template_instance
+              (identifier)
+              (template_arguments
+                (template_single_argument
+                  (double_quoted_string))))))
+        (declarators
+          (declarator_initializer
+            (var_declarator
+              (identifier))))))))
