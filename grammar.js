@@ -16,6 +16,7 @@ module.exports = grammar({
     // https://dlang.org/spec/lex.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/lex.html#SourceFile
     source_file: $ =>
       choice(
         seq(
@@ -37,12 +38,14 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#ByteOrderMark
     byte_order_mark: $ =>
       token(
         // ByteOrderMark
         "\uFEFF",
       ),
 
+    // https://dlang.org/spec/lex.html#Shebang
     shebang: $ =>
       token(
         // Shebang
@@ -70,6 +73,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#EndOfLine
     _end_of_line: $ =>
       token(
         // EndOfLine
@@ -93,6 +97,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#WhiteSpace
     _white_space: $ =>
       token(
         // WhiteSpace
@@ -109,6 +114,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#Comment
     comment: $ =>
       token(
         // Comment
@@ -174,6 +180,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#TokenNoBraces
     token_no_braces: $ =>
       choice(
         $.identifier,
@@ -239,6 +246,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#Identifier
     identifier: $ =>
       token(
         // Identifier
@@ -281,6 +289,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#StringLiteral
     _string_literal: $ =>
       choice(
         $.wysiwyg_string,
@@ -293,6 +302,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#WysiwygString
     wysiwyg_string: $ =>
       token(
         // WysiwygString
@@ -337,6 +347,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/lex.html#AlternateWysiwygString
     alternate_wysiwyg_string: $ =>
       token(
         // AlternateWysiwygString
@@ -381,6 +392,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/lex.html#DoubleQuotedString
     double_quoted_string: $ =>
       token(
         // DoubleQuotedString
@@ -1044,6 +1056,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/lex.html#HexString
     hex_string: $ =>
       token(
         // HexString
@@ -1130,6 +1143,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/lex.html#DelimitedString
     delimited_string: $ =>
       token(
         // DelimitedString
@@ -1254,6 +1268,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#TokenString
     token_string: $ =>
       seq(
         "q{",
@@ -1263,11 +1278,13 @@ module.exports = grammar({
         "}",
       ),
 
+    // https://dlang.org/spec/lex.html#TokenStringTokens
     token_string_tokens: $ =>
       repeat1(
         $.token_string_token,
       ),
 
+    // https://dlang.org/spec/lex.html#TokenStringToken
     token_string_token: $ =>
       choice(
         $.token_no_braces,
@@ -1282,6 +1299,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#CharacterLiteral
     character_literal: $ =>
       token(
         // CharacterLiteral
@@ -1917,6 +1935,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#IntegerLiteral
     integer_literal: $ =>
       token(
         // IntegerLiteral
@@ -2278,6 +2297,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#FloatLiteral
     float_literal: $ =>
       token(
         // FloatLiteral
@@ -7576,6 +7596,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#Keyword
     keyword: $ =>
       choice(
         "abstract",
@@ -7692,6 +7713,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#SpecialTokenSequence
     special_token_sequence: $ =>
       choice(
         seq(
@@ -7711,6 +7733,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/lex.html#Filespec
     filespec: $ =>
       token(
         // Filespec
@@ -7731,6 +7754,7 @@ module.exports = grammar({
     // https://dlang.org/spec/module.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/module.html#Module
     module: $ =>
       choice(
         seq(
@@ -7740,11 +7764,13 @@ module.exports = grammar({
         $.decl_defs,
       ),
 
+    // https://dlang.org/spec/module.html#DeclDefs
     decl_defs: $ =>
       repeat1(
         $._decl_def,
       ),
 
+    // https://dlang.org/spec/module.html#DeclDef
     _decl_def: $ =>
       choice(
         $.attribute_specifier,
@@ -7772,11 +7798,13 @@ module.exports = grammar({
         $.empty_declaration,
       ),
 
+    // https://dlang.org/spec/module.html#EmptyDeclaration
     empty_declaration: $ =>
       ";",
 
     // ---
 
+    // https://dlang.org/spec/module.html#ModuleDeclaration
     module_declaration: $ =>
       seq(
         optional(
@@ -7787,17 +7815,20 @@ module.exports = grammar({
         ";",
       ),
 
+    // https://dlang.org/spec/module.html#ModuleAttributes
     module_attributes: $ =>
       repeat1(
         $._module_attribute,
       ),
 
+    // https://dlang.org/spec/module.html#ModuleAttribute
     _module_attribute: $ =>
       choice(
         $.deprecated_attribute,
         $.user_defined_attribute,
       ),
 
+    // https://dlang.org/spec/module.html#ModuleFullyQualifiedName
     module_fully_qualified_name: $ =>
       choice(
         $._module_name,
@@ -7808,9 +7839,11 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/module.html#ModuleName
     _module_name: $ =>
       $.identifier,
 
+    // https://dlang.org/spec/module.html#Packages
     packages: $ =>
       choice(
         $._package_name,
@@ -7821,11 +7854,13 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/module.html#PackageName
     _package_name: $ =>
       $.identifier,
 
     // ---
 
+    // https://dlang.org/spec/module.html#ImportDeclaration
     import_declaration: $ =>
       choice(
         seq(
@@ -7841,6 +7876,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/module.html#ImportList
     import_list: $ =>
       choice(
         $.import,
@@ -7852,6 +7888,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/module.html#Import
     import: $ =>
       choice(
         $.module_fully_qualified_name,
@@ -7862,6 +7899,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/module.html#ImportBindings
     import_bindings: $ =>
       seq(
         $.import,
@@ -7869,6 +7907,7 @@ module.exports = grammar({
         $.import_bind_list,
       ),
 
+    // https://dlang.org/spec/module.html#ImportBindList
     import_bind_list: $ =>
       seq(
         $.import_bind,
@@ -7880,6 +7919,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/module.html#ImportBind
     import_bind: $ =>
       seq(
         $.identifier,
@@ -7891,11 +7931,13 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/module.html#ModuleAliasIdentifier
     _module_alias_identifier: $ =>
       $.identifier,
 
     // ---
 
+    // https://dlang.org/spec/module.html#MixinDeclaration
     mixin_declaration: $ =>
       seq(
         "mixin",
@@ -7909,6 +7951,7 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/declaration.html#Declaration
     _declaration: $ =>
       choice(
         $.func_declaration,
@@ -7924,6 +7967,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/declaration.html#VarDeclarations
     var_declarations: $ =>
       choice(
         seq(
@@ -7937,6 +7981,7 @@ module.exports = grammar({
         $.auto_declaration,
       ),
 
+    // https://dlang.org/spec/declaration.html#Declarators
     declarators: $ =>
       seq(
         $.declarator_initializer,
@@ -7948,6 +7993,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#DeclaratorInitializer
     declarator_initializer: $ =>
       choice(
         $.var_declarator,
@@ -7967,6 +8013,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#DeclaratorIdentifierList
     declarator_identifier_list: $ =>
       seq(
         $._declarator_identifier,
@@ -7978,12 +8025,14 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#DeclaratorIdentifier
     _declarator_identifier: $ =>
       choice(
         $.var_declarator_identifier,
         $.alt_declarator_identifier,
       ),
 
+    // https://dlang.org/spec/declaration.html#VarDeclaratorIdentifier
     var_declarator_identifier: $ =>
       seq(
         $.identifier,
@@ -7998,6 +8047,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#AltDeclaratorIdentifier
     alt_declarator_identifier: $ =>
       choice(
         seq(
@@ -8034,12 +8084,14 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#Declarator
     _declarator: $ =>
       choice(
         $.var_declarator,
         $.alt_declarator,
       ),
 
+    // https://dlang.org/spec/declaration.html#VarDeclarator
     var_declarator: $ =>
       seq(
         optional(
@@ -8048,6 +8100,7 @@ module.exports = grammar({
         $.identifier,
       ),
 
+    // https://dlang.org/spec/declaration.html#AltDeclarator
     alt_declarator: $ =>
       choice(
         seq(
@@ -8085,6 +8138,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#AltDeclaratorInner
     alt_declarator_inner: $ =>
       choice(
         seq(
@@ -8103,11 +8157,13 @@ module.exports = grammar({
         $.alt_declarator,
       ),
 
+    // https://dlang.org/spec/declaration.html#AltDeclaratorSuffixes
     alt_declarator_suffixes: $ =>
       repeat1(
         $.alt_declarator_suffix,
       ),
 
+    // https://dlang.org/spec/declaration.html#AltDeclaratorSuffix
     alt_declarator_suffix: $ =>
       choice(
         seq(
@@ -8126,6 +8182,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#AltFuncDeclaratorSuffix
     alt_func_declarator_suffix: $ =>
       seq(
         $.parameters,
@@ -8136,11 +8193,13 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/declaration.html#StorageClasses
     storage_classes: $ =>
       repeat1(
         $.storage_class,
       ),
 
+    // https://dlang.org/spec/declaration.html#StorageClass
     storage_class: $ =>
       choice(
         $.linkage_attribute,
@@ -8167,12 +8226,14 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/declaration.html#Initializer
     _initializer: $ =>
       choice(
         $.void_initializer,
         $._non_void_initializer,
       ),
 
+    // https://dlang.org/spec/declaration.html#NonVoidInitializer
     _non_void_initializer: $ =>
       choice(
         $._exp_initializer,
@@ -8180,9 +8241,11 @@ module.exports = grammar({
         $.struct_initializer,
       ),
 
+    // https://dlang.org/spec/declaration.html#ExpInitializer
     _exp_initializer: $ =>
       $.assign_expression,
 
+    // https://dlang.org/spec/declaration.html#ArrayInitializer
     array_initializer: $ =>
       seq(
         "[",
@@ -8192,6 +8255,7 @@ module.exports = grammar({
         "]",
       ),
 
+    // https://dlang.org/spec/declaration.html#ArrayMemberInitializations
     array_member_initializations: $ =>
       seq(
         $.array_member_initialization,
@@ -8206,6 +8270,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#ArrayMemberInitialization
     array_member_initialization: $ =>
       choice(
         $._non_void_initializer,
@@ -8216,6 +8281,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#StructInitializer
     struct_initializer: $ =>
       seq(
         "{",
@@ -8225,6 +8291,7 @@ module.exports = grammar({
         "}",
       ),
 
+    // https://dlang.org/spec/declaration.html#StructMemberInitializers
     struct_member_initializers: $ =>
       seq(
         $.struct_member_initializer,
@@ -8239,6 +8306,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#StructMemberInitializer
     struct_member_initializer: $ =>
       choice(
         $._non_void_initializer,
@@ -8251,6 +8319,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/declaration.html#AutoDeclaration
     auto_declaration: $ =>
       seq(
         $.storage_classes,
@@ -8258,6 +8327,7 @@ module.exports = grammar({
         ";",
       ),
 
+    // https://dlang.org/spec/declaration.html#AutoAssignments
     auto_assignments: $ =>
       choice(
         $.auto_assignment,
@@ -8268,6 +8338,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#AutoAssignment
     auto_assignment: $ =>
       seq(
         $.identifier,
@@ -8280,6 +8351,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/declaration.html#AliasDeclaration
     alias_declaration: $ =>
       choice(
         seq(
@@ -8307,6 +8379,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#AliasAssignments
     alias_assignments: $ =>
       choice(
         $.alias_assignment,
@@ -8317,6 +8390,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/declaration.html#AliasAssignment
     alias_assignment: $ =>
       choice(
         seq(
@@ -8357,6 +8431,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/declaration.html#VoidInitializer
     void_initializer: $ =>
       "void",
 
@@ -8364,6 +8439,7 @@ module.exports = grammar({
     // https://dlang.org/spec/type.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/type.html#Type
     type: $ =>
       seq(
         optional(
@@ -8375,11 +8451,13 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/type.html#TypeCtors
     type_ctors: $ =>
       repeat1(
         $.type_ctor,
       ),
 
+    // https://dlang.org/spec/type.html#TypeCtor
     type_ctor: $ =>
       choice(
         "const",
@@ -8388,6 +8466,7 @@ module.exports = grammar({
         "shared",
       ),
 
+    // https://dlang.org/spec/type.html#BasicType
     basic_type: $ =>
       choice(
         $.fundamental_type,
@@ -8413,6 +8492,7 @@ module.exports = grammar({
         $.mixin_type,
       ),
 
+    // https://dlang.org/spec/type.html#Vector
     vector: $ =>
       seq(
         "__vector",
@@ -8421,9 +8501,11 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/type.html#VectorBaseType
     _vector_base_type: $ =>
       $.type,
 
+    // https://dlang.org/spec/type.html#FundamentalType
     fundamental_type: $ =>
       choice(
         "bool",
@@ -8452,11 +8534,13 @@ module.exports = grammar({
         "void",
       ),
 
+    // https://dlang.org/spec/type.html#TypeSuffixes
     type_suffixes: $ =>
       repeat1(
         $.type_suffix,
       ),
 
+    // https://dlang.org/spec/type.html#TypeSuffix
     type_suffix: $ =>
       choice(
         "*",
@@ -8497,6 +8581,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/type.html#QualifiedIdentifier
     qualified_identifier: $ =>
       choice(
         $.identifier,
@@ -8529,6 +8614,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/type.html#Typeof
     typeof: $ =>
       choice(
         seq(
@@ -8547,6 +8633,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/type.html#MixinType
     mixin_type: $ =>
       seq(
         "mixin",
@@ -8559,6 +8646,7 @@ module.exports = grammar({
     // https://dlang.org/spec/attribute.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/attribute.html#AttributeSpecifier
     attribute_specifier: $ =>
       choice(
         seq(
@@ -8571,6 +8659,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/attribute.html#Attribute
     attribute: $ =>
       choice(
         $.linkage_attribute,
@@ -8597,12 +8686,14 @@ module.exports = grammar({
         "return",
       ),
 
+    // https://dlang.org/spec/attribute.html#FunctionAttributeKwd
     function_attribute_kwd: $ =>
       choice(
         "nothrow",
         "pure",
       ),
 
+    // https://dlang.org/spec/attribute.html#AtAttribute
     at_attribute: $ =>
       choice(
         seq(
@@ -8633,12 +8724,14 @@ module.exports = grammar({
         $.user_defined_attribute,
       ),
 
+    // https://dlang.org/spec/attribute.html#Property
     property: $ =>
       seq(
         "@",
         "property",
       ),
 
+    // https://dlang.org/spec/attribute.html#DeclarationBlock
     declaration_block: $ =>
       choice(
         $._decl_def,
@@ -8653,6 +8746,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/attribute.html#LinkageAttribute
     linkage_attribute: $ =>
       choice(
         seq(
@@ -8679,6 +8773,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/attribute.html#LinkageType
     linkage_type: $ =>
       choice(
         "C",
@@ -8689,6 +8784,7 @@ module.exports = grammar({
         "Objective-C",
       ),
 
+    // https://dlang.org/spec/attribute.html#NamespaceList
     namespace_list: $ =>
       seq(
         $.conditional_expression,
@@ -8705,6 +8801,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/attribute.html#AlignAttribute
     align_attribute: $ =>
       seq(
         "align",
@@ -8719,6 +8816,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/attribute.html#DeprecatedAttribute
     deprecated_attribute: $ =>
       seq(
         "deprecated",
@@ -8733,6 +8831,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/attribute.html#VisibilityAttribute
     visibility_attribute: $ =>
       choice(
         "private",
@@ -8750,6 +8849,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/attribute.html#UserDefinedAttribute
     user_defined_attribute: $ =>
       choice(
         seq(
@@ -8790,6 +8890,7 @@ module.exports = grammar({
     // https://dlang.org/spec/pragma.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/pragma.html#PragmaStatement
     pragma_statement: $ =>
       choice(
         seq(
@@ -8802,6 +8903,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/pragma.html#Pragma
     pragma: $ =>
       choice(
         seq(
@@ -8824,9 +8926,11 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/expression.html#Expression
     _expression: $ =>
       $.comma_expression,
 
+    // https://dlang.org/spec/expression.html#CommaExpression
     comma_expression: $ =>
       choice(
         $.assign_expression,
@@ -8839,6 +8943,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#AssignExpression
     assign_expression: $ =>
       seq(
         $.conditional_expression,
@@ -8906,6 +9011,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#ConditionalExpression
     conditional_expression: $ =>
       seq(
         $.or_or_expression,
@@ -8921,6 +9027,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#OrOrExpression
     or_or_expression: $ =>
       choice(
         $.and_and_expression,
@@ -8933,6 +9040,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#AndAndExpression
     and_and_expression: $ =>
       choice(
         $.or_expression,
@@ -8945,6 +9053,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#OrExpression
     or_expression: $ =>
       choice(
         $.xor_expression,
@@ -8957,6 +9066,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#XorExpression
     xor_expression: $ =>
       choice(
         $.and_expression,
@@ -8969,6 +9079,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#AndExpression
     and_expression: $ =>
       choice(
         $._cmp_expression,
@@ -8981,6 +9092,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#CmpExpression
     _cmp_expression: $ =>
       choice(
         $.shift_expression,
@@ -8992,6 +9104,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#EqualExpression
     equal_expression: $ =>
       choice(
         seq(
@@ -9008,6 +9121,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#IdentityExpression
     identity_expression: $ =>
       choice(
         seq(
@@ -9025,6 +9139,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#RelExpression
     rel_expression: $ =>
       choice(
         seq(
@@ -9052,6 +9167,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#InExpression
     in_expression: $ =>
       choice(
         seq(
@@ -9069,6 +9185,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#ShiftExpression
     shift_expression: $ =>
       choice(
         $.add_expression,
@@ -9095,6 +9212,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#AddExpression
     add_expression: $ =>
       choice(
         $.mul_expression,
@@ -9113,6 +9231,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#CatExpression
     cat_expression: $ =>
       seq(
         $.add_expression,
@@ -9122,6 +9241,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#MulExpression
     mul_expression: $ =>
       choice(
         $.unary_expression,
@@ -9144,6 +9264,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#UnaryExpression
     unary_expression: $ =>
       choice(
         seq(
@@ -9196,6 +9317,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#ComplementExpression
     complement_expression: $ =>
       seq(
         "~",
@@ -9204,6 +9326,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#NewExpression
     new_expression: $ =>
       choice(
         seq(
@@ -9238,6 +9361,7 @@ module.exports = grammar({
         $.new_anon_class_expression,
       ),
 
+    // https://dlang.org/spec/expression.html#AllocatorArguments
     allocator_arguments: $ =>
       seq(
         "(",
@@ -9247,6 +9371,7 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/expression.html#ArgumentList
     argument_list: $ =>
       seq(
         $.assign_expression,
@@ -9263,6 +9388,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#DeleteExpression
     delete_expression: $ =>
       seq(
         "delete",
@@ -9271,6 +9397,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#CastExpression
     cast_expression: $ =>
       choice(
         seq(
@@ -9293,6 +9420,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#PowExpression
     pow_expression: $ =>
       seq(
         $.postfix_expression,
@@ -9306,6 +9434,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#PostfixExpression
     postfix_expression: $ =>
       choice(
         $.primary_expression,
@@ -9357,6 +9486,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#IndexExpression
     index_expression: $ =>
       seq(
         $.postfix_expression,
@@ -9367,6 +9497,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#SliceExpression
     slice_expression: $ =>
       choice(
         seq(
@@ -9385,6 +9516,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/expression.html#Slice
     slice: $ =>
       seq(
         $.assign_expression,
@@ -9410,6 +9542,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#PrimaryExpression
     primary_expression: $ =>
       choice(
         $.identifier,
@@ -9485,6 +9618,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#StringLiterals
     string_literals: $ =>
       choice(
         $._string_literal,
@@ -9496,6 +9630,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#ArrayLiteral
     array_literal: $ =>
       seq(
         "[",
@@ -9507,6 +9642,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#AssocArrayLiteral
     assoc_array_literal: $ =>
       seq(
         "[",
@@ -9514,6 +9650,7 @@ module.exports = grammar({
         "]",
       ),
 
+    // https://dlang.org/spec/expression.html#KeyValuePairs
     key_value_pairs: $ =>
       seq(
         $.key_value_pair,
@@ -9525,6 +9662,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/expression.html#KeyValuePair
     key_value_pair: $ =>
       seq(
         $._key_expression,
@@ -9532,14 +9670,17 @@ module.exports = grammar({
         $._value_expression,
       ),
 
+    // https://dlang.org/spec/expression.html#KeyExpression
     _key_expression: $ =>
       $.assign_expression,
 
+    // https://dlang.org/spec/expression.html#ValueExpression
     _value_expression: $ =>
       $.assign_expression,
 
     // ---
 
+    // https://dlang.org/spec/expression.html#FunctionLiteral
     function_literal: $ =>
       choice(
         seq(
@@ -9583,6 +9724,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/expression.html#ParameterWithAttributes
     parameter_with_attributes: $ =>
       seq(
         $.parameters,
@@ -9591,6 +9733,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/expression.html#ParameterWithMemberAttributes
     parameter_with_member_attributes: $ =>
       seq(
         $.parameters,
@@ -9599,6 +9742,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/expression.html#FunctionLiteralBody2
     function_literal_body2: $ =>
       choice(
         seq(
@@ -9610,6 +9754,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#AssertExpression
     assert_expression: $ =>
       seq(
         "assert",
@@ -9618,6 +9763,7 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/expression.html#AssertArguments
     assert_arguments: $ =>
       choice(
         seq(
@@ -9638,6 +9784,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#MixinExpression
     mixin_expression: $ =>
       seq(
         "mixin",
@@ -9648,6 +9795,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#ImportExpression
     import_expression: $ =>
       seq(
         "import",
@@ -9658,6 +9806,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#TypeidExpression
     typeid_expression: $ =>
       choice(
         seq(
@@ -9676,6 +9825,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#IsExpression
     is_expression: $ =>
       choice(
         seq(
@@ -9769,6 +9919,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/expression.html#TypeSpecialization
     type_specialization: $ =>
       choice(
         $.type,
@@ -9793,6 +9944,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/expression.html#SpecialKeyword
     special_keyword: $ =>
       choice(
         "__FILE__",
@@ -9807,6 +9959,7 @@ module.exports = grammar({
     // https://dlang.org/spec/statement.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/statement.html#Statement
     _statement: $ =>
       choice(
         $.empty_statement,
@@ -9814,15 +9967,18 @@ module.exports = grammar({
         $._scope_block_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#EmptyStatement
     empty_statement: $ =>
       ";",
 
+    // https://dlang.org/spec/statement.html#NoScopeNonEmptyStatement
     _no_scope_non_empty_statement: $ =>
       choice(
         $._non_empty_statement,
         $.block_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#NoScopeStatement
     _no_scope_statement: $ =>
       choice(
         $.empty_statement,
@@ -9830,12 +9986,14 @@ module.exports = grammar({
         $.block_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#NonEmptyOrScopeBlockStatement
     _non_empty_or_scope_block_statement: $ =>
       choice(
         $._non_empty_statement,
         $._scope_block_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#NonEmptyStatement
     _non_empty_statement: $ =>
       choice(
         $._non_empty_statement_no_case_no_default,
@@ -9844,6 +10002,7 @@ module.exports = grammar({
         $.default_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#NonEmptyStatementNoCaseNoDefault
     _non_empty_statement_no_case_no_default: $ =>
       choice(
         $.labeled_statement,
@@ -9878,6 +10037,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ScopeStatement
     _scope_statement: $ =>
       choice(
         $._non_empty_statement,
@@ -9886,11 +10046,13 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ScopeBlockStatement
     _scope_block_statement: $ =>
       $.block_statement,
 
     // ---
 
+    // https://dlang.org/spec/statement.html#LabeledStatement
     labeled_statement: $ =>
       seq(
         $.identifier,
@@ -9902,6 +10064,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#BlockStatement
     block_statement: $ =>
       choice(
         seq(
@@ -9915,6 +10078,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#StatementList
     statement_list: $ =>
       repeat1(
         $._statement,
@@ -9922,6 +10086,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ExpressionStatement
     expression_statement: $ =>
       seq(
         $._expression,
@@ -9930,11 +10095,13 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#DeclarationStatement
     _declaration_statement: $ =>
       $._declaration,
 
     // ---
 
+    // https://dlang.org/spec/statement.html#IfStatement
     if_statement: $ =>
       seq(
         "if",
@@ -9950,6 +10117,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#IfCondition
     if_condition: $ =>
       choice(
         $._expression,
@@ -9976,14 +10144,17 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#ThenStatement
     _then_statement: $ =>
       $._scope_statement,
 
+    // https://dlang.org/spec/statement.html#ElseStatement
     _else_statement: $ =>
       $._scope_statement,
 
     // ---
 
+    // https://dlang.org/spec/statement.html#WhileStatement
     while_statement: $ =>
       seq(
         "while",
@@ -9995,6 +10166,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#DoStatement
     do_statement: $ =>
       seq(
         "do",
@@ -10008,6 +10180,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ForStatement
     for_statement: $ =>
       seq(
         "for",
@@ -10024,20 +10197,24 @@ module.exports = grammar({
         $._scope_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#Initialize
     initialize: $ =>
       choice(
         ";",
         $._no_scope_non_empty_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#Test
     _test: $ =>
       $._expression,
 
+    // https://dlang.org/spec/statement.html#Increment
     _increment: $ =>
       $._expression,
 
     // ---
 
+    // https://dlang.org/spec/statement.html#AggregateForeach
     aggregate_foreach: $ =>
       seq(
         $.foreach,
@@ -10048,18 +10225,21 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/statement.html#ForeachStatement
     foreach_statement: $ =>
       seq(
         $.aggregate_foreach,
         $._no_scope_non_empty_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#Foreach
     foreach: $ =>
       choice(
         "foreach",
         "foreach_reverse",
       ),
 
+    // https://dlang.org/spec/statement.html#ForeachTypeList
     foreach_type_list: $ =>
       seq(
         $.foreach_type,
@@ -10071,6 +10251,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#ForeachType
     foreach_type: $ =>
       choice(
         seq(
@@ -10095,6 +10276,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#ForeachTypeAttributes
     foreach_type_attributes: $ =>
       seq(
         $.foreach_type_attribute,
@@ -10105,6 +10287,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#ForeachTypeAttribute
     foreach_type_attribute: $ =>
       choice(
         "ref",
@@ -10112,11 +10295,13 @@ module.exports = grammar({
         "enum",
       ),
 
+    // https://dlang.org/spec/statement.html#ForeachAggregate
     _foreach_aggregate: $ =>
       $._expression,
 
     // ---
 
+    // https://dlang.org/spec/statement.html#RangeForeach
     range_foreach: $ =>
       seq(
         $.foreach,
@@ -10129,12 +10314,15 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/statement.html#LwrExpression
     _lwr_expression: $ =>
       $._expression,
 
+    // https://dlang.org/spec/statement.html#UprExpression
     _upr_expression: $ =>
       $._expression,
 
+    // https://dlang.org/spec/statement.html#ForeachRangeStatement
     foreach_range_statement: $ =>
       seq(
         $.range_foreach,
@@ -10143,6 +10331,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#SwitchStatement
     switch_statement: $ =>
       seq(
         "switch",
@@ -10152,6 +10341,7 @@ module.exports = grammar({
         $._scope_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#CaseStatement
     case_statement: $ =>
       seq(
         "case",
@@ -10160,6 +10350,7 @@ module.exports = grammar({
         $._scope_statement_list,
       ),
 
+    // https://dlang.org/spec/statement.html#CaseRangeStatement
     case_range_statement: $ =>
       seq(
         "case",
@@ -10172,12 +10363,15 @@ module.exports = grammar({
         $._scope_statement_list,
       ),
 
+    // https://dlang.org/spec/statement.html#FirstExp
     _first_exp: $ =>
       $.assign_expression,
 
+    // https://dlang.org/spec/statement.html#LastExp
     _last_exp: $ =>
       $.assign_expression,
 
+    // https://dlang.org/spec/statement.html#DefaultStatement
     default_statement: $ =>
       seq(
         "default",
@@ -10185,14 +10379,17 @@ module.exports = grammar({
         $._scope_statement_list,
       ),
 
+    // https://dlang.org/spec/statement.html#ScopeStatementList
     _scope_statement_list: $ =>
       $.statement_list_no_case_no_default,
 
+    // https://dlang.org/spec/statement.html#StatementListNoCaseNoDefault
     statement_list_no_case_no_default: $ =>
       repeat1(
         $._statement_no_case_no_default,
       ),
 
+    // https://dlang.org/spec/statement.html#StatementNoCaseNoDefault
     _statement_no_case_no_default: $ =>
       choice(
         $.empty_statement,
@@ -10202,6 +10399,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#FinalSwitchStatement
     final_switch_statement: $ =>
       seq(
         "final",
@@ -10214,6 +10412,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ContinueStatement
     continue_statement: $ =>
       seq(
         "continue",
@@ -10225,6 +10424,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#BreakStatement
     break_statement: $ =>
       seq(
         "break",
@@ -10236,6 +10436,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ReturnStatement
     return_statement: $ =>
       seq(
         "return",
@@ -10247,6 +10448,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#GotoStatement
     goto_statement: $ =>
       choice(
         seq(
@@ -10274,6 +10476,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#WithStatement
     with_statement: $ =>
       choice(
         seq(
@@ -10301,6 +10504,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#SynchronizedStatement
     synchronized_statement: $ =>
       choice(
         seq(
@@ -10318,6 +10522,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#TryStatement
     try_statement: $ =>
       choice(
         seq(
@@ -10338,11 +10543,13 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#Catches
     catches: $ =>
       repeat1(
         $.catch,
       ),
 
+    // https://dlang.org/spec/statement.html#Catch
     catch: $ =>
       seq(
         "catch",
@@ -10352,6 +10559,7 @@ module.exports = grammar({
         $._no_scope_non_empty_statement,
       ),
 
+    // https://dlang.org/spec/statement.html#CatchParameter
     catch_parameter: $ =>
       seq(
         $.basic_type,
@@ -10360,6 +10568,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/statement.html#FinallyStatement
     finally_statement: $ =>
       seq(
         "finally",
@@ -10368,6 +10577,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ThrowStatement
     throw_statement: $ =>
       seq(
         "throw",
@@ -10377,6 +10587,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#ScopeGuardStatement
     scope_guard_statement: $ =>
       choice(
         seq(
@@ -10404,6 +10615,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#AsmStatement
     asm_statement: $ =>
       seq(
         "asm",
@@ -10417,6 +10629,7 @@ module.exports = grammar({
         "}",
       ),
 
+    // https://dlang.org/spec/statement.html#AsmInstructionList
     asm_instruction_list: $ =>
       seq(
         $.asm_instruction,
@@ -10428,6 +10641,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/statement.html#MixinStatement
     mixin_statement: $ =>
       seq(
         "mixin",
@@ -10441,6 +10655,7 @@ module.exports = grammar({
     // https://dlang.org/spec/struct.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/struct.html#AggregateDeclaration
     _aggregate_declaration: $ =>
       choice(
         $.class_declaration,
@@ -10449,6 +10664,7 @@ module.exports = grammar({
         $.union_declaration,
       ),
 
+    // https://dlang.org/spec/struct.html#StructDeclaration
     struct_declaration: $ =>
       choice(
         seq(
@@ -10465,12 +10681,14 @@ module.exports = grammar({
         $.anon_struct_declaration,
       ),
 
+    // https://dlang.org/spec/struct.html#AnonStructDeclaration
     anon_struct_declaration: $ =>
       seq(
         "struct",
         $.aggregate_body,
       ),
 
+    // https://dlang.org/spec/struct.html#UnionDeclaration
     union_declaration: $ =>
       choice(
         seq(
@@ -10487,12 +10705,14 @@ module.exports = grammar({
         $.anon_union_declaration,
       ),
 
+    // https://dlang.org/spec/struct.html#AnonUnionDeclaration
     anon_union_declaration: $ =>
       seq(
         "union",
         $.aggregate_body,
       ),
 
+    // https://dlang.org/spec/struct.html#AggregateBody
     aggregate_body: $ =>
       seq(
         "{",
@@ -10504,6 +10724,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/struct.html#Postblit
     postblit: $ =>
       choice(
         seq(
@@ -10530,6 +10751,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/struct.html#Invariant
     invariant: $ =>
       choice(
         seq(
@@ -10555,6 +10777,7 @@ module.exports = grammar({
     // https://dlang.org/spec/class.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/class.html#ClassDeclaration
     class_declaration: $ =>
       choice(
         seq(
@@ -10573,6 +10796,7 @@ module.exports = grammar({
         $.class_template_declaration,
       ),
 
+    // https://dlang.org/spec/class.html#BaseClassList
     base_class_list: $ =>
       seq(
         ":",
@@ -10585,9 +10809,11 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/class.html#SuperClassOrInterface
     _super_class_or_interface: $ =>
       $.basic_type,
 
+    // https://dlang.org/spec/class.html#Interfaces
     interfaces: $ =>
       seq(
         $._interface,
@@ -10599,11 +10825,13 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/class.html#Interface
     _interface: $ =>
       $.basic_type,
 
     // ---
 
+    // https://dlang.org/spec/class.html#Constructor
     constructor: $ =>
       choice(
         seq(
@@ -10619,6 +10847,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#Destructor
     destructor: $ =>
       seq(
         "~",
@@ -10633,6 +10862,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#StaticConstructor
     static_constructor: $ =>
       choice(
         seq(
@@ -10659,6 +10889,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#StaticDestructor
     static_destructor: $ =>
       choice(
         seq(
@@ -10687,6 +10918,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#SharedStaticConstructor
     shared_static_constructor: $ =>
       choice(
         seq(
@@ -10715,6 +10947,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#SharedStaticDestructor
     shared_static_destructor: $ =>
       choice(
         seq(
@@ -10745,6 +10978,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#Allocator
     allocator: $ =>
       seq(
         "new",
@@ -10754,6 +10988,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#Deallocator
     deallocator: $ =>
       seq(
         "delete",
@@ -10763,6 +10998,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#AliasThis
     alias_this: $ =>
       seq(
         "alias",
@@ -10773,6 +11009,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/class.html#NewAnonClassExpression
     new_anon_class_expression: $ =>
       seq(
         "new",
@@ -10792,6 +11029,7 @@ module.exports = grammar({
         $.aggregate_body,
       ),
 
+    // https://dlang.org/spec/class.html#ConstructorArgs
     constructor_args: $ =>
       seq(
         "(",
@@ -10805,6 +11043,7 @@ module.exports = grammar({
     // https://dlang.org/spec/interface.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/interface.html#InterfaceDeclaration
     interface_declaration: $ =>
       choice(
         seq(
@@ -10823,6 +11062,7 @@ module.exports = grammar({
         $.interface_template_declaration,
       ),
 
+    // https://dlang.org/spec/interface.html#BaseInterfaceList
     base_interface_list: $ =>
       seq(
         ":",
@@ -10833,6 +11073,7 @@ module.exports = grammar({
     // https://dlang.org/spec/enum.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/enum.html#EnumDeclaration
     enum_declaration: $ =>
       choice(
         seq(
@@ -10850,9 +11091,11 @@ module.exports = grammar({
         $.anonymous_enum_declaration,
       ),
 
+    // https://dlang.org/spec/enum.html#EnumBaseType
     _enum_base_type: $ =>
       $.type,
 
+    // https://dlang.org/spec/enum.html#EnumBody
     enum_body: $ =>
       choice(
         seq(
@@ -10863,6 +11106,7 @@ module.exports = grammar({
         ";",
       ),
 
+    // https://dlang.org/spec/enum.html#EnumMembers
     enum_members: $ =>
       seq(
         $.enum_member,
@@ -10877,11 +11121,13 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/enum.html#EnumMemberAttributes
     enum_member_attributes: $ =>
       repeat1(
         $.enum_member_attribute,
       ),
 
+    // https://dlang.org/spec/enum.html#EnumMemberAttribute
     enum_member_attribute: $ =>
       choice(
         $.deprecated_attribute,
@@ -10892,6 +11138,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/enum.html#EnumMember
     enum_member: $ =>
       seq(
         optional(
@@ -10906,6 +11153,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/enum.html#AnonymousEnumDeclaration
     anonymous_enum_declaration: $ =>
       choice(
         seq(
@@ -10930,6 +11178,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/enum.html#AnonymousEnumMembers
     anonymous_enum_members: $ =>
       seq(
         $.anonymous_enum_member,
@@ -10944,6 +11193,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/enum.html#AnonymousEnumMember
     anonymous_enum_member: $ =>
       choice(
         $.enum_member,
@@ -10959,6 +11209,7 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/function.html#FuncDeclaration
     func_declaration: $ =>
       choice(
         seq(
@@ -10972,6 +11223,7 @@ module.exports = grammar({
         $.auto_func_declaration,
       ),
 
+    // https://dlang.org/spec/function.html#AutoFuncDeclaration
     auto_func_declaration: $ =>
       seq(
         $.storage_classes,
@@ -10980,6 +11232,7 @@ module.exports = grammar({
         $._function_body,
       ),
 
+    // https://dlang.org/spec/function.html#FuncDeclarator
     func_declarator: $ =>
       seq(
         optional(
@@ -10989,6 +11242,7 @@ module.exports = grammar({
         $.func_declarator_suffix,
       ),
 
+    // https://dlang.org/spec/function.html#FuncDeclaratorSuffix
     func_declarator_suffix: $ =>
       choice(
         seq(
@@ -11011,6 +11265,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/function.html#Parameters
     parameters: $ =>
       seq(
         "(",
@@ -11020,6 +11275,7 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/function.html#ParameterList
     parameter_list: $ =>
       choice(
         $.parameter,
@@ -11034,6 +11290,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/function.html#Parameter
     parameter: $ =>
       choice(
         seq(
@@ -11075,6 +11332,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/function.html#ParameterAttributes
     parameter_attributes: $ =>
       choice(
         $.in_out,
@@ -11090,6 +11348,7 @@ module.exports = grammar({
         $.parameter_attributes,
       ),
 
+    // https://dlang.org/spec/function.html#InOut
     in_out: $ =>
       choice(
         "auto",
@@ -11106,11 +11365,13 @@ module.exports = grammar({
         "scope",
       ),
 
+    // https://dlang.org/spec/function.html#VariadicArgumentsAttributes
     variadic_arguments_attributes: $ =>
       repeat1(
         $.variadic_arguments_attribute,
       ),
 
+    // https://dlang.org/spec/function.html#VariadicArgumentsAttribute
     variadic_arguments_attribute: $ =>
       choice(
         "const",
@@ -11122,22 +11383,26 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/function.html#FunctionAttributes
     function_attributes: $ =>
       repeat1(
         $._function_attribute,
       ),
 
+    // https://dlang.org/spec/function.html#FunctionAttribute
     _function_attribute: $ =>
       choice(
         $.function_attribute_kwd,
         $.property,
       ),
 
+    // https://dlang.org/spec/function.html#MemberFunctionAttributes
     member_function_attributes: $ =>
       repeat1(
         $.member_function_attribute,
       ),
 
+    // https://dlang.org/spec/function.html#MemberFunctionAttribute
     member_function_attribute: $ =>
       choice(
         "const",
@@ -11150,6 +11415,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/function.html#FunctionBody
     _function_body: $ =>
       choice(
         $.specified_function_body,
@@ -11157,9 +11423,11 @@ module.exports = grammar({
         $.shortened_function_body,
       ),
 
+    // https://dlang.org/spec/function.html#FunctionLiteralBody
     _function_literal_body: $ =>
       $.block_statement,
 
+    // https://dlang.org/spec/function.html#SpecifiedFunctionBody
     specified_function_body: $ =>
       choice(
         seq(
@@ -11188,6 +11456,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/function.html#MissingFunctionBody
     missing_function_body: $ =>
       choice(
         ";",
@@ -11206,6 +11475,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/function.html#ShortenedFunctionBody
     shortened_function_body: $ =>
       seq(
         "=>",
@@ -11215,29 +11485,34 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/function.html#FunctionContracts
     function_contracts: $ =>
       repeat1(
         $._function_contract,
       ),
 
+    // https://dlang.org/spec/function.html#FunctionContract
     _function_contract: $ =>
       choice(
         $._in_out_contract_expression,
         $._in_out_statement,
       ),
 
+    // https://dlang.org/spec/function.html#InOutContractExpression
     _in_out_contract_expression: $ =>
       choice(
         $.in_contract_expression,
         $.out_contract_expression,
       ),
 
+    // https://dlang.org/spec/function.html#InOutStatement
     _in_out_statement: $ =>
       choice(
         $.in_statement,
         $.out_statement,
       ),
 
+    // https://dlang.org/spec/function.html#InContractExpression
     in_contract_expression: $ =>
       seq(
         "in",
@@ -11246,6 +11521,7 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/function.html#OutContractExpression
     out_contract_expression: $ =>
       choice(
         seq(
@@ -11265,12 +11541,14 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/function.html#InStatement
     in_statement: $ =>
       seq(
         "in",
         $.block_statement,
       ),
 
+    // https://dlang.org/spec/function.html#OutStatement
     out_statement: $ =>
       choice(
         seq(
@@ -11290,6 +11568,7 @@ module.exports = grammar({
     // https://dlang.org/spec/template.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/template.html#TemplateDeclaration
     template_declaration: $ =>
       seq(
         "template",
@@ -11305,6 +11584,7 @@ module.exports = grammar({
         "}",
       ),
 
+    // https://dlang.org/spec/template.html#TemplateParameters
     template_parameters: $ =>
       seq(
         "(",
@@ -11314,6 +11594,7 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/template.html#TemplateParameterList
     template_parameter_list: $ =>
       seq(
         $._template_parameter,
@@ -11328,6 +11609,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateParameter
     _template_parameter: $ =>
       choice(
         $.template_type_parameter,
@@ -11339,12 +11621,14 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#TemplateInstance
     template_instance: $ =>
       seq(
         $.identifier,
         $.template_arguments,
       ),
 
+    // https://dlang.org/spec/template.html#TemplateArguments
     template_arguments: $ =>
       choice(
         seq(
@@ -11361,6 +11645,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateArgumentList
     template_argument_list: $ =>
       seq(
         $._template_argument,
@@ -11375,6 +11660,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateArgument
     _template_argument: $ =>
       choice(
         $.type,
@@ -11382,6 +11668,7 @@ module.exports = grammar({
         $.symbol,
       ),
 
+    // https://dlang.org/spec/template.html#Symbol
     symbol: $ =>
       choice(
         $.symbol_tail,
@@ -11391,6 +11678,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#SymbolTail
     symbol_tail: $ =>
       choice(
         $.identifier,
@@ -11407,6 +11695,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateSingleArgument
     template_single_argument: $ =>
       choice(
         $.identifier,
@@ -11424,6 +11713,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#TemplateTypeParameter
     template_type_parameter: $ =>
       seq(
         $.identifier,
@@ -11439,12 +11729,14 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateTypeParameterSpecialization
     template_type_parameter_specialization: $ =>
       seq(
         ":",
         $.type,
       ),
 
+    // https://dlang.org/spec/template.html#TemplateTypeParameterDefault
     template_type_parameter_default: $ =>
       seq(
         "=",
@@ -11453,6 +11745,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#TemplateThisParameter
     template_this_parameter: $ =>
       seq(
         "this",
@@ -11461,6 +11754,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#TemplateValueParameter
     template_value_parameter: $ =>
       seq(
         $.basic_type,
@@ -11477,12 +11771,14 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateValueParameterSpecialization
     template_value_parameter_specialization: $ =>
       seq(
         ":",
         $.conditional_expression,
       ),
 
+    // https://dlang.org/spec/template.html#TemplateValueParameterDefault
     template_value_parameter_default: $ =>
       choice(
         seq(
@@ -11497,6 +11793,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#TemplateAliasParameter
     template_alias_parameter: $ =>
       choice(
         seq(
@@ -11522,6 +11819,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateAliasParameterSpecialization
     template_alias_parameter_specialization: $ =>
       choice(
         seq(
@@ -11534,6 +11832,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#TemplateAliasParameterDefault
     template_alias_parameter_default: $ =>
       choice(
         seq(
@@ -11548,6 +11847,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#TemplateSequenceParameter
     template_sequence_parameter: $ =>
       seq(
         $.identifier,
@@ -11556,6 +11856,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#ConstructorTemplate
     constructor_template: $ =>
       choice(
         seq(
@@ -11586,6 +11887,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#ClassTemplateDeclaration
     class_template_declaration: $ =>
       choice(
         seq(
@@ -11620,6 +11922,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#InterfaceTemplateDeclaration
     interface_template_declaration: $ =>
       choice(
         seq(
@@ -11650,6 +11953,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#StructTemplateDeclaration
     struct_template_declaration: $ =>
       choice(
         seq(
@@ -11669,6 +11973,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template.html#UnionTemplateDeclaration
     union_template_declaration: $ =>
       choice(
         seq(
@@ -11690,6 +11995,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/template.html#Constraint
     constraint: $ =>
       seq(
         "if",
@@ -11702,6 +12008,7 @@ module.exports = grammar({
     // https://dlang.org/spec/template-mixin.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/template-mixin.html#TemplateMixinDeclaration
     template_mixin_declaration: $ =>
       seq(
         "mixin",
@@ -11718,6 +12025,7 @@ module.exports = grammar({
         "}",
       ),
 
+    // https://dlang.org/spec/template-mixin.html#TemplateMixin
     template_mixin: $ =>
       seq(
         "mixin",
@@ -11731,6 +12039,7 @@ module.exports = grammar({
         ";",
       ),
 
+    // https://dlang.org/spec/template-mixin.html#MixinTemplateName
     mixin_template_name: $ =>
       choice(
         seq(
@@ -11745,6 +12054,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/template-mixin.html#MixinQualifiedIdentifier
     mixin_qualified_identifier: $ =>
       choice(
         $.identifier,
@@ -11764,6 +12074,7 @@ module.exports = grammar({
     // https://dlang.org/spec/version.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/version.html#ConditionalDeclaration
     conditional_declaration: $ =>
       choice(
         seq(
@@ -11794,6 +12105,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/version.html#ConditionalStatement
     conditional_statement: $ =>
       seq(
         $._condition,
@@ -11808,6 +12120,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#Condition
     _condition: $ =>
       choice(
         $.version_condition,
@@ -11817,6 +12130,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#VersionCondition
     version_condition: $ =>
       choice(
         seq(
@@ -11847,6 +12161,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#VersionSpecification
     version_specification: $ =>
       choice(
         seq(
@@ -11865,6 +12180,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#DebugCondition
     debug_condition: $ =>
       seq(
         "debug",
@@ -11886,6 +12202,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#DebugSpecification
     debug_specification: $ =>
       choice(
         seq(
@@ -11904,6 +12221,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#StaticIfCondition
     static_if_condition: $ =>
       seq(
         "static",
@@ -11915,6 +12233,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#StaticForeach
     static_foreach: $ =>
       choice(
         seq(
@@ -11927,6 +12246,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/version.html#StaticForeachDeclaration
     static_foreach_declaration: $ =>
       choice(
         seq(
@@ -11942,6 +12262,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/version.html#StaticForeachStatement
     static_foreach_statement: $ =>
       seq(
         $.static_foreach,
@@ -11950,6 +12271,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/version.html#StaticAssert
     static_assert: $ =>
       seq(
         "static",
@@ -11964,6 +12286,7 @@ module.exports = grammar({
     // https://dlang.org/spec/traits.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/traits.html#TraitsExpression
     traits_expression: $ =>
       seq(
         "__traits",
@@ -11974,6 +12297,7 @@ module.exports = grammar({
         ")",
       ),
 
+    // https://dlang.org/spec/traits.html#TraitsKeyword
     traits_keyword: $ =>
       choice(
         "isAbstractClass",
@@ -12036,6 +12360,7 @@ module.exports = grammar({
         "toType",
       ),
 
+    // https://dlang.org/spec/traits.html#TraitsArguments
     traits_arguments: $ =>
       seq(
         $._traits_argument,
@@ -12047,6 +12372,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/traits.html#TraitsArgument
     _traits_argument: $ =>
       choice(
         $.assign_expression,
@@ -12057,6 +12383,7 @@ module.exports = grammar({
     // https://dlang.org/spec/unittest.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/unittest.html#UnitTest
     unit_test: $ =>
       seq(
         "unittest",
@@ -12067,6 +12394,7 @@ module.exports = grammar({
     // https://dlang.org/spec/iasm.html
     // ------------------------------------------------------------------------
 
+    // https://dlang.org/spec/iasm.html#AsmInstruction
     asm_instruction: $ =>
       choice(
         seq(
@@ -12139,9 +12467,11 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#Opcode
     _opcode: $ =>
       $.identifier,
 
+    // https://dlang.org/spec/iasm.html#Operands
     operands: $ =>
       seq(
         $._operand,
@@ -12155,6 +12485,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/iasm.html#IntegerExpression
     _integer_expression: $ =>
       choice(
         $.integer_literal,
@@ -12163,6 +12494,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/iasm.html#Register
     register: $ =>
       choice(
         seq(
@@ -12269,6 +12601,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/iasm.html#Register64
     register64: $ =>
       choice(
         seq(
@@ -12375,9 +12708,11 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/iasm.html#Operand
     _operand: $ =>
       $.asm_exp,
 
+    // https://dlang.org/spec/iasm.html#AsmExp
     asm_exp: $ =>
       seq(
         $.asm_log_or_exp,
@@ -12391,6 +12726,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmLogOrExp
     asm_log_or_exp: $ =>
       choice(
         $.asm_log_and_exp,
@@ -12401,6 +12737,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmLogAndExp
     asm_log_and_exp: $ =>
       choice(
         $.asm_or_exp,
@@ -12411,6 +12748,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmOrExp
     asm_or_exp: $ =>
       choice(
         $.asm_xor_exp,
@@ -12421,6 +12759,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmXorExp
     asm_xor_exp: $ =>
       choice(
         $.asm_and_exp,
@@ -12431,6 +12770,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmAndExp
     asm_and_exp: $ =>
       choice(
         $.asm_equal_exp,
@@ -12441,6 +12781,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmEqualExp
     asm_equal_exp: $ =>
       choice(
         $.asm_rel_exp,
@@ -12456,6 +12797,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmRelExp
     asm_rel_exp: $ =>
       choice(
         $.asm_shift_exp,
@@ -12482,6 +12824,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmShiftExp
     asm_shift_exp: $ =>
       choice(
         $.asm_add_exp,
@@ -12503,6 +12846,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmAddExp
     asm_add_exp: $ =>
       choice(
         $.asm_mul_exp,
@@ -12518,6 +12862,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmMulExp
     asm_mul_exp: $ =>
       choice(
         $.asm_br_exp,
@@ -12538,6 +12883,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmBrExp
     asm_br_exp: $ =>
       choice(
         $.asm_una_exp,
@@ -12549,6 +12895,7 @@ module.exports = grammar({
         ),
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmUnaExp
     asm_una_exp: $ =>
       choice(
         seq(
@@ -12582,6 +12929,7 @@ module.exports = grammar({
         $.asm_primary_exp,
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmPrimaryExp
     asm_primary_exp: $ =>
       choice(
         $.integer_literal,
@@ -12604,6 +12952,7 @@ module.exports = grammar({
         "this",
       ),
 
+    // https://dlang.org/spec/iasm.html#DotIdentifier
     dot_identifier: $ =>
       choice(
         $.identifier,
@@ -12621,6 +12970,7 @@ module.exports = grammar({
 
     // ---
 
+    // https://dlang.org/spec/iasm.html#AsmTypePrefix
     asm_type_prefix: $ =>
       choice(
         seq(
