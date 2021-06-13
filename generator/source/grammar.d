@@ -1,6 +1,7 @@
 import std.algorithm.comparison;
 import std.algorithm.iteration;
 import std.algorithm.searching;
+import std.algorithm.sorting;
 import std.array;
 import std.exception;
 import std.format;
@@ -14,6 +15,17 @@ import ae.utils.text;
 
 import ddoc;
 
+static this()
+{
+	if (false)
+	{
+		// Avoid https://issues.dlang.org/show_bug.cgi?id=22010
+		// (or some similar bug)
+		Grammar.Node node;
+		auto b = node == node;
+	}
+}
+
 struct Grammar
 {
 	struct RegExp { string regexp; } /// Regular expression, generally with the intent to describe some character set.
@@ -26,6 +38,7 @@ struct Grammar
 	struct Repeat { Node[/*1*/] node; } /// Zero-or-more occurrences of the given node.
 	struct Repeat1 { Node[/*1*/] node; } /// One-or-more occurrences of the given node.
 	struct Optional { Node[/*1*/] node; } /// Zero-or-one occurrences of the given node.
+	struct SeqChoice { Node[][] nodes; } /// Internal node, superset of Choice, Seq and Optional. `nodes` is a list of choices of sequences.
 
 	// https://issues.dlang.org/show_bug.cgi?id=22003
 	alias NodeValue = SumType!(
@@ -38,6 +51,7 @@ struct Grammar
 		Repeat1,
 		Seq,
 		Optional,
+		SeqChoice,
 	);
 
 	/// A grammar node.
@@ -83,11 +97,14 @@ struct Grammar
 	void analyze(string[] roots)
 	{
 		checkReferences();
+		normalize();
 		optimize();
+		deRecurse();
 		extractBodies();
 		checkKinds();
 		scanUsed(roots);
 		scanHidden();
+		compile();
 	}
 
 	// Ensure that all referenced grammar definitions are defined.
@@ -100,17 +117,87 @@ struct Grammar
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
 				(ref Reference    v) { enforce(v.name in defs, "Unknown reference: " ~ v.name); },
-				(ref Choice       v) { v.nodes.each!scan(); },
-				(ref Seq          v) { v.nodes.each!scan(); },
-				(ref Repeat       v) { v.node .each!scan(); },
-				(ref Repeat1      v) { v.node .each!scan(); },
-				(ref Optional     v) { v.node .each!scan(); },
+				(ref Choice       v) { v.nodes       .each!scan(); },
+				(ref Seq          v) { v.nodes       .each!scan(); },
+				(ref Repeat       v) { v.node        .each!scan(); },
+				(ref Repeat1      v) { v.node        .each!scan(); },
+				(ref Optional     v) { v.node        .each!scan(); },
+				(ref SeqChoice    v) { v.nodes.joiner.each!scan(); },
 			);
 		}
 		foreach (name, ref def; defs)
 			scan(def.node);
 	}
 
+	// Convert rules to an intermediate normalized form, which makes other manipulations easier.
+	// In the normalized form, only the following nodes are allowed:
+	// - Leaf nodes (RegExp, LiteralChars, LiteralToken)
+	// - Reference
+	// - SeqChoice
+	// - Repeat1
+	// Seq, Choice, and Optional are expressed as SeqChoice nodes.
+	// Repeat is expressed as SeqChoice([[], [Repeat1(...)]]).
+	private void normalize()
+	{
+		void normalizeNode(ref Node node)
+		{
+			// Normalize children
+			node.match!(
+				(ref RegExp       v) {},
+				(ref LiteralChars v) {},
+				(ref LiteralToken v) {},
+				(ref Reference    v) {},
+				(ref Choice       v) { v.nodes.each!normalizeNode(); },
+				(ref Seq          v) { v.nodes.each!normalizeNode(); },
+				(ref Repeat       v) { v.node .each!normalizeNode(); },
+				(ref Repeat1      v) { v.node .each!normalizeNode(); },
+				(ref Optional     v) { v.node .each!normalizeNode(); },
+				(ref SeqChoice    v) { assert(false); },
+			);
+
+			// Normalize node
+			node = node.match!(
+				(ref RegExp       v) => node,
+				(ref LiteralChars v) => node,
+				(ref LiteralToken v) => node,
+				(ref Reference    v) => node,
+				(ref Choice       v) => seqChoice(v.nodes.map!((ref Node node) => node.match!(
+					(ref RegExp       v) => [[node]],
+					(ref LiteralChars v) => [[node]],
+					(ref LiteralToken v) => [[node]],
+					(ref Reference    v) => [[node]],
+					(ref SeqChoice    v) => v.nodes,
+					(ref Repeat1      v) => [[node]],
+					(ref              _) => enforce(null),
+				)).join),
+				(ref Seq          v) => seqChoice([v.nodes]),
+				(ref Repeat       v) => seqChoice([[], [repeat1(v.node[0])]]),
+				(ref Repeat1      v) => node,
+				(ref Optional     v) => seqChoice([[], v.node]),
+				(ref SeqChoice    v) { enforce(false); return node; },
+			);
+		}
+
+		foreach (defName, ref def; defs)
+			normalizeNode(def.node);
+	}
+
+	// Extract the empty choice from a SeqChoice, if it has one.
+	// If not, just return null and leave the argument unmodified.
+	// The return value can then be appended to a choice list to
+	// re-add the optional choice back in the tree.
+	private Node[][] extractOptional(ref Node[][] choices)
+	{
+		foreach (i, choice; choices)
+			if (!choice.length)
+			{
+				choices = choices[0 .. i] ~ choices[i + 1 .. $];
+				return [[]];
+			}
+		return null;
+	}
+
+	// Optimize the given normalized node in-place.
 	private void optimizeNode(ref Node node)
 	{
 		void optimizeNode(ref Node node) { Grammar.optimizeNode(node); }
@@ -121,130 +208,89 @@ struct Grammar
 			(ref LiteralChars v) {},
 			(ref LiteralToken v) {},
 			(ref Reference    v) {},
-			(ref Choice       v) { v.nodes.each!optimizeNode(); },
-			(ref Seq          v) { v.nodes.each!optimizeNode(); },
-			(ref Repeat       v) { v.node .each!optimizeNode(); },
-			(ref Repeat1      v) { v.node .each!optimizeNode(); },
-			(ref Optional     v) { v.node .each!optimizeNode(); },
+			(ref SeqChoice    v) { v.nodes.joiner.each!optimizeNode(); },
+			(ref Repeat1      v) { v.node        .each!optimizeNode(); },
+			(ref              _) { assert(false); },
 		);
 
-		// Optimize node
+		// Replace unary SeqChoice nodes with their sole contents.
 		node = node.match!(
-			(ref RegExp       v) => node,
-			(ref LiteralChars v) => node,
-			(ref LiteralToken v) => node,
-			(ref Reference    v) => node,
-			(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
-			(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
-			(ref Repeat       v) => node,
-			(ref Repeat1      v) => node,
-			(ref Optional     v) => node,
+			(ref SeqChoice    v) => v.nodes.length == 1 && v.nodes[0].length == 1 ? v.nodes[0][0] : node,
+			(ref              _) => node,
 		);
 
-		// Returns the index of the shortest node in `nodes` (for the purposes of prefix/suffix lifting).
-		size_t shortestIndex(Node[] nodes)
-		{
-			auto lengths = nodes.map!((ref Node node) => node.match!(
-				(ref Seq seqNode) => seqNode.nodes.length,
-				(ref _) => 1,
-			));
-			auto shortestLength = lengths.reduce!min;
-			auto shortestIndex = lengths.countUntil(shortestLength);
-			return shortestIndex;
-		}
-
-		// Transform choice(a, seq(a, b), seq(a, c)...) into seq(a, optional(choice(b, c, ...)))
+		// Un-nest single-choice SeqChoice nodes.
 		node.match!(
-			(ref Choice choiceNode)
+			(ref SeqChoice    v)
 			{
-				if (choiceNode.nodes.length < 2)
-					return;
-				auto prefixIndex = shortestIndex(choiceNode.nodes);
-				auto prefix = choiceNode.nodes[prefixIndex].match!(
-					(ref Seq seqNode) => seqNode.nodes,
-					(_) => choiceNode.nodes[prefixIndex .. prefixIndex + 1],
-				);
-				if (!prefix)
-					return;
-
-				auto remainder = choiceNode.nodes[0 .. prefixIndex] ~ choiceNode.nodes[prefixIndex + 1 .. $];
-				bool samePrefix = remainder.map!((ref Node node) => node.match!(
-					(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
-					(_) => false,
-				)).all;
-				if (!samePrefix)
-					return;
-
-				node = seq(
-					prefix ~
-					optional(
-						choice(
-							remainder.map!((ref n) => seq(
-								n.tryMatch!(
-									(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
-								)
-							))
-							.array,
-						)
-					)
-				);
-				optimizeNode(node);
+				foreach (ref choice; v.nodes)
+					foreach_reverse (i; 0 .. choice.length)
+						choice[i].match!(
+							(ref SeqChoice v)
+							{
+								if (v.nodes.length == 1) // single-choice
+									choice = choice[0 .. i] ~ v.nodes[0] ~ choice[i + 1 .. $];
+							},
+							(ref _) {}
+						);
 			},
-			(ref _) {},
+			(ref              _) {},
 		);
 
-		// Transform choice(a, seq(b, a), seq(c, a)...) into seq(optional(choice(b, c, ...)), a)
-		// Same as the above transformation, but lifting the suffix instead of the prefix.
+		// Lift the common part (prefix or suffix) out of SeqChoice, e.g, transform:
+		// x | x a | x b | ... => x ( | a | b | ... )
 		node.match!(
-			(ref Choice choiceNode)
+			(ref SeqChoice scNode)
 			{
-				if (choiceNode.nodes.length < 2)
-					return;
-				auto suffixIndex = shortestIndex(choiceNode.nodes);
-				auto suffix = choiceNode.nodes[suffixIndex].match!(
-					(ref Seq seqNode) => seqNode.nodes,
-					(_) => choiceNode.nodes[suffixIndex .. suffixIndex + 1],
-				);
-				if (!suffix)
+				auto choices = scNode.nodes;
+				auto optional = extractOptional(choices);
+
+				if (choices.length < 2)
+					return; // Must have at least two choices
+
+				auto prefix = choices          .fold!commonPrefix      ;
+				auto suffix = choices.map!retro.fold!commonPrefix.retro;
+				if (!prefix.length && !suffix.length)
 					return;
 
-				auto remainder = choiceNode.nodes[0 .. suffixIndex] ~ choiceNode.nodes[suffixIndex + 1 .. $];
-				bool sameSuffix = remainder.map!((ref n) => n.match!(
-					(ref Seq seqNode) => seqNode.nodes.endsWith(suffix),
-					(_) => false,
-				)).all;
-				if (!sameSuffix)
-					return;
+				// Avoid overlap
+				auto minLength = choices.map!(choiceSeq => choiceSeq.length).reduce!min;
+				while (prefix.length + suffix.length > minLength)
+					if (!suffix.empty)
+						suffix.popFront();
+					else
+					if (!prefix.empty)
+						prefix.popBack();
+					else
+						assert(false);
 
-				node = seq(
-					optional(
-						choice(
-							remainder.map!((ref n) => seq(
-								n.tryMatch!(
-									(ref Seq seqNode) => seqNode.nodes[0 .. $ - suffix.length],
-								)
-							))
-							.array,
-						)
+				node = seqChoice(optional ~ [
+					(prefix.length ? [seqChoice([prefix])] : []) ~
+					seqChoice(
+						choices.map!(choiceSeq => choiceSeq[prefix.length .. $ - suffix.length]).array,
 					) ~
-					suffix
-				);
+					(suffix.length ? [seqChoice([suffix])] : [])
+				]);
+
 				optimizeNode(node);
 			},
 			(ref _) {},
 		);
 	}
 
-	// Fold away unnecessary grammar nodes, or refactor into simpler constructs which
-	// are available in tree-sitter but not used in the D grammar specification.
+	// Fold away unnecessary grammar nodes, simplify the node tree,
+	// and otherwise prepare it for the transformations to follow.
 	private void optimize()
 	{
-		foreach (name, ref def; defs)
-		{
+		foreach (ref def; defs)
 			optimizeNode(def.node);
+	}
 
-			// Attempt to remove recursion
-
+	// Attempt to remove recursion as needed
+	private void deRecurse()
+	{
+		foreach (defName, ref def; defs)
+		{
 			// In the D grammar, recursion is used for two purposes:
 			// - Repetition (e.g. Characters)
 			// - Nested constructs (e.g. binary expressions)
@@ -256,43 +302,43 @@ struct Grammar
 				def.kind == Def.Kind.chars ||
 
 				// Lists of things generally involve repetition.
-				name.splitByCamelCase.canFind("List") ||
+				defName.splitByCamelCase.canFind("List") ||
 
 				// If the definition name is the plural of the name of another definition,
 				// then this is almost certainly used for repetition.
 				["s", "es"].any!(pluralSuffix =>
-					name.endsWith(pluralSuffix) &&
+					defName.endsWith(pluralSuffix) &&
 					["", "Name"].any!(singularSuffix =>
-						name[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
+						defName[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
 					)
 				);
 
 			if (shouldDeRecurse)
 			{
-				// Transform x := seq(y, optional(x)) into x := repeat1(y)
-				def.node.match!(
-					(ref Seq seqNode)
-					{
-						if (seqNode.nodes.length < 2)
-							return;
-						seqNode.nodes[$-1].match!(
-							(ref Optional optionalNode)
-							{
-								optionalNode.node[0].match!(
-									(ref Reference referenceNode)
-									{
-										if (referenceNode.name != name)
-											return;
+				auto x = reference(defName);
 
-										def.node = repeat1(
-											seq(
-												seqNode.nodes[0 .. $ - 1],
-											)
-										);
-										optimizeNode(def.node);
-									},
-									(_) {}
+				// Transform x := y ( | x ) into x := ( y )+
+				def.node.match!(
+					(ref SeqChoice sc1)
+					{
+						if (sc1.nodes.length != 1)
+							return; // Single choice
+						if (sc1.nodes[0].length < 2)
+							return;
+
+						auto y = sc1.nodes[0][0 .. $-1];
+
+						sc1.nodes[0][$-1].match!(
+							(ref SeqChoice sc2)
+							{
+								sc2.nodes.sort();
+								if (sc2.nodes != [[], [x]])
+									return;
+
+								def.node = repeat1(
+									seqChoice([y])
 								);
+								optimizeNode(def.node);
 							},
 							(_) {}
 						);
@@ -300,41 +346,43 @@ struct Grammar
 					(_) {}
 				);
 
-				// Transform x := seq(y, optional(seq(z, x))) into x := seq(y, repeat(seq(z, y)))
+				// Transform x := y ( | z x ) into x := y ( | ( z y )+ )
 				def.node.match!(
-					(ref Seq seqNode1)
+					(ref SeqChoice sc1)
 					{
-						if (seqNode1.nodes.length < 2)
+						if (sc1.nodes.length != 1)
+							return; // Single choice
+						if (sc1.nodes[0].length < 2)
 							return;
-						seqNode1.nodes[$-1].match!(
-							(ref Optional optionalNode)
-							{
-								optionalNode.node[0].match!(
-									(ref Seq seqNode2)
-									{
-										if (seqNode2.nodes.length < 2)
-											return;
-										seqNode2.nodes[$-1].match!(
-											(ref Reference referenceNode)
-											{
-												if (referenceNode.name != name)
-													return;
 
-												def.node = seq(
-													seqNode1.nodes[0 .. $-1] ~
-													repeat(
-														seq(
-															seqNode2.nodes[0 .. $-1] ~
-															seqNode1.nodes[0 .. $-1],
-														),
-													),
-												);
-											},
-											(_) {}
-										);
-									},
-									(_) {}
-								);
+						auto y = sc1.nodes[0][0 .. $-1];
+
+						sc1.nodes[0][$-1].match!(
+							(ref SeqChoice sc2)
+							{
+								if (sc2.nodes.length != 2)
+									return;
+								sc2.nodes.sort();
+								if (sc2.nodes[0] != [])
+									return; // Optional
+								if (sc2.nodes[1][$-1] != x)
+									return;
+
+								auto z = sc2.nodes[1][0 .. $-1];
+
+								def.node = seqChoice([
+									y ~
+									seqChoice([
+										[], // optional
+										[repeat1(
+											seqChoice([
+												z ~
+												y,
+											])
+										)],
+									]),
+								]);
+								optimizeNode(def.node);
 							},
 							(_) {}
 						);
@@ -342,42 +390,44 @@ struct Grammar
 					(_) {}
 				);
 
-				// Transform x := seq(optional(seq(x, z)), y) into x := seq(repeat(seq(y, z)), y)
+				// Transform x := ( | x z ) y into x := ( | y z ) y
 				// Same as above, but in the other direction.
 				def.node.match!(
-					(ref Seq seqNode1)
+					(ref SeqChoice sc1)
 					{
-						if (seqNode1.nodes.length < 2)
+						if (sc1.nodes.length != 1)
+							return; // Single choice
+						if (sc1.nodes[0].length < 2)
 							return;
-						seqNode1.nodes[0].match!(
-							(ref Optional optionalNode)
-							{
-								optionalNode.node[0].match!(
-									(ref Seq seqNode2)
-									{
-										if (seqNode2.nodes.length < 2)
-											return;
-										seqNode2.nodes[0].match!(
-											(ref Reference referenceNode)
-											{
-												if (referenceNode.name != name)
-													return;
 
-												def.node = seq(
-													repeat(
-														seq(
-															seqNode1.nodes[1 .. $] ~
-															seqNode2.nodes[1 .. $],
-														),
-													) ~
-													seqNode1.nodes[1 .. $],
-												);
-											},
-											(_) {}
-										);
-									},
-									(_) {}
-								);
+						auto y = sc1.nodes[0][1 .. $];
+
+						sc1.nodes[0][0].match!(
+							(ref SeqChoice sc2)
+							{
+								if (sc2.nodes.length != 2)
+									return;
+								sc2.nodes.sort();
+								if (sc2.nodes[0] != [])
+									return; // Optional
+								if (sc2.nodes[1][0] != x)
+									return;
+
+								auto z = sc2.nodes[1][1 .. $];
+
+								def.node = seqChoice([
+									seqChoice([
+										[], // optional
+										[repeat1(
+											seqChoice([
+												y ~
+												z,
+											])
+										)],
+									]) ~
+									y,
+								]);
+								optimizeNode(def.node);
 							},
 							(_) {}
 						);
@@ -385,53 +435,52 @@ struct Grammar
 					(_) {}
 				);
 
-				// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
+				// Transform x := y ( | z ( | x ) ) into x := y ( | ( z y )+ ) ( | z )
 				def.node.match!(
-					(ref Seq seqNode1)
+					(ref SeqChoice sc1)
 					{
-						if (seqNode1.nodes.length < 2)
+						if (sc1.nodes.length != 1)
+							return; // Single choice
+						if (sc1.nodes[0].length < 2)
 							return;
-						auto y = seqNode1.nodes[0 .. $-1];
-						seqNode1.nodes[$-1].match!(
-							(ref Optional optionalNode1)
-							{
-								optionalNode1.node[0].match!(
-									(ref Seq seqNode2)
-									{
-										if (seqNode2.nodes.length < 2)
-											return;
-										auto z = seqNode2.nodes[0 .. $-1];
-										seqNode2.nodes[$-1].match!(
-											(ref Optional optionalNode1)
-											{
-												optionalNode1.node[0].match!(
-													(ref Reference referenceNode)
-													{
-														if (referenceNode.name != name)
-															return;
-														auto x = referenceNode;
 
-														def.node = seq(
-															y ~
-															repeat(
-																seq(
-																	z ~
-																	y
-																)
-															) ~
-															optional(
-																seq(
-																	z
-																)
-															)
-														);
-														optimizeNode(def.node);
-													},
-													(_) {}
-												);
-											},
-											(_) {}
-										);
+						auto y = sc1.nodes[0][0 .. $-1];
+
+						sc1.nodes[0][$-1].match!(
+							(ref SeqChoice sc2)
+							{
+								if (sc2.nodes.length != 2)
+									return;
+								sc2.nodes.sort();
+								if (sc2.nodes[0] != [])
+									return; // Optional
+
+								auto z = sc2.nodes[1][0 .. $-1];
+
+								sc2.nodes[1][$-1].match!(
+									(ref SeqChoice sc3)
+									{
+										sc3.nodes.sort();
+										if (sc3.nodes != [[], [x]])
+											return;
+
+										def.node = seqChoice([
+											y ~
+											seqChoice([
+												[], // optional
+												[repeat1(
+													seqChoice([
+														z ~
+														y,
+													])
+												)],
+											]) ~
+											seqChoice([
+												[], // optional
+												z,
+											]),
+										]);
+										optimizeNode(def.node);
 									},
 									(_) {}
 								);
@@ -460,78 +509,91 @@ struct Grammar
 			if (def.kind != Def.Kind.tokens)
 				continue;
 
+			// The rule of thumb to decide whether a rule should have its body extracted
+			// is to see if the rule name makes sense even with just the minimal,
+			// non-body interpretation of the definition.
+			// E.g., an AddExpression is expected to always have an addition,
+			// but an Import is an import even without a ModuleAliasIdentifier.
+
+			// The following grammar definitions are eligible for body extraction,
+			// but it doesn't make sense to do so for them.
+			// As far as I can see, there is no way to mechanically distinguish these cases
+			// from the majority of cases where body extraction is desirable.
+			if (defName.among(
+					"Import",
+					"ImportBind",
+					"Declarators",
+					"VarDeclaratorIdentifier",
+					"ArrayMemberInitialization",
+					"StructMemberInitializer",
+					"Slice", // needs to be de-recursed
+					"Symbol",
+					"MixinTemplateName",
+				))
+				continue;
+
+			auto x = reference(defName);
+
 			/*
-				x := seq(
-				  y... ,
-				  optional(
-					choice( // implied (with one child) if absent
-					  seq( a... , x , p... ), // Contains x anywhere
-					  seq( b... , x , q... ),
-					  ...
-					)
-			      )
-				  z... ,
-				)
-
+				x := y ( | a... | b... ) z
 				=>
+				x := y z | x_ts_body
+				x_ts_body := y ( a... | b... ) z
 
-				x := choice(
-				  seq(y ... , z ...),
-				  x_ts_body,
-				)
-
-				x_ts_body := choice(
-				  seq( y... , a... , x , p... , z... ),
-				  seq( y... , b... , x , q... , z... ),
-				  ...
-				)
+				- y and z are the mandatory descending part (must be references)
+				- a, b, ... are the implementation part, which we will extract to a separate rule
+				  These should contain a token or such (i.e. consist of not just all references).
 			*/
 			def.node.match!(
-				(ref Seq seqNode1)
+				(ref SeqChoice sc1)
 				{
-					auto x = reference(defName);
+					if (sc1.nodes.length != 1)
+						return; // Single choice
 
 					auto optionalIndex =
-						seqNode1.nodes.countUntil!((ref Node node) => node.match!(
-							(ref Optional optionalNode) => optionalNode.node[0] == x || optionalNode.node[0].match!(
-								(ref Choice choiceNode) => choiceNode.nodes.all!((ref Node node) => node == x || node.match!(
-									(ref Seq seqNode2) => seqNode2.nodes.canFind(x),
-									(ref _) => false,
-								)),
-								(ref Seq seqNode2) => seqNode2.nodes.canFind(x),
-								(ref _) => false
-							),
+						sc1.nodes[0].countUntil!((ref Node node) => node.match!(
+							(ref SeqChoice sc2) => sc2.nodes.canFind(null),
 							(ref _) => false
 						));
 					if (optionalIndex < 0)
 						return;
 
-					Node[][] choices =
-						seqNode1.nodes[optionalIndex].tryMatch!(
-							(ref Optional optionalNode) => optionalNode.node[0].match!(
-								(ref Choice choiceNode) => choiceNode.nodes.map!((ref Node node) => node.tryMatch!(
-									(ref Seq seqNode2) => seqNode2.nodes,
-								)).array,
-								(ref Seq seqNode2) => [seqNode2.nodes],
-								(ref _) => [[x]]
-							)
-						);
+					auto y = sc1.nodes[0][0 .. optionalIndex];
+					auto z = sc1.nodes[0][optionalIndex + 1 .. $];
+					auto y_z = y ~ z;
+					if (y_z.length != 1) // Match logic in scanHidden
+						return;
+					bool yzOK = y_z.all!((ref Node node) => node.match!(
+						(ref Reference v) => true,
+						(ref           _) => false,
+					));
+					if (!yzOK)
+						return;
 
-					auto y = seqNode1.nodes[0 .. optionalIndex];
-					auto z = seqNode1.nodes[optionalIndex + 1 .. $];
+					auto choices = sc1.nodes[0][optionalIndex].tryMatch!(
+						(ref SeqChoice sc2) => sc2.nodes,
+					);
+					extractOptional(choices).enforce();
+					alias choicesOK = delegate bool (choices) => choices.all!(choice => choice.any!((ref Node node) => node.match!(
+						(ref RegExp       v) => true,
+						(ref LiteralChars v) => true,
+						(ref LiteralToken v) => true,
+						(ref SeqChoice    v) => choicesOK(v.nodes),
+						(ref              _) => false,
+					)));
+					if (!choicesOK(choices))
+						return;
 
 					auto bodyName = defName ~ "TSBody";
-					def.node = choice([
-						seq(y ~ z),
-						reference(bodyName),
+					def.node = seqChoice([
+						y_z,
+						[reference(bodyName)],
 					]);
 					def.tail ~= bodyName;
 					def.publicName = "Maybe" ~ (def.publicName ? def.publicName : defName);
 
 					Def bodyDef;
-					bodyDef.node = choice(
-						choices.map!(choiceNodes => seq(y ~ choiceNodes ~ z)).array,
-					);
+					bodyDef.node = seqChoice([y ~ seqChoice(choices) ~ z]);
 					bodyDef.kind = Def.Kind.tokens;
 					bodyDef.synthetic = true;
 					bodyDef.publicName = defName;
@@ -569,41 +631,38 @@ struct Grammar
 			  )
 			*/
 			def.node.match!(
-				(ref Choice choiceNode)
+				(ref SeqChoice sc1)
 				{
-					alias isRecursive = delegate bool (ref Node node) => node.match!(
+					alias isRecursive = delegate bool (ref Node node) => node.tryMatch!(
 						(ref RegExp       v) => false,
 						(ref LiteralChars v) => false,
 						(ref LiteralToken v) => false,
 						(ref Reference    v) => v.name == defName,
-						(ref Choice       v) => v.nodes.any!isRecursive,
-						(ref Seq          v) => v.nodes.any!isRecursive,
-						(ref Repeat       v) => v.node[0].I!isRecursive,
+						(ref SeqChoice    v) => v.nodes.joiner.any!isRecursive,
 						(ref Repeat1      v) => v.node[0].I!isRecursive,
-						(ref Optional     v) => v.node[0].I!isRecursive,
 					);
 					if (isRecursive(def.node))
 						return;
 
-					alias isReference = (ref Node node) => node.match!(
+					alias isReference = (Node[] nodes) => nodes.length == 1 && nodes[0].match!(
 						(ref Reference    v) => true,
 						(_) => false,
 					);
-					auto references = choiceNode.nodes.filter!isReference.array;
-					auto remainder  = choiceNode.nodes.filter!(not!isReference).array;
+					auto references = sc1.nodes.filter!isReference.array;
+					auto remainder  = sc1.nodes.filter!(not!isReference).array;
 					if (!references || !remainder)
 						return;
 
 					auto bodyName = defName ~ "TSBody";
-					def.node = choice(
+					def.node = seqChoice(
 						references ~
-						reference(bodyName),
+						[reference(bodyName)],
 					);
 					def.tail ~= bodyName;
 					def.publicName = "Maybe" ~ (def.publicName ? def.publicName : defName);
 
 					Def bodyDef;
-					bodyDef.node = choice(
+					bodyDef.node = seqChoice(
 						remainder,
 					);
 					bodyDef.kind = Def.Kind.tokens;
@@ -660,11 +719,9 @@ struct Grammar
 								(ref LiteralChars v) => State.hasChars,
 								(ref LiteralToken v) => State.hasToken,
 								(ref Reference    v) { enforce(defs[v.name].kind == Def.Kind.chars, "%s of kind %s references %s of kind %s".format(defName, def.kind, v.name, defs[v.name].kind)); return checkDef(v.name); },
-								(ref Choice       v) => v.nodes.map!scanNode().fold!((a, b) => State(a | b)),
-								(ref Seq          v) => v.nodes.map!scanNode().fold!concat,
-								(ref Repeat       v) => v.node[0].I!scanNode().I!(x => concat(x, x)),
 								(ref Repeat1      v) => v.node[0].I!scanNode().I!(x => concat(x, x)),
-								(ref Optional     v) => v.node[0].I!scanNode(),
+								(ref SeqChoice    v) => v.nodes.map!(choiceSeq => choiceSeq.map!scanNode().fold!concat(State.init)).fold!((a, b) => State(a | b)),
+								(ref              _) => enforce(State.init),
 							);
 						}
 						return scanNode(defs[defName].node);
@@ -683,11 +740,9 @@ struct Grammar
 							(ref LiteralChars v) { throw new Exception("Definition %s with kind %s has literal chars: %(%s%)".format(defName, def.kind, [v.chars])); },
 							(ref LiteralToken v) {},
 							(ref Reference    v) {},
-							(ref Choice       v) { v.nodes.each!scanNode(); },
-							(ref Seq          v) { v.nodes.each!scanNode(); },
-							(ref Repeat       v) { v.node .each!scanNode(); },
-							(ref Repeat1      v) { v.node .each!scanNode(); },
-							(ref Optional     v) { v.node .each!scanNode(); },
+							(ref Repeat1      v) { v.node        .each!scanNode(); },
+							(ref SeqChoice    v) { v.nodes.joiner.each!scanNode(); },
+							(ref              _) { assert(false); },
 						);
 					}
 					scanNode(def.node);
@@ -716,11 +771,9 @@ struct Grammar
 					(ref LiteralChars v) {},
 					(ref LiteralToken v) {},
 					(ref Reference    v) { scanDef(v.name); },
-					(ref Choice       v) { v.nodes.each!scanNode(); },
-					(ref Seq          v) { v.nodes.each!scanNode(); },
-					(ref Repeat       v) { v.node .each!scanNode(); },
-					(ref Repeat1      v) { v.node .each!scanNode(); },
-					(ref Optional     v) { v.node .each!scanNode(); },
+					(ref Repeat1      v) { v.node        .each!scanNode(); },
+					(ref SeqChoice    v) { v.nodes.joiner.each!scanNode(); },
+					(ref              _) { assert(false); },
 				);
 			}
 			scanNode(def.node);
@@ -749,25 +802,78 @@ struct Grammar
 					(ref LiteralChars v) => enforce(0),
 					(ref LiteralToken v) => 2,
 					(ref Reference    v) => 1,
-					(ref Choice       v) => v.nodes.map!scanNode().reduce!max(),
-					(ref Seq          v) => v.nodes.map!scanNode().sum(),
-					(ref Repeat       v) => v.node[0].I!scanNode() * 2,
 					(ref Repeat1      v) => v.node[0].I!scanNode() * 2,
-					(ref Optional     v) => v.node[0].I!scanNode(),
+					(ref SeqChoice    v) => v.nodes.map!(choiceSeq => choiceSeq.map!scanNode().sum()).reduce!max,
+					(ref              _) => enforce(0),
 				);
 			}
 			def.hidden = scanNode(def.node) <= 1;
 		}
 	}
+
+	// Convert rules from the internal normalized form to the tree-sitter form.
+	// This replaces SeqChoice nodes with Seq / Choice / Optional.
+	private void compile()
+	{
+		void compileNode(ref Node node)
+		{
+			// Compile children
+			node.match!(
+				(ref RegExp       v) {},
+				(ref LiteralChars v) {},
+				(ref LiteralToken v) {},
+				(ref Reference    v) {},
+				(ref Choice       v) { assert(false); },
+				(ref Seq          v) { assert(false); },
+				(ref Repeat       v) { assert(false); },
+				(ref Repeat1      v) { v.node        .each!compileNode(); },
+				(ref Optional     v) { assert(false); },
+				(ref SeqChoice    v) { v.nodes.joiner.each!compileNode(); },
+			);
+
+			// Compile node
+			node = node.match!(
+				(ref RegExp       v) => node,
+				(ref LiteralChars v) => node,
+				(ref LiteralToken v) => node,
+				(ref Reference    v) => node,
+				(ref SeqChoice    v)
+				{
+					auto optionalChoice = extractOptional(v.nodes);
+
+					alias maybeSeq = (Node[] nodes) => nodes.length == 1 ? nodes[0] : seq(nodes);
+
+					node = v.nodes.length == 1 ? maybeSeq(v.nodes[0]) : choice(v.nodes.map!maybeSeq.array);
+
+					if (optionalChoice)
+					{
+						// optional(repeat1(...)) -> repeat(...)
+						node = node.match!(
+							(ref Repeat1 v) => repeat(v.node[0]),
+							(ref         _) => optional(node),
+						);
+					}
+
+					return node;
+				},
+				(ref Repeat1      v) => node,
+				(ref              _) { enforce(false); return node; },
+			);
+		}
+
+		foreach (defName, ref def; defs)
+			compileNode(def.node);
+	}
 }
 
 /// Convenience factory functions.
-Grammar.Node regexp      (string         regexp ) { return Grammar.Node(Grammar.NodeValue(Grammar.RegExp      ( regexp  ))); }
-Grammar.Node literalChars(string         chars  ) { return Grammar.Node(Grammar.NodeValue(Grammar.LiteralChars( chars   ))); } /// ditto
-Grammar.Node literalToken(string         literal) { return Grammar.Node(Grammar.NodeValue(Grammar.LiteralToken( literal ))); } /// ditto
-Grammar.Node reference   (string         name   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Reference   ( name    ))); } /// ditto
-Grammar.Node choice      (Grammar.Node[] nodes  ) { return Grammar.Node(Grammar.NodeValue(Grammar.Choice      ( nodes   ))); } /// ditto
-Grammar.Node seq         (Grammar.Node[] nodes  ) { return Grammar.Node(Grammar.NodeValue(Grammar.Seq         ( nodes   ))); } /// ditto
-Grammar.Node repeat      (Grammar.Node   node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Repeat      ([node   ]))); } /// ditto
-Grammar.Node repeat1     (Grammar.Node   node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Repeat1     ([node   ]))); } /// ditto
-Grammar.Node optional    (Grammar.Node   node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Optional    ([node   ]))); } /// ditto
+Grammar.Node regexp      (string           regexp ) { return Grammar.Node(Grammar.NodeValue(Grammar.RegExp      ( regexp  ))); }
+Grammar.Node literalChars(string           chars  ) { return Grammar.Node(Grammar.NodeValue(Grammar.LiteralChars( chars   ))); } /// ditto
+Grammar.Node literalToken(string           literal) { return Grammar.Node(Grammar.NodeValue(Grammar.LiteralToken( literal ))); } /// ditto
+Grammar.Node reference   (string           name   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Reference   ( name    ))); } /// ditto
+Grammar.Node choice      (Grammar.Node[]   nodes  ) { return Grammar.Node(Grammar.NodeValue(Grammar.Choice      ( nodes   ))); } /// ditto
+Grammar.Node seq         (Grammar.Node[]   nodes  ) { return Grammar.Node(Grammar.NodeValue(Grammar.Seq         ( nodes   ))); } /// ditto
+Grammar.Node repeat      (Grammar.Node     node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Repeat      ([node   ]))); } /// ditto
+Grammar.Node repeat1     (Grammar.Node     node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Repeat1     ([node   ]))); } /// ditto
+Grammar.Node optional    (Grammar.Node     node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Optional    ([node   ]))); } /// ditto
+Grammar.Node seqChoice   (Grammar.Node[][] nodes  ) { return Grammar.Node(Grammar.NodeValue(Grammar.SeqChoice   ( nodes   ))); } /// ditto
