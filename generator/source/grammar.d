@@ -45,6 +45,13 @@ struct Grammar
 	{
 		NodeValue value;
 		alias value this;
+
+		void toString(scope void delegate(const(char)[]) sink) const
+		{
+			value.match!(
+				(ref v) => sink.formattedWrite!"%s"(v),
+			);
+		}
 	}
 
 	/// A grammar definition.
