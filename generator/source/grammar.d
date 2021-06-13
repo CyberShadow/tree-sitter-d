@@ -331,8 +331,10 @@ struct Grammar
 						sc1.nodes[0][$-1].match!(
 							(ref SeqChoice sc2)
 							{
-								sc2.nodes.sort();
-								if (sc2.nodes != [[], [x]])
+								auto choices = sc2.nodes;
+								if (!extractOptional(choices))
+									return;
+								if (choices != [[x]])
 									return;
 
 								def.node = repeat1(
@@ -360,8 +362,10 @@ struct Grammar
 						sc1.nodes[0][0].match!(
 							(ref SeqChoice sc2)
 							{
-								sc2.nodes.sort();
-								if (sc2.nodes != [[], [x]])
+								auto choices = sc2.nodes;
+								if (!extractOptional(choices))
+									return;
+								if (choices != [[x]])
 									return;
 
 								def.node = repeat1(
@@ -389,15 +393,16 @@ struct Grammar
 						sc1.nodes[0][$-1].match!(
 							(ref SeqChoice sc2)
 							{
-								if (sc2.nodes.length != 2)
+
+								auto choices = sc2.nodes;
+								if (!extractOptional(choices))
 									return;
-								sc2.nodes.sort();
-								if (sc2.nodes[0] != [])
-									return; // Optional
-								if (sc2.nodes[1][$-1] != x)
+								if (choices.length != 1)
+									return;
+								if (choices[0][$-1] != x)
 									return;
 
-								auto z = sc2.nodes[1][0 .. $-1];
+								auto z = choices[0][0 .. $-1];
 
 								def.node = seqChoice([
 									y ~
@@ -434,15 +439,15 @@ struct Grammar
 						sc1.nodes[0][0].match!(
 							(ref SeqChoice sc2)
 							{
-								if (sc2.nodes.length != 2)
+								auto choices = sc2.nodes;
+								if (!extractOptional(choices))
 									return;
-								sc2.nodes.sort();
-								if (sc2.nodes[0] != [])
-									return; // Optional
-								if (sc2.nodes[1][0] != x)
+								if (choices.length != 1)
+									return;
+								if (choices[0][0] != x)
 									return;
 
-								auto z = sc2.nodes[1][1 .. $];
+								auto z = choices[0][1 .. $];
 
 								def.node = seqChoice([
 									seqChoice([
@@ -478,19 +483,21 @@ struct Grammar
 						sc1.nodes[0][$-1].match!(
 							(ref SeqChoice sc2)
 							{
-								if (sc2.nodes.length != 2)
+								auto choices = sc2.nodes;
+								if (!extractOptional(choices))
 									return;
-								sc2.nodes.sort();
-								if (sc2.nodes[0] != [])
-									return; // Optional
+								if (choices.length != 1)
+									return;
 
-								auto z = sc2.nodes[1][0 .. $-1];
+								auto z = choices[0][0 .. $-1];
 
 								sc2.nodes[1][$-1].match!(
 									(ref SeqChoice sc3)
 									{
-										sc3.nodes.sort();
-										if (sc3.nodes != [[], [x]])
+										auto choices = sc3.nodes;
+										if (!extractOptional(choices))
+											return;
+										if (choices != [[x]])
 											return;
 
 										def.node = seqChoice([
