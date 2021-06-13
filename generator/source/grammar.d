@@ -98,116 +98,118 @@ struct Grammar
 			scan(def.node);
 	}
 
+	private void optimizeNode(ref Node node)
+	{
+		void optimizeNode(ref Node node) { Grammar.optimizeNode(node); }
+
+		// Optimize children
+		node.match!(
+			(ref RegExp       v) {},
+			(ref LiteralChars v) {},
+			(ref LiteralToken v) {},
+			(ref Reference    v) {},
+			(ref Choice       v) { v.nodes.each!optimizeNode(); },
+			(ref Seq          v) { v.nodes.each!optimizeNode(); },
+			(ref Repeat       v) { v.node .each!optimizeNode(); },
+			(ref Repeat1      v) { v.node .each!optimizeNode(); },
+			(ref Optional     v) { v.node .each!optimizeNode(); },
+		);
+
+		// Optimize node
+		node = node.match!(
+			(ref RegExp       v) => node,
+			(ref LiteralChars v) => node,
+			(ref LiteralToken v) => node,
+			(ref Reference    v) => node,
+			(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
+			(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
+			(ref Repeat       v) => node,
+			(ref Repeat1      v) => node,
+			(ref Optional     v) => node,
+		);
+
+		// Transform choice(a, seq(a, b), seq(a, c)...) into seq(a, optional(choice(b, c, ...)))
+		node.match!(
+			(ref Choice choiceNode)
+			{
+				if (choiceNode.nodes.length < 2)
+					return;
+				auto prefix = choiceNode.nodes[0].match!(
+					(ref Seq seqNode) => seqNode.nodes,
+					(_) => choiceNode.nodes[0 .. 1],
+				);
+				if (!prefix)
+					return;
+
+				bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+					(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
+					(_) => false,
+				)).all;
+				if (!samePrefix)
+					return;
+
+				node = seq(
+					prefix ~
+					optional(
+						choice(
+							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+								n.tryMatch!(
+									(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
+								)
+							))
+							.array,
+						)
+					)
+				);
+				optimizeNode(node);
+			},
+			(ref _) {},
+		);
+
+		// Transform choice(a, seq(b, a), seq(c, a)...) into seq(optional(choice(b, c, ...)), a)
+		// Same as the above transformation, but lifting the suffix instead of the prefix.
+		node.match!(
+			(ref Choice choiceNode)
+			{
+				if (choiceNode.nodes.length < 2)
+					return;
+				auto suffix = choiceNode.nodes[0].match!(
+					(ref Seq seqNode) => seqNode.nodes,
+					(_) => choiceNode.nodes[0 .. 1],
+				);
+				if (!suffix)
+					return;
+
+				bool sameSuffix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+					(ref Seq seqNode) => seqNode.nodes.endsWith(suffix),
+					(_) => false,
+				)).all;
+				if (!sameSuffix)
+					return;
+
+				node = seq(
+					optional(
+						choice(
+							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+								n.tryMatch!(
+									(ref Seq seqNode) => seqNode.nodes[0 .. $ - suffix.length],
+								)
+							))
+							.array,
+						)
+					) ~
+					suffix
+				);
+				optimizeNode(node);
+			},
+			(ref _) {},
+		);
+	}
+
 	// Fold away unnecessary grammar nodes, or refactor into simpler constructs which
 	// are available in tree-sitter but not used in the D grammar specification.
 	private void optimize()
 	{
-		void optimizeNode(ref Node node)
-		{
-			// Optimize children
-			node.match!(
-				(ref RegExp       v) {},
-				(ref LiteralChars v) {},
-				(ref LiteralToken v) {},
-				(ref Reference    v) {},
-				(ref Choice       v) { v.nodes.each!optimizeNode(); },
-				(ref Seq          v) { v.nodes.each!optimizeNode(); },
-				(ref Repeat       v) { v.node .each!optimizeNode(); },
-				(ref Repeat1      v) { v.node .each!optimizeNode(); },
-				(ref Optional     v) { v.node .each!optimizeNode(); },
-			);
-
-			// Optimize node
-			node = node.match!(
-				(ref RegExp       v) => node,
-				(ref LiteralChars v) => node,
-				(ref LiteralToken v) => node,
-				(ref Reference    v) => node,
-				(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
-				(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
-				(ref Repeat       v) => node,
-				(ref Repeat1      v) => node,
-				(ref Optional     v) => node,
-			);
-
-			// Transform choice(a, seq(a, b), seq(a, c)...) into seq(a, optional(choice(b, c, ...)))
-			node.match!(
-				(ref Choice choiceNode)
-				{
-					if (choiceNode.nodes.length < 2)
-						return;
-					auto prefix = choiceNode.nodes[0].match!(
-						(ref Seq seqNode) => seqNode.nodes,
-						(_) => choiceNode.nodes[0 .. 1],
-					);
-					if (!prefix)
-						return;
-
-					bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
-						(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
-						(_) => false,
-					)).all;
-					if (!samePrefix)
-						return;
-
-					node = seq(
-						prefix ~
-						optional(
-							choice(
-								choiceNode.nodes[1 .. $].map!((ref n) => seq(
-									n.tryMatch!(
-										(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
-									)
-								))
-								.array,
-							)
-						)
-					);
-					optimizeNode(node);
-				},
-				(ref _) {},
-			);
-
-			// Transform choice(a, seq(b, a), seq(c, a)...) into seq(optional(choice(b, c, ...)), a)
-			// Same as the above transformation, but lifting the suffix instead of the prefix.
-			node.match!(
-				(ref Choice choiceNode)
-				{
-					if (choiceNode.nodes.length < 2)
-						return;
-					auto suffix = choiceNode.nodes[0].match!(
-						(ref Seq seqNode) => seqNode.nodes,
-						(_) => choiceNode.nodes[0 .. 1],
-					);
-					if (!suffix)
-						return;
-
-					bool sameSuffix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
-						(ref Seq seqNode) => seqNode.nodes.endsWith(suffix),
-						(_) => false,
-					)).all;
-					if (!sameSuffix)
-						return;
-
-					node = seq(
-						optional(
-							choice(
-								choiceNode.nodes[1 .. $].map!((ref n) => seq(
-									n.tryMatch!(
-										(ref Seq seqNode) => seqNode.nodes[0 .. $ - suffix.length],
-									)
-								))
-								.array,
-							)
-						) ~
-						suffix
-					);
-					optimizeNode(node);
-				},
-				(ref _) {},
-			);
-		}
-
 		foreach (name, ref def; defs)
 		{
 			optimizeNode(def.node);
