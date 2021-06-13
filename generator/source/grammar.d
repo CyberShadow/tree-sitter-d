@@ -4,6 +4,8 @@ import std.algorithm.searching;
 import std.array;
 import std.exception;
 import std.format;
+import std.functional;
+import std.range;
 import std.sumtype;
 
 import ae.utils.aa;
@@ -132,20 +134,34 @@ struct Grammar
 			(ref Optional     v) => node,
 		);
 
+		// Returns the index of the shortest node in `nodes` (for the purposes of prefix/suffix lifting).
+		size_t shortestIndex(Node[] nodes)
+		{
+			auto lengths = nodes.map!((ref Node node) => node.match!(
+				(ref Seq seqNode) => seqNode.nodes.length,
+				(ref _) => 1,
+			));
+			auto shortestLength = lengths.reduce!min;
+			auto shortestIndex = lengths.countUntil(shortestLength);
+			return shortestIndex;
+		}
+
 		// Transform choice(a, seq(a, b), seq(a, c)...) into seq(a, optional(choice(b, c, ...)))
 		node.match!(
 			(ref Choice choiceNode)
 			{
 				if (choiceNode.nodes.length < 2)
 					return;
-				auto prefix = choiceNode.nodes[0].match!(
+				auto prefixIndex = shortestIndex(choiceNode.nodes);
+				auto prefix = choiceNode.nodes[prefixIndex].match!(
 					(ref Seq seqNode) => seqNode.nodes,
-					(_) => choiceNode.nodes[0 .. 1],
+					(_) => choiceNode.nodes[prefixIndex .. prefixIndex + 1],
 				);
 				if (!prefix)
 					return;
 
-				bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+				auto remainder = choiceNode.nodes[0 .. prefixIndex] ~ choiceNode.nodes[prefixIndex + 1 .. $];
+				bool samePrefix = remainder.map!((ref Node node) => node.match!(
 					(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
 					(_) => false,
 				)).all;
@@ -156,7 +172,7 @@ struct Grammar
 					prefix ~
 					optional(
 						choice(
-							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+							remainder.map!((ref n) => seq(
 								n.tryMatch!(
 									(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
 								)
@@ -177,14 +193,16 @@ struct Grammar
 			{
 				if (choiceNode.nodes.length < 2)
 					return;
-				auto suffix = choiceNode.nodes[0].match!(
+				auto suffixIndex = shortestIndex(choiceNode.nodes);
+				auto suffix = choiceNode.nodes[suffixIndex].match!(
 					(ref Seq seqNode) => seqNode.nodes,
-					(_) => choiceNode.nodes[0 .. 1],
+					(_) => choiceNode.nodes[suffixIndex .. suffixIndex + 1],
 				);
 				if (!suffix)
 					return;
 
-				bool sameSuffix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+				auto remainder = choiceNode.nodes[0 .. suffixIndex] ~ choiceNode.nodes[suffixIndex + 1 .. $];
+				bool sameSuffix = remainder.map!((ref n) => n.match!(
 					(ref Seq seqNode) => seqNode.nodes.endsWith(suffix),
 					(_) => false,
 				)).all;
@@ -194,7 +212,7 @@ struct Grammar
 				node = seq(
 					optional(
 						choice(
-							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+							remainder.map!((ref n) => seq(
 								n.tryMatch!(
 									(ref Seq seqNode) => seqNode.nodes[0 .. $ - suffix.length],
 								)
@@ -432,6 +450,9 @@ struct Grammar
 		{
 			auto def = &defs[defName];
 
+			if (def.kind != Def.Kind.tokens)
+				continue;
+
 			/*
 				x := seq(
 				  y... ,
@@ -458,10 +479,11 @@ struct Grammar
 				  ...
 				)
 			*/
-			auto x = reference(defName);
 			def.node.match!(
 				(ref Seq seqNode1)
 				{
+					auto x = reference(defName);
+
 					auto optionalIndex =
 						seqNode1.nodes.countUntil!((ref Node node) => node.match!(
 							(ref Optional optionalNode) => optionalNode.node[0] == x || optionalNode.node[0].match!(
@@ -502,6 +524,80 @@ struct Grammar
 					Def bodyDef;
 					bodyDef.node = choice(
 						choices.map!(choiceNodes => seq(y ~ choiceNodes ~ z)).array,
+					);
+					bodyDef.kind = Def.Kind.tokens;
+					bodyDef.synthetic = true;
+					bodyDef.publicName = defName;
+
+					optimizeNode(def.node);
+					optimizeNode(bodyDef.node);
+
+					defs[bodyName] = bodyDef;
+				},
+				(ref _) {}
+			);
+
+			/*
+			  x := choice(
+			    // Some choices are references (descending part)
+				reference(...),
+				reference(...),
+
+				// Some choices are sequences (implementation part)
+				seq(...),
+				seq(...),
+			  )
+
+			  =>
+
+			  x := choice(
+				reference(...),
+				reference(...),
+				reference(x_ts_body),
+			  )
+
+			  x_ts_body := choice(
+				seq(...),
+				seq(...),
+			  )
+			*/
+			def.node.match!(
+				(ref Choice choiceNode)
+				{
+					alias isRecursive = delegate bool (ref Node node) => node.match!(
+						(ref RegExp       v) => false,
+						(ref LiteralChars v) => false,
+						(ref LiteralToken v) => false,
+						(ref Reference    v) => v.name == defName,
+						(ref Choice       v) => v.nodes.any!isRecursive,
+						(ref Seq          v) => v.nodes.any!isRecursive,
+						(ref Repeat       v) => v.node[0].I!isRecursive,
+						(ref Repeat1      v) => v.node[0].I!isRecursive,
+						(ref Optional     v) => v.node[0].I!isRecursive,
+					);
+					if (isRecursive(def.node))
+						return;
+
+					alias isReference = (ref Node node) => node.match!(
+						(ref Reference    v) => true,
+						(_) => false,
+					);
+					auto references = choiceNode.nodes.filter!isReference.array;
+					auto remainder  = choiceNode.nodes.filter!(not!isReference).array;
+					if (!references || !remainder)
+						return;
+
+					auto bodyName = defName ~ "TSBody";
+					def.node = choice(
+						references ~
+						reference(bodyName),
+					);
+					def.tail ~= bodyName;
+					def.publicName = "Maybe" ~ (def.publicName ? def.publicName : defName);
+
+					Def bodyDef;
+					bodyDef.node = choice(
+						remainder,
 					);
 					bodyDef.kind = Def.Kind.tokens;
 					bodyDef.synthetic = true;
