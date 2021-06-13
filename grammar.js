@@ -53,10 +53,7 @@ module.exports = grammar({
     [$.auto_assignment, $.qualified_identifier, $.auto_func_declaration],
     [$.var_declarator, $.func_declarator],
 
-    [$.primary_expression, $.qualified_identifier],
-    [$.primary_expression, $.qualified_identifier, $.symbol_tail],
     [$.primary_expression, $.template_instance],
-    [$.primary_expression, $.basic_type],
 
     [$.type_ctor, $.variadic_arguments_attribute],
     [$.in_out, $.variadic_arguments_attribute],
@@ -97,9 +94,6 @@ module.exports = grammar({
 
     [$.conditional_declaration], // TODO else precedence
 
-    [$.assign_expression], // TODO precedence
-    [$.conditional_expression, $.or_or_expression], // TODO precedence
-    [$.conditional_expression], // TODO precedence
     [$.or_or_expression, $.and_and_expression], // TODO precedence
     [$.and_and_expression, $.or_expression], // TODO precedence
 
@@ -138,7 +132,6 @@ module.exports = grammar({
     [$._exp_initializer, $.argument_list],
     [$.array_member_initialization, $._key_expression],
     [$.struct_initializer, $.block_statement],
-    [$._exp_initializer, $.comma_expression],
     [$.mixin_type, $.mixin_expression],
     [$.qualified_identifier, $.symbol_tail],
     [$.asm_rel_exp, $.asm_shift_exp],
@@ -158,8 +151,6 @@ module.exports = grammar({
     [$.identity_expression, $.shift_expression],
     [$.cat_expression, $.mul_expression],
     [$.slice],
-    [$.asm_exp, $.asm_log_or_exp],
-    [$.asm_exp],
     [$.asm_log_or_exp, $.asm_log_and_exp],
     [$.asm_log_and_exp, $.asm_or_exp],
     [$.asm_or_exp, $.asm_xor_exp],
@@ -196,6 +187,34 @@ module.exports = grammar({
     [$._no_scope_statement, $._function_literal_body],
     [$._no_scope_non_empty_statement, $._function_literal_body],
     [$.struct_member_initializer, $.labeled_statement],
+
+    [$.packages],
+    [$.qualified_identifier, $.primary_expression],
+    [$.basic_type, $.primary_expression],
+    [$.qualified_identifier, $.primary_expression, $.symbol_tail],
+    [$._maybe_assign_expression, $.assign_expression],
+    [$._maybe_conditional_expression, $.or_or_expression],
+    [$._maybe_conditional_expression, $.conditional_expression],
+    [$._maybe_or_or_expression, $.and_and_expression],
+    [$._maybe_and_and_expression, $.or_expression],
+    [$._maybe_or_expression, $.xor_expression],
+    [$._maybe_xor_expression, $.and_expression],
+    [$._maybe_shift_expression, $.add_expression],
+    [$._maybe_shift_expression, $.cat_expression],
+    [$._exp_initializer, $._maybe_comma_expression],
+    [$._maybe_asm_rel_exp, $.asm_shift_exp],
+    [$._maybe_asm_exp, $.asm_log_or_exp],
+    [$._maybe_asm_exp, $.asm_exp],
+    [$._maybe_asm_log_or_exp, $.asm_log_and_exp],
+    [$._maybe_asm_log_and_exp, $.asm_or_exp],
+    [$._maybe_asm_or_exp, $.asm_xor_exp],
+    [$._maybe_asm_xor_exp, $.asm_and_exp],
+    [$._maybe_asm_and_exp, $.asm_equal_exp],
+    [$._maybe_asm_equal_exp, $.asm_rel_exp],
+    [$._maybe_asm_shift_exp, $.asm_add_exp],
+    [$._maybe_asm_add_exp, $.asm_mul_exp],
+    [$._maybe_asm_mul_exp, $.asm_br_exp],
+    // <-- insert here
   ],
 
   rules: {
@@ -8019,13 +8038,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#ModuleFullyQualifiedName
     module_fully_qualified_name: $ =>
-      choice(
-        $._module_name,
-        seq(
-          $.packages,
-          ".",
-          $._module_name,
+      seq(
+        optional(
+          seq(
+            $.packages,
+            ".",
+          ),
         ),
+        $._module_name,
       ),
 
     // https://dlang.org/spec/module.html#ModuleName
@@ -8034,13 +8054,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#Packages
     packages: $ =>
-      choice(
-        $._package_name,
-        seq(
-          $.packages,
-          ".",
-          $._package_name,
+      seq(
+        repeat(
+          seq(
+            $._package_name,
+            ".",
+          ),
         ),
+        $._package_name,
       ),
 
     // https://dlang.org/spec/module.html#PackageName
@@ -8051,18 +8072,13 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#ImportDeclaration
     import_declaration: $ =>
-      choice(
-        seq(
-          "import",
-          $.import_list,
-          ";",
-        ),
-        seq(
+      seq(
+        optional(
           "static",
-          "import",
-          $.import_list,
-          ";",
         ),
+        "import",
+        $.import_list,
+        ";",
       ),
 
     // https://dlang.org/spec/module.html#ImportList
@@ -8079,13 +8095,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#Import
     import: $ =>
-      choice(
-        $.module_fully_qualified_name,
-        seq(
-          $._module_alias_identifier,
-          "=",
-          $.module_fully_qualified_name,
+      seq(
+        optional(
+          seq(
+            $._module_alias_identifier,
+            "=",
+          ),
         ),
+        $.module_fully_qualified_name,
       ),
 
     // https://dlang.org/spec/module.html#ImportBindings
@@ -8361,7 +8378,7 @@ module.exports = grammar({
         ),
         seq(
           "[",
-          $.assign_expression,
+          $._maybe_assign_expression,
           "]",
         ),
         seq(
@@ -8432,7 +8449,7 @@ module.exports = grammar({
 
     // https://dlang.org/spec/declaration.html#ExpInitializer
     _exp_initializer: $ =>
-      $.assign_expression,
+      $._maybe_assign_expression,
 
     // https://dlang.org/spec/declaration.html#ArrayInitializer
     array_initializer: $ =>
@@ -8461,13 +8478,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/declaration.html#ArrayMemberInitialization
     array_member_initialization: $ =>
-      choice(
-        $._non_void_initializer,
-        seq(
-          $.assign_expression,
-          ":",
-          $._non_void_initializer,
+      seq(
+        optional(
+          seq(
+            $._maybe_assign_expression,
+            ":",
+          ),
         ),
+        $._non_void_initializer,
       ),
 
     // https://dlang.org/spec/declaration.html#StructInitializer
@@ -8497,13 +8515,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/declaration.html#StructMemberInitializer
     struct_member_initializer: $ =>
-      choice(
-        $._non_void_initializer,
-        seq(
-          $.identifier,
-          ":",
-          $._non_void_initializer,
+      seq(
+        optional(
+          seq(
+            $.identifier,
+            ":",
+          ),
         ),
+        $._non_void_initializer,
       ),
 
     // ---
@@ -8518,13 +8537,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/declaration.html#AutoAssignments
     auto_assignments: $ =>
-      choice(
-        $.auto_assignment,
-        seq(
-          $.auto_assignments,
-          ",",
-          $.auto_assignment,
+      seq(
+        repeat(
+          seq(
+            $.auto_assignment,
+            ",",
+          ),
         ),
+        $.auto_assignment,
       ),
 
     // https://dlang.org/spec/declaration.html#AutoAssignment
@@ -8570,13 +8590,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/declaration.html#AliasAssignments
     alias_assignments: $ =>
-      choice(
-        $.alias_assignment,
-        seq(
-          $.alias_assignments,
-          ",",
-          $.alias_assignment,
+      seq(
+        repeat(
+          seq(
+            $.alias_assignment,
+            ",",
+          ),
         ),
+        $.alias_assignment,
       ),
 
     // https://dlang.org/spec/declaration.html#AliasAssignment
@@ -8739,14 +8760,14 @@ module.exports = grammar({
         ),
         seq(
           "[",
-          $.assign_expression,
+          $._maybe_assign_expression,
           "]",
         ),
         seq(
           "[",
-          $.assign_expression,
+          $._maybe_assign_expression,
           "..",
-          $.assign_expression,
+          $._maybe_assign_expression,
           "]",
         ),
         seq(
@@ -8788,13 +8809,13 @@ module.exports = grammar({
         seq(
           $.identifier,
           "[",
-          $.assign_expression,
+          $._maybe_assign_expression,
           "]",
         ),
         seq(
           $.identifier,
           "[",
-          $.assign_expression,
+          $._maybe_assign_expression,
           "]",
           ".",
           $.qualified_identifier,
@@ -8976,11 +8997,11 @@ module.exports = grammar({
     // https://dlang.org/spec/attribute.html#NamespaceList
     namespace_list: $ =>
       seq(
-        $.conditional_expression,
+        $._maybe_conditional_expression,
         repeat(
           seq(
             ",",
-            $.conditional_expression,
+            $._maybe_conditional_expression,
           ),
         ),
         optional(
@@ -8997,7 +9018,7 @@ module.exports = grammar({
         optional(
           seq(
             "(",
-            $.assign_expression,
+            $._maybe_assign_expression,
             ")",
           ),
         ),
@@ -9012,7 +9033,7 @@ module.exports = grammar({
         optional(
           seq(
             "(",
-            $.assign_expression,
+            $._maybe_assign_expression,
             ")",
           ),
         ),
@@ -9117,165 +9138,201 @@ module.exports = grammar({
 
     // https://dlang.org/spec/expression.html#Expression
     _expression: $ =>
-      $.comma_expression,
+      $._maybe_comma_expression,
 
     // https://dlang.org/spec/expression.html#CommaExpression
-    comma_expression: $ =>
+    _maybe_comma_expression: $ =>
       choice(
-        $.assign_expression,
-        seq(
-          $.comma_expression,
-          ",",
-          $.assign_expression,
-        ),
+        $._maybe_assign_expression,
+        $.comma_expression,
+      ),
+
+    comma_expression: $ =>
+      seq(
+        $._maybe_comma_expression,
+        ",",
+        $._maybe_assign_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#AssignExpression
+    _maybe_assign_expression: $ =>
+      choice(
+        $._maybe_conditional_expression,
+        $.assign_expression,
+      ),
+
     assign_expression: $ =>
-      seq(
-        $.conditional_expression,
-        choice(
-          seq(),
-          seq(
-            "=",
-            $.assign_expression,
-          ),
-          seq(
-            "+=",
-            $.assign_expression,
-          ),
-          seq(
-            "-=",
-            $.assign_expression,
-          ),
-          seq(
-            "*=",
-            $.assign_expression,
-          ),
-          seq(
-            "/=",
-            $.assign_expression,
-          ),
-          seq(
-            "%=",
-            $.assign_expression,
-          ),
-          seq(
-            "&=",
-            $.assign_expression,
-          ),
-          seq(
-            "|=",
-            $.assign_expression,
-          ),
-          seq(
-            "^=",
-            $.assign_expression,
-          ),
-          seq(
-            "~=",
-            $.assign_expression,
-          ),
-          seq(
-            "<<=",
-            $.assign_expression,
-          ),
-          seq(
-            ">>=",
-            $.assign_expression,
-          ),
-          seq(
-            ">>>=",
-            $.assign_expression,
-          ),
-          seq(
-            "^^=",
-            $.assign_expression,
-          ),
+      choice(
+        seq(
+          $._maybe_conditional_expression,
+          "=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "+=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "-=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "*=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "/=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "%=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "&=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "|=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "^=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "~=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "<<=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          ">>=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          ">>>=",
+          $._maybe_assign_expression,
+        ),
+        seq(
+          $._maybe_conditional_expression,
+          "^^=",
+          $._maybe_assign_expression,
         ),
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#ConditionalExpression
+    _maybe_conditional_expression: $ =>
+      choice(
+        $._maybe_or_or_expression,
+        $.conditional_expression,
+      ),
+
     conditional_expression: $ =>
       seq(
-        $.or_or_expression,
-        repeat(
-          seq(
-            "?",
-            $._expression,
-            ":",
-            $.or_or_expression,
-          ),
-        ),
+        $._maybe_or_or_expression,
+        "?",
+        $._expression,
+        ":",
+        $._maybe_conditional_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#OrOrExpression
-    or_or_expression: $ =>
+    _maybe_or_or_expression: $ =>
       choice(
-        $.and_and_expression,
-        seq(
-          $.or_or_expression,
-          "||",
-          $.and_and_expression,
-        ),
+        $._maybe_and_and_expression,
+        $.or_or_expression,
+      ),
+
+    or_or_expression: $ =>
+      seq(
+        $._maybe_or_or_expression,
+        "||",
+        $._maybe_and_and_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#AndAndExpression
-    and_and_expression: $ =>
+    _maybe_and_and_expression: $ =>
       choice(
-        $.or_expression,
-        seq(
-          $.and_and_expression,
-          "&&",
-          $.or_expression,
-        ),
+        $._maybe_or_expression,
+        $.and_and_expression,
+      ),
+
+    and_and_expression: $ =>
+      seq(
+        $._maybe_and_and_expression,
+        "&&",
+        $._maybe_or_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#OrExpression
-    or_expression: $ =>
+    _maybe_or_expression: $ =>
       choice(
-        $.xor_expression,
-        seq(
-          $.or_expression,
-          "|",
-          $.xor_expression,
-        ),
+        $._maybe_xor_expression,
+        $.or_expression,
+      ),
+
+    or_expression: $ =>
+      seq(
+        $._maybe_or_expression,
+        "|",
+        $._maybe_xor_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#XorExpression
-    xor_expression: $ =>
+    _maybe_xor_expression: $ =>
       choice(
-        $.and_expression,
-        seq(
-          $.xor_expression,
-          "^",
-          $.and_expression,
-        ),
+        $._maybe_and_expression,
+        $.xor_expression,
+      ),
+
+    xor_expression: $ =>
+      seq(
+        $._maybe_xor_expression,
+        "^",
+        $._maybe_and_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#AndExpression
-    and_expression: $ =>
+    _maybe_and_expression: $ =>
       choice(
         $._cmp_expression,
-        seq(
-          $.and_expression,
-          "&",
-          $._cmp_expression,
-        ),
+        $.and_expression,
+      ),
+
+    and_expression: $ =>
+      seq(
+        $._maybe_and_expression,
+        "&",
+        $._cmp_expression,
       ),
 
     // ---
@@ -9283,7 +9340,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#CmpExpression
     _cmp_expression: $ =>
       choice(
-        $.shift_expression,
+        $._maybe_shift_expression,
         $.equal_expression,
         $.identity_expression,
         $.rel_expression,
@@ -9296,14 +9353,14 @@ module.exports = grammar({
     equal_expression: $ =>
       choice(
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "==",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "!=",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
       ),
 
@@ -9313,15 +9370,15 @@ module.exports = grammar({
     identity_expression: $ =>
       choice(
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "is",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "!",
           "is",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
       ),
 
@@ -9331,25 +9388,25 @@ module.exports = grammar({
     rel_expression: $ =>
       choice(
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "<",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "<",
           "=",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           ">",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           ">=",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
       ),
 
@@ -9359,38 +9416,43 @@ module.exports = grammar({
     in_expression: $ =>
       choice(
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "in",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "!",
           "in",
-          $.shift_expression,
+          $._maybe_shift_expression,
         ),
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#ShiftExpression
-    shift_expression: $ =>
+    _maybe_shift_expression: $ =>
       choice(
         $.add_expression,
+        $.shift_expression,
+      ),
+
+    shift_expression: $ =>
+      choice(
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           "<",
           "<",
           $.add_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           ">",
           ">",
           $.add_expression,
         ),
         seq(
-          $.shift_expression,
+          $._maybe_shift_expression,
           ">",
           ">",
           ">",
@@ -9403,16 +9465,16 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#AddExpression
     add_expression: $ =>
       choice(
-        $.mul_expression,
+        $._maybe_mul_expression,
         seq(
           $.add_expression,
           "+",
-          $.mul_expression,
+          $._maybe_mul_expression,
         ),
         seq(
           $.add_expression,
           "-",
-          $.mul_expression,
+          $._maybe_mul_expression,
         ),
         $.cat_expression,
       ),
@@ -9424,27 +9486,32 @@ module.exports = grammar({
       seq(
         $.add_expression,
         "~",
-        $.mul_expression,
+        $._maybe_mul_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#MulExpression
-    mul_expression: $ =>
+    _maybe_mul_expression: $ =>
       choice(
         $.unary_expression,
+        $.mul_expression,
+      ),
+
+    mul_expression: $ =>
+      choice(
         seq(
-          $.mul_expression,
+          $._maybe_mul_expression,
           "*",
           $.unary_expression,
         ),
         seq(
-          $.mul_expression,
+          $._maybe_mul_expression,
           "/",
           $.unary_expression,
         ),
         seq(
-          $.mul_expression,
+          $._maybe_mul_expression,
           "%",
           $.unary_expression,
         ),
@@ -9531,7 +9598,7 @@ module.exports = grammar({
           ),
           $.type,
           "[",
-          $.assign_expression,
+          $._maybe_assign_expression,
           "]",
         ),
         seq(
@@ -9562,11 +9629,11 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#ArgumentList
     argument_list: $ =>
       seq(
-        $.assign_expression,
+        $._maybe_assign_expression,
         repeat(
           seq(
             ",",
-            $.assign_expression,
+            $._maybe_assign_expression,
           ),
         ),
         optional(
@@ -9707,22 +9774,23 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#Slice
     slice: $ =>
       seq(
-        $.assign_expression,
-        choice(
-          seq(),
-          seq(
-            ",",
-            $.slice,
-          ),
-          seq(
-            "..",
-            $.assign_expression,
-          ),
-          seq(
-            "..",
-            $.assign_expression,
-            ",",
-            $.slice,
+        $._maybe_assign_expression,
+        optional(
+          choice(
+            seq(
+              ",",
+              $.slice,
+            ),
+            seq(
+              "..",
+              $._maybe_assign_expression,
+            ),
+            seq(
+              "..",
+              $._maybe_assign_expression,
+              ",",
+              $.slice,
+            ),
           ),
         ),
       ),
@@ -9751,7 +9819,7 @@ module.exports = grammar({
         $.integer_literal,
         $.float_literal,
         $.character_literal,
-        $.string_literals,
+        $._maybe_string_literals,
         $.array_literal,
         $.assoc_array_literal,
         $.function_literal,
@@ -9806,13 +9874,16 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/expression.html#StringLiterals
-    string_literals: $ =>
+    _maybe_string_literals: $ =>
       choice(
         $._string_literal,
-        seq(
-          $.string_literals,
-          $._string_literal,
-        ),
+        $.string_literals,
+      ),
+
+    string_literals: $ =>
+      seq(
+        $._maybe_string_literals,
+        $._string_literal,
       ),
 
     // ---
@@ -9859,11 +9930,11 @@ module.exports = grammar({
 
     // https://dlang.org/spec/expression.html#KeyExpression
     _key_expression: $ =>
-      $.assign_expression,
+      $._maybe_assign_expression,
 
     // https://dlang.org/spec/expression.html#ValueExpression
     _value_expression: $ =>
-      $.assign_expression,
+      $._maybe_assign_expression,
 
     // ---
 
@@ -9907,7 +9978,7 @@ module.exports = grammar({
         seq(
           $.identifier,
           "=>",
-          $.assign_expression,
+          $._maybe_assign_expression,
         ),
       ),
 
@@ -9934,7 +10005,7 @@ module.exports = grammar({
       choice(
         seq(
           "=>",
-          $.assign_expression,
+          $._maybe_assign_expression,
         ),
         $._function_literal_body,
       ),
@@ -9952,20 +10023,16 @@ module.exports = grammar({
 
     // https://dlang.org/spec/expression.html#AssertArguments
     assert_arguments: $ =>
-      choice(
-        seq(
-          $.assign_expression,
-          optional(
+      seq(
+        optional(
+          seq(
+            $._maybe_assign_expression,
             ",",
           ),
         ),
-        seq(
-          $.assign_expression,
+        $._maybe_assign_expression,
+        optional(
           ",",
-          $.assign_expression,
-          optional(
-            ",",
-          ),
         ),
       ),
 
@@ -9987,7 +10054,7 @@ module.exports = grammar({
       seq(
         "import",
         "(",
-        $.assign_expression,
+        $._maybe_assign_expression,
         ")",
       ),
 
@@ -10306,29 +10373,30 @@ module.exports = grammar({
 
     // https://dlang.org/spec/statement.html#IfCondition
     if_condition: $ =>
-      choice(
-        $._expression,
-        seq(
-          "auto",
-          $.identifier,
-          "=",
-          $._expression,
-        ),
-        seq(
-          $.type_ctors,
-          $.identifier,
-          "=",
-          $._expression,
-        ),
-        seq(
-          optional(
-            $.type_ctors,
+      seq(
+        optional(
+          choice(
+            seq(
+              "auto",
+              $.identifier,
+              "=",
+            ),
+            seq(
+              $.type_ctors,
+              $.identifier,
+              "=",
+            ),
+            seq(
+              optional(
+                $.type_ctors,
+              ),
+              $.basic_type,
+              $._declarator,
+              "=",
+            ),
           ),
-          $.basic_type,
-          $._declarator,
-          "=",
-          $._expression,
         ),
+        $._expression,
       ),
 
     // https://dlang.org/spec/statement.html#ThenStatement
@@ -10552,11 +10620,11 @@ module.exports = grammar({
 
     // https://dlang.org/spec/statement.html#FirstExp
     _first_exp: $ =>
-      $.assign_expression,
+      $._maybe_assign_expression,
 
     // https://dlang.org/spec/statement.html#LastExp
     _last_exp: $ =>
-      $.assign_expression,
+      $._maybe_assign_expression,
 
     // https://dlang.org/spec/statement.html#DefaultStatement
     default_statement: $ =>
@@ -10818,11 +10886,10 @@ module.exports = grammar({
 
     // https://dlang.org/spec/statement.html#AsmInstructionList
     asm_instruction_list: $ =>
-      seq(
-        $.asm_instruction,
-        ";",
-        optional(
-          $.asm_instruction_list,
+      repeat1(
+        seq(
+          $.asm_instruction,
+          ";",
         ),
       ),
 
@@ -11335,7 +11402,7 @@ module.exports = grammar({
         optional(
           seq(
             "=",
-            $.assign_expression,
+            $._maybe_assign_expression,
           ),
         ),
       ),
@@ -11388,7 +11455,7 @@ module.exports = grammar({
           $.type,
           $.identifier,
           "=",
-          $.assign_expression,
+          $._maybe_assign_expression,
         ),
       ),
 
@@ -11502,7 +11569,7 @@ module.exports = grammar({
           $.basic_type,
           $._declarator,
           "=",
-          $.assign_expression,
+          $._maybe_assign_expression,
         ),
         seq(
           optional(
@@ -11666,7 +11733,7 @@ module.exports = grammar({
     shortened_function_body: $ =>
       seq(
         "=>",
-        $.assign_expression,
+        $._maybe_assign_expression,
         ";",
       ),
 
@@ -11851,18 +11918,17 @@ module.exports = grammar({
     _template_argument: $ =>
       choice(
         $.type,
-        $.assign_expression,
+        $._maybe_assign_expression,
         $.symbol,
       ),
 
     // https://dlang.org/spec/template.html#Symbol
     symbol: $ =>
-      choice(
-        $.symbol_tail,
-        seq(
+      seq(
+        optional(
           ".",
-          $.symbol_tail,
         ),
+        $.symbol_tail,
       ),
 
     // https://dlang.org/spec/template.html#SymbolTail
@@ -11904,13 +11970,14 @@ module.exports = grammar({
     template_type_parameter: $ =>
       seq(
         $.identifier,
-        choice(
-          seq(),
-          $.template_type_parameter_specialization,
-          $.template_type_parameter_default,
-          seq(
+        optional(
+          choice(
             $.template_type_parameter_specialization,
             $.template_type_parameter_default,
+            seq(
+              $.template_type_parameter_specialization,
+              $.template_type_parameter_default,
+            ),
           ),
         ),
       ),
@@ -11945,13 +12012,14 @@ module.exports = grammar({
       seq(
         $.basic_type,
         $._declarator,
-        choice(
-          seq(),
-          $.template_value_parameter_specialization,
-          $.template_value_parameter_default,
-          seq(
+        optional(
+          choice(
             $.template_value_parameter_specialization,
             $.template_value_parameter_default,
+            seq(
+              $.template_value_parameter_specialization,
+              $.template_value_parameter_default,
+            ),
           ),
         ),
       ),
@@ -11960,7 +12028,7 @@ module.exports = grammar({
     template_value_parameter_specialization: $ =>
       seq(
         ":",
-        $.conditional_expression,
+        $._maybe_conditional_expression,
       ),
 
     // https://dlang.org/spec/template.html#TemplateValueParameterDefault
@@ -11968,7 +12036,7 @@ module.exports = grammar({
       choice(
         seq(
           "=",
-          $.assign_expression,
+          $._maybe_assign_expression,
         ),
         seq(
           "=",
@@ -12013,7 +12081,7 @@ module.exports = grammar({
         ),
         seq(
           ":",
-          $.conditional_expression,
+          $._maybe_conditional_expression,
         ),
       ),
 
@@ -12026,7 +12094,7 @@ module.exports = grammar({
         ),
         seq(
           "=",
-          $.conditional_expression,
+          $._maybe_conditional_expression,
         ),
       ),
 
@@ -12369,17 +12437,18 @@ module.exports = grammar({
     debug_condition: $ =>
       seq(
         "debug",
-        choice(
-          seq(),
-          seq(
-            "(",
-            $.integer_literal,
-            ")",
-          ),
-          seq(
-            "(",
-            $.identifier,
-            ")",
+        optional(
+          choice(
+            seq(
+              "(",
+              $.integer_literal,
+              ")",
+            ),
+            seq(
+              "(",
+              $.identifier,
+              ")",
+            ),
           ),
         ),
       ),
@@ -12411,7 +12480,7 @@ module.exports = grammar({
         "static",
         "if",
         "(",
-        $.assign_expression,
+        $._maybe_assign_expression,
         ")",
       ),
 
@@ -12559,7 +12628,7 @@ module.exports = grammar({
     // https://dlang.org/spec/traits.html#TraitsArgument
     _traits_argument: $ =>
       choice(
-        $.assign_expression,
+        $._maybe_assign_expression,
         $.type,
       ),
 
@@ -12894,174 +12963,216 @@ module.exports = grammar({
 
     // https://dlang.org/spec/iasm.html#Operand
     _operand: $ =>
-      $.asm_exp,
+      $._maybe_asm_exp,
 
     // https://dlang.org/spec/iasm.html#AsmExp
+    _maybe_asm_exp: $ =>
+      choice(
+        $._maybe_asm_log_or_exp,
+        $.asm_exp,
+      ),
+
     asm_exp: $ =>
       seq(
-        $.asm_log_or_exp,
-        repeat(
-          seq(
-            "?",
-            $.asm_exp,
-            ":",
-            $.asm_log_or_exp,
-          ),
-        ),
+        $._maybe_asm_log_or_exp,
+        "?",
+        $._maybe_asm_exp,
+        ":",
+        $._maybe_asm_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmLogOrExp
-    asm_log_or_exp: $ =>
+    _maybe_asm_log_or_exp: $ =>
       choice(
-        $.asm_log_and_exp,
-        seq(
-          $.asm_log_or_exp,
-          "||",
-          $.asm_log_and_exp,
-        ),
+        $._maybe_asm_log_and_exp,
+        $.asm_log_or_exp,
+      ),
+
+    asm_log_or_exp: $ =>
+      seq(
+        $._maybe_asm_log_or_exp,
+        "||",
+        $._maybe_asm_log_and_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmLogAndExp
-    asm_log_and_exp: $ =>
+    _maybe_asm_log_and_exp: $ =>
       choice(
-        $.asm_or_exp,
-        seq(
-          $.asm_log_and_exp,
-          "&&",
-          $.asm_or_exp,
-        ),
+        $._maybe_asm_or_exp,
+        $.asm_log_and_exp,
+      ),
+
+    asm_log_and_exp: $ =>
+      seq(
+        $._maybe_asm_log_and_exp,
+        "&&",
+        $._maybe_asm_or_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmOrExp
-    asm_or_exp: $ =>
+    _maybe_asm_or_exp: $ =>
       choice(
-        $.asm_xor_exp,
-        seq(
-          $.asm_or_exp,
-          "|",
-          $.asm_xor_exp,
-        ),
+        $._maybe_asm_xor_exp,
+        $.asm_or_exp,
+      ),
+
+    asm_or_exp: $ =>
+      seq(
+        $._maybe_asm_or_exp,
+        "|",
+        $._maybe_asm_xor_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmXorExp
-    asm_xor_exp: $ =>
+    _maybe_asm_xor_exp: $ =>
       choice(
-        $.asm_and_exp,
-        seq(
-          $.asm_xor_exp,
-          "^",
-          $.asm_and_exp,
-        ),
+        $._maybe_asm_and_exp,
+        $.asm_xor_exp,
+      ),
+
+    asm_xor_exp: $ =>
+      seq(
+        $._maybe_asm_xor_exp,
+        "^",
+        $._maybe_asm_and_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmAndExp
-    asm_and_exp: $ =>
+    _maybe_asm_and_exp: $ =>
       choice(
-        $.asm_equal_exp,
-        seq(
-          $.asm_and_exp,
-          "&",
-          $.asm_equal_exp,
-        ),
+        $._maybe_asm_equal_exp,
+        $.asm_and_exp,
+      ),
+
+    asm_and_exp: $ =>
+      seq(
+        $._maybe_asm_and_exp,
+        "&",
+        $._maybe_asm_equal_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmEqualExp
+    _maybe_asm_equal_exp: $ =>
+      choice(
+        $._maybe_asm_rel_exp,
+        $.asm_equal_exp,
+      ),
+
     asm_equal_exp: $ =>
       choice(
-        $.asm_rel_exp,
         seq(
-          $.asm_equal_exp,
+          $._maybe_asm_equal_exp,
           "==",
-          $.asm_rel_exp,
+          $._maybe_asm_rel_exp,
         ),
         seq(
-          $.asm_equal_exp,
+          $._maybe_asm_equal_exp,
           "!=",
-          $.asm_rel_exp,
+          $._maybe_asm_rel_exp,
         ),
       ),
 
     // https://dlang.org/spec/iasm.html#AsmRelExp
+    _maybe_asm_rel_exp: $ =>
+      choice(
+        $._maybe_asm_shift_exp,
+        $.asm_rel_exp,
+      ),
+
     asm_rel_exp: $ =>
       choice(
-        $.asm_shift_exp,
         seq(
-          $.asm_rel_exp,
+          $._maybe_asm_rel_exp,
           "<",
-          $.asm_shift_exp,
+          $._maybe_asm_shift_exp,
         ),
         seq(
-          $.asm_rel_exp,
+          $._maybe_asm_rel_exp,
           "<",
           "=",
-          $.asm_shift_exp,
+          $._maybe_asm_shift_exp,
         ),
         seq(
-          $.asm_rel_exp,
+          $._maybe_asm_rel_exp,
           ">",
-          $.asm_shift_exp,
+          $._maybe_asm_shift_exp,
         ),
         seq(
-          $.asm_rel_exp,
+          $._maybe_asm_rel_exp,
           ">=",
-          $.asm_shift_exp,
+          $._maybe_asm_shift_exp,
         ),
       ),
 
     // https://dlang.org/spec/iasm.html#AsmShiftExp
+    _maybe_asm_shift_exp: $ =>
+      choice(
+        $._maybe_asm_add_exp,
+        $.asm_shift_exp,
+      ),
+
     asm_shift_exp: $ =>
       choice(
-        $.asm_add_exp,
         seq(
-          $.asm_shift_exp,
+          $._maybe_asm_shift_exp,
           "<",
           "<",
-          $.asm_add_exp,
+          $._maybe_asm_add_exp,
         ),
         seq(
-          $.asm_shift_exp,
+          $._maybe_asm_shift_exp,
           ">>",
-          $.asm_add_exp,
+          $._maybe_asm_add_exp,
         ),
         seq(
-          $.asm_shift_exp,
+          $._maybe_asm_shift_exp,
           ">>>",
-          $.asm_add_exp,
+          $._maybe_asm_add_exp,
         ),
       ),
 
     // https://dlang.org/spec/iasm.html#AsmAddExp
+    _maybe_asm_add_exp: $ =>
+      choice(
+        $._maybe_asm_mul_exp,
+        $.asm_add_exp,
+      ),
+
     asm_add_exp: $ =>
       choice(
-        $.asm_mul_exp,
         seq(
-          $.asm_add_exp,
+          $._maybe_asm_add_exp,
           "+",
-          $.asm_mul_exp,
+          $._maybe_asm_mul_exp,
         ),
         seq(
-          $.asm_add_exp,
+          $._maybe_asm_add_exp,
           "-",
-          $.asm_mul_exp,
+          $._maybe_asm_mul_exp,
         ),
       ),
 
     // https://dlang.org/spec/iasm.html#AsmMulExp
-    asm_mul_exp: $ =>
+    _maybe_asm_mul_exp: $ =>
       choice(
         $.asm_br_exp,
+        $.asm_mul_exp,
+      ),
+
+    asm_mul_exp: $ =>
+      choice(
         seq(
-          $.asm_mul_exp,
+          $._maybe_asm_mul_exp,
           "*",
           $.asm_br_exp,
         ),
         seq(
-          $.asm_mul_exp,
+          $._maybe_asm_mul_exp,
           "/",
           $.asm_br_exp,
         ),
         seq(
-          $.asm_mul_exp,
+          $._maybe_asm_mul_exp,
           "%",
           $.asm_br_exp,
         ),
@@ -13074,7 +13185,7 @@ module.exports = grammar({
         seq(
           $.asm_br_exp,
           "[",
-          $.asm_exp,
+          $._maybe_asm_exp,
           "]",
         ),
       ),
@@ -13084,15 +13195,15 @@ module.exports = grammar({
       choice(
         seq(
           $.asm_type_prefix,
-          $.asm_exp,
+          $._maybe_asm_exp,
         ),
         seq(
           "offsetof",
-          $.asm_exp,
+          $._maybe_asm_exp,
         ),
         seq(
           "seg",
-          $.asm_exp,
+          $._maybe_asm_exp,
         ),
         seq(
           "+",
@@ -13124,13 +13235,13 @@ module.exports = grammar({
         seq(
           $.register,
           ":",
-          $.asm_exp,
+          $._maybe_asm_exp,
         ),
         $.register64,
         seq(
           $.register64,
           ":",
-          $.asm_exp,
+          $._maybe_asm_exp,
         ),
         $.dot_identifier,
         "this",

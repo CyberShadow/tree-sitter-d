@@ -8,6 +8,7 @@ import std.sumtype;
 
 import ae.utils.aa;
 import ae.utils.meta;
+import ae.utils.text;
 
 import ddoc;
 
@@ -61,6 +62,9 @@ struct Grammar
 		bool used; /// Include the definition in the generated grammar.
 		bool hidden; /// Hide in the tree-sitter AST (by prefixing the name with _).
 		bool synthetic; /// We made this one up - don't emit a dlang.org link.
+
+		string publicName; /// If set, use this name instead of the `defs` key.
+		string[] tail; /// Also write these (synthetic) rules after this one
 	}
 
 	/// All definitions in the grammar, indexed by their official names.
@@ -71,6 +75,7 @@ struct Grammar
 	{
 		checkReferences();
 		optimize();
+		extractBodies();
 		checkKinds();
 		scanUsed(roots);
 		scanHidden();
@@ -97,106 +102,155 @@ struct Grammar
 			scan(def.node);
 	}
 
+	private void optimizeNode(ref Node node)
+	{
+		void optimizeNode(ref Node node) { Grammar.optimizeNode(node); }
+
+		// Optimize children
+		node.match!(
+			(ref RegExp       v) {},
+			(ref LiteralChars v) {},
+			(ref LiteralToken v) {},
+			(ref Reference    v) {},
+			(ref Choice       v) { v.nodes.each!optimizeNode(); },
+			(ref Seq          v) { v.nodes.each!optimizeNode(); },
+			(ref Repeat       v) { v.node .each!optimizeNode(); },
+			(ref Repeat1      v) { v.node .each!optimizeNode(); },
+			(ref Optional     v) { v.node .each!optimizeNode(); },
+		);
+
+		// Optimize node
+		node = node.match!(
+			(ref RegExp       v) => node,
+			(ref LiteralChars v) => node,
+			(ref LiteralToken v) => node,
+			(ref Reference    v) => node,
+			(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
+			(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
+			(ref Repeat       v) => node,
+			(ref Repeat1      v) => node,
+			(ref Optional     v) => node,
+		);
+
+		// Transform choice(a, seq(a, b), seq(a, c)...) into seq(a, optional(choice(b, c, ...)))
+		node.match!(
+			(ref Choice choiceNode)
+			{
+				if (choiceNode.nodes.length < 2)
+					return;
+				auto prefix = choiceNode.nodes[0].match!(
+					(ref Seq seqNode) => seqNode.nodes,
+					(_) => choiceNode.nodes[0 .. 1],
+				);
+				if (!prefix)
+					return;
+
+				bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+					(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
+					(_) => false,
+				)).all;
+				if (!samePrefix)
+					return;
+
+				node = seq(
+					prefix ~
+					optional(
+						choice(
+							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+								n.tryMatch!(
+									(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
+								)
+							))
+							.array,
+						)
+					)
+				);
+				optimizeNode(node);
+			},
+			(ref _) {},
+		);
+
+		// Transform choice(a, seq(b, a), seq(c, a)...) into seq(optional(choice(b, c, ...)), a)
+		// Same as the above transformation, but lifting the suffix instead of the prefix.
+		node.match!(
+			(ref Choice choiceNode)
+			{
+				if (choiceNode.nodes.length < 2)
+					return;
+				auto suffix = choiceNode.nodes[0].match!(
+					(ref Seq seqNode) => seqNode.nodes,
+					(_) => choiceNode.nodes[0 .. 1],
+				);
+				if (!suffix)
+					return;
+
+				bool sameSuffix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+					(ref Seq seqNode) => seqNode.nodes.endsWith(suffix),
+					(_) => false,
+				)).all;
+				if (!sameSuffix)
+					return;
+
+				node = seq(
+					optional(
+						choice(
+							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+								n.tryMatch!(
+									(ref Seq seqNode) => seqNode.nodes[0 .. $ - suffix.length],
+								)
+							))
+							.array,
+						)
+					) ~
+					suffix
+				);
+				optimizeNode(node);
+			},
+			(ref _) {},
+		);
+	}
+
 	// Fold away unnecessary grammar nodes, or refactor into simpler constructs which
 	// are available in tree-sitter but not used in the D grammar specification.
 	private void optimize()
 	{
-		void optimizeNode(ref Node node)
-		{
-			// Optimize children
-			node.match!(
-				(ref RegExp       v) {},
-				(ref LiteralChars v) {},
-				(ref LiteralToken v) {},
-				(ref Reference    v) {},
-				(ref Choice       v) { v.nodes.each!optimizeNode(); },
-				(ref Seq          v) { v.nodes.each!optimizeNode(); },
-				(ref Repeat       v) { v.node .each!optimizeNode(); },
-				(ref Repeat1      v) { v.node .each!optimizeNode(); },
-				(ref Optional     v) { v.node .each!optimizeNode(); },
-			);
-
-			// Optimize node
-			node = node.match!(
-				(ref RegExp       v) => node,
-				(ref LiteralChars v) => node,
-				(ref LiteralToken v) => node,
-				(ref Reference    v) => node,
-				(ref Choice       v) => v.nodes.length == 1 ? v.nodes[0] : node,
-				(ref Seq          v) => v.nodes.length == 1 ? v.nodes[0] : node,
-				(ref Repeat       v) => node,
-				(ref Repeat1      v) => node,
-				(ref Optional     v) => node,
-			);
-
-			// Transform choice(a, seq(a, b)) into seq(a, optional(b))
-			node.match!(
-				(ref Choice choiceNode)
-				{
-					if (choiceNode.nodes.length < 2)
-						return;
-					auto prefix = choiceNode.nodes[0].match!(
-						(ref Seq seqNode) => seqNode.nodes,
-						(_) => choiceNode.nodes[0 .. 1],
-					);
-					if (!prefix)
-						return;
-
-					bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
-						(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
-						(_) => false,
-					)).all;
-					if (!samePrefix)
-						return;
-
-					node = seq(
-						prefix ~
-						optional(
-							choice(
-								choiceNode.nodes[1 .. $].map!((ref n) => seq(
-									n.tryMatch!(
-										(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
-									)
-								))
-								.array,
-							)
-						)
-					);
-					optimizeNode(node);
-				},
-				(ref _) {},
-			);
-
-			// Transform optional(choice(y...)) into choice(seq(), y...)
-			// This makes it easier to work with seq(..., choice(...)) nodes later.
-			node.match!(
-				(ref Optional optionalNode)
-				{
-					optionalNode.node[0].match!(
-						(ref Choice choiceNode)
-						{
-							node = choice(seq([]) ~ choiceNode.nodes);
-						},
-						(ref _) {}
-					);
-				},
-				(ref _) {}
-			);
-		}
-
 		foreach (name, ref def; defs)
 		{
 			optimizeNode(def.node);
 
-			// Transform x := seq(y, optional(x)) into x := repeat1(y)
-			// (attempt to remove recursion)
+			// Attempt to remove recursion
+
+			// In the D grammar, recursion is used for two purposes:
+			// - Repetition (e.g. Characters)
+			// - Nested constructs (e.g. binary expressions)
+			// We only want to de-recurse the first kind.
+			bool shouldDeRecurse =
+
+				// We must always de-recurse token fragments,
+				// because we can't use tree-sitter recursion with them.
+				def.kind == Def.Kind.chars ||
+
+				// Lists of things generally involve repetition.
+				name.splitByCamelCase.canFind("List") ||
+
+				// If the definition name is the plural of the name of another definition,
+				// then this is almost certainly used for repetition.
+				["s", "es"].any!(pluralSuffix =>
+					name.endsWith(pluralSuffix) &&
+					["", "Name"].any!(singularSuffix =>
+						name[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
+					)
+				);
+
+			if (shouldDeRecurse)
 			{
+				// Transform x := seq(y, optional(x)) into x := repeat1(y)
 				def.node.match!(
 					(ref Seq seqNode)
 					{
-						if (seqNode.nodes.length != 2)
+						if (seqNode.nodes.length < 2)
 							return;
-						seqNode.nodes[1].match!(
+						seqNode.nodes[$-1].match!(
 							(ref Optional optionalNode)
 							{
 								optionalNode.node[0].match!(
@@ -206,8 +260,11 @@ struct Grammar
 											return;
 
 										def.node = repeat1(
-											seqNode.nodes[0],
+											seq(
+												seqNode.nodes[0 .. $ - 1],
+											)
 										);
+										optimizeNode(def.node);
 									},
 									(_) {}
 								);
@@ -217,11 +274,8 @@ struct Grammar
 					},
 					(_) {}
 				);
-			}
 
-			// Transform x := seq(y, optional(seq(z, x))) into x := seq(y, repeat(seq(z, y)))
-			// (attempt to remove recursion)
-			{
+				// Transform x := seq(y, optional(seq(z, x))) into x := seq(y, repeat(seq(z, y)))
 				def.node.match!(
 					(ref Seq seqNode1)
 					{
@@ -262,11 +316,51 @@ struct Grammar
 					},
 					(_) {}
 				);
-			}
 
-			// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
-			// (attempt to remove recursion)
-			{
+				// Transform x := seq(optional(seq(x, z)), y) into x := seq(repeat(seq(y, z)), y)
+				// Same as above, but in the other direction.
+				def.node.match!(
+					(ref Seq seqNode1)
+					{
+						if (seqNode1.nodes.length < 2)
+							return;
+						seqNode1.nodes[0].match!(
+							(ref Optional optionalNode)
+							{
+								optionalNode.node[0].match!(
+									(ref Seq seqNode2)
+									{
+										if (seqNode2.nodes.length < 2)
+											return;
+										seqNode2.nodes[0].match!(
+											(ref Reference referenceNode)
+											{
+												if (referenceNode.name != name)
+													return;
+
+												def.node = seq(
+													repeat(
+														seq(
+															seqNode1.nodes[1 .. $] ~
+															seqNode2.nodes[1 .. $],
+														),
+													) ~
+													seqNode1.nodes[1 .. $],
+												);
+											},
+											(_) {}
+										);
+									},
+									(_) {}
+								);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+
+				// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
 				def.node.match!(
 					(ref Seq seqNode1)
 					{
@@ -323,6 +417,103 @@ struct Grammar
 					(_) {}
 				);
 			}
+		}
+	}
+
+	// Refactor some definitions into a descending part and an
+	// implementation part, so that we can hide the descending
+	// part to avoid excessive nesting in the tree-sitter AST.
+	// This aims to solve the problem described in
+	// http://tree-sitter.github.io/tree-sitter/creating-parsers#structuring-rules-well ,
+	// though using a different approach.
+	private void extractBodies()
+	{
+		foreach (defName; defs.keys)
+		{
+			auto def = &defs[defName];
+
+			/*
+				x := seq(
+				  y... ,
+				  optional(
+					choice( // implied (with one child) if absent
+					  seq( a... , x , p... ), // Contains x anywhere
+					  seq( b... , x , q... ),
+					  ...
+					)
+			      )
+				  z... ,
+				)
+
+				=>
+
+				x := choice(
+				  seq(y ... , z ...),
+				  x_ts_body,
+				)
+
+				x_ts_body := choice(
+				  seq( y... , a... , x , p... , z... ),
+				  seq( y... , b... , x , q... , z... ),
+				  ...
+				)
+			*/
+			auto x = reference(defName);
+			def.node.match!(
+				(ref Seq seqNode1)
+				{
+					auto optionalIndex =
+						seqNode1.nodes.countUntil!((ref Node node) => node.match!(
+							(ref Optional optionalNode) => optionalNode.node[0] == x || optionalNode.node[0].match!(
+								(ref Choice choiceNode) => choiceNode.nodes.all!((ref Node node) => node == x || node.match!(
+									(ref Seq seqNode2) => seqNode2.nodes.canFind(x),
+									(ref _) => false,
+								)),
+								(ref Seq seqNode2) => seqNode2.nodes.canFind(x),
+								(ref _) => false
+							),
+							(ref _) => false
+						));
+					if (optionalIndex < 0)
+						return;
+
+					Node[][] choices =
+						seqNode1.nodes[optionalIndex].tryMatch!(
+							(ref Optional optionalNode) => optionalNode.node[0].match!(
+								(ref Choice choiceNode) => choiceNode.nodes.map!((ref Node node) => node.tryMatch!(
+									(ref Seq seqNode2) => seqNode2.nodes,
+								)).array,
+								(ref Seq seqNode2) => [seqNode2.nodes],
+								(ref _) => [[x]]
+							)
+						);
+
+					auto y = seqNode1.nodes[0 .. optionalIndex];
+					auto z = seqNode1.nodes[optionalIndex + 1 .. $];
+
+					auto bodyName = defName ~ "TSBody";
+					def.node = choice([
+						seq(y ~ z),
+						reference(bodyName),
+					]);
+					def.tail ~= bodyName;
+					def.publicName = "Maybe" ~ (def.publicName ? def.publicName : defName);
+
+					Def bodyDef;
+					bodyDef.node = choice(
+						choices.map!(choiceNodes => seq(y ~ choiceNodes ~ z)).array,
+					);
+					bodyDef.kind = Def.Kind.tokens;
+					bodyDef.synthetic = true;
+					bodyDef.publicName = defName;
+
+					optimizeNode(def.node);
+					optimizeNode(bodyDef.node);
+
+					defs[bodyName] = bodyDef;
+				},
+				(ref _) {}
+			);
 		}
 	}
 
