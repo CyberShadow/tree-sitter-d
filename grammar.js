@@ -8330,9 +8330,9 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#AutoAssignments
     auto_assignments: $ =>
       seq(
-        optional(
+        repeat(
           seq(
-            $.auto_assignments,
+            $.auto_assignment,
             ",",
           ),
         ),
@@ -8383,9 +8383,9 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#AliasAssignments
     alias_assignments: $ =>
       seq(
-        optional(
+        repeat(
           seq(
-            $.alias_assignments,
+            $.alias_assignment,
             ",",
           ),
         ),

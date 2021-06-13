@@ -304,6 +304,49 @@ struct Grammar
 					(_) {}
 				);
 
+				// Transform x := seq(optional(seq(x, z)), y) into x := seq(repeat(seq(y, z)), y)
+				// Same as above, but in the other direction.
+				def.node.match!(
+					(ref Seq seqNode1)
+					{
+						if (seqNode1.nodes.length < 2)
+							return;
+						seqNode1.nodes[0].match!(
+							(ref Optional optionalNode)
+							{
+								optionalNode.node[0].match!(
+									(ref Seq seqNode2)
+									{
+										if (seqNode2.nodes.length < 2)
+											return;
+										seqNode2.nodes[0].match!(
+											(ref Reference referenceNode)
+											{
+												if (referenceNode.name != name)
+													return;
+
+												def.node = seq(
+													repeat(
+														seq(
+															seqNode1.nodes[1 .. $] ~
+															seqNode2.nodes[1 .. $],
+														),
+													) ~
+													seqNode1.nodes[1 .. $],
+												);
+											},
+											(_) {}
+										);
+									},
+									(_) {}
+								);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+
 				// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
 				def.node.match!(
 					(ref Seq seqNode1)
