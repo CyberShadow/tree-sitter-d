@@ -24,8 +24,12 @@ bool tree_sitter_d_external_scanner_scan(void *payload, TSLexer *lexer,
       lexer->advance(lexer, false);
       if (last == '/' && lexer->lookahead == '+') {
         depth++;
+        last = 0;
+        lexer->advance(lexer, false);
       } else if (last == '+' && lexer->lookahead == '/') {
         depth--;
+        last = 0;
+        lexer->advance(lexer, false);
       } else if (lexer->lookahead == 0) {
         return false; // EOF
       }
