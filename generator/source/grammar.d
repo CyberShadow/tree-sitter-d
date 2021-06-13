@@ -71,7 +71,7 @@ struct Grammar
 	{
 		void scan(Node node)
 		{
-			node.value.match!(
+			node.match!(
 				(ref RegExp       v) {},
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
@@ -94,7 +94,7 @@ struct Grammar
 		void optimizeNode(ref Node node)
 		{
 			// Optimize children
-			node.value.match!(
+			node.match!(
 				(ref RegExp       v) {},
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
@@ -107,7 +107,7 @@ struct Grammar
 			);
 
 			// Optimize node
-			node = node.value.match!(
+			node = node.match!(
 				(ref RegExp       v) => node,
 				(ref LiteralChars v) => node,
 				(ref LiteralToken v) => node,
@@ -120,7 +120,7 @@ struct Grammar
 			);
 
 			// Transform choice(a, seq(a, b)) into seq(a, optional(b))
-			node.value.match!(
+			node.match!(
 				(ref Choice choiceNode)
 				{
 					if (choiceNode.nodes.length < 2)
@@ -335,7 +335,7 @@ struct Grammar
 
 						State scanNode(ref Node node)
 						{
-							return node.value.match!(
+							return node.match!(
 								(ref RegExp       v) => State.init,
 								(ref LiteralChars v) => State.hasChars,
 								(ref LiteralToken v) => State.hasToken,
@@ -358,7 +358,7 @@ struct Grammar
 				{
 					void scanNode(ref Node node)
 					{
-						node.value.match!(
+						node.match!(
 							(ref RegExp       v) {},
 							(ref LiteralChars v) { throw new Exception("Definition %s with kind %s has literal chars: %(%s%)".format(defName, def.kind, [v.chars])); },
 							(ref LiteralToken v) {},
@@ -391,7 +391,7 @@ struct Grammar
 
 			void scanNode(ref Node node)
 			{
-				node.value.match!(
+				node.match!(
 					(ref RegExp       v) {},
 					(ref LiteralChars v) {},
 					(ref LiteralToken v) {},
@@ -424,7 +424,7 @@ struct Grammar
 
 			size_t scanNode(ref Node node)
 			{
-				return node.value.match!(
+				return node.match!(
 					(ref RegExp       v) => enforce(0),
 					(ref LiteralChars v) => enforce(0),
 					(ref LiteralToken v) => 2,

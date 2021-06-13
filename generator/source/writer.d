@@ -139,7 +139,7 @@ private:
 
 			void writeNode(ref Grammar.Node node)
 			{
-				node.value.match!(
+				node.match!(
 					(ref Grammar.RegExp       v) => single(v.regexp),
 					(ref Grammar.LiteralChars v) => single(format!"%(%s%)"([v.chars])),
 					(ref Grammar.LiteralToken v) => single(format!"%(%s%)"([v.literal])),
