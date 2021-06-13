@@ -129,7 +129,7 @@ struct Grammar
 				(ref Optional     v) => node,
 			);
 
-			// Transform choice(a, seq(a, b)) into seq(a, optional(b))
+			// Transform choice(a, seq(a, b), seq(a, c)...) into seq(a, optional(choice(b, c, ...)))
 			node.match!(
 				(ref Choice choiceNode)
 				{
