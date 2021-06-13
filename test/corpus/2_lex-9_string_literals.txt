@@ -14,43 +14,34 @@ x!r"
     (decl_defs
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (wysiwyg_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (wysiwyg_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier)))))
+          (var_declarator
+            (identifier))))
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (wysiwyg_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (wysiwyg_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier)))))
+          (var_declarator
+            (identifier))))
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (wysiwyg_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (wysiwyg_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier))))))))
+          (var_declarator
+            (identifier)))))))
 
 ====================
 AlternateWysiwygString
@@ -68,43 +59,34 @@ x!`
     (decl_defs
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (alternate_wysiwyg_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (alternate_wysiwyg_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier)))))
+          (var_declarator
+            (identifier))))
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (alternate_wysiwyg_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (alternate_wysiwyg_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier)))))
+          (var_declarator
+            (identifier))))
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (alternate_wysiwyg_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (alternate_wysiwyg_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier))))))))
+          (var_declarator
+            (identifier)))))))
 
 ====================
 DoubleQuotedString
@@ -122,40 +104,31 @@ x!"
     (decl_defs
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (double_quoted_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (double_quoted_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier)))))
+          (var_declarator
+            (identifier))))
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (double_quoted_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (double_quoted_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier)))))
+          (var_declarator
+            (identifier))))
 
       (var_declarations
-        (basic_type
-          (qualified_identifier
-            (template_instance
-              (identifier)
-              (template_arguments
-                (template_single_argument
-                  (double_quoted_string))))))
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (double_quoted_string))))
         (declarators
-          (declarator_initializer
-            (var_declarator
-              (identifier))))))))
+          (var_declarator
+            (identifier)))))))
