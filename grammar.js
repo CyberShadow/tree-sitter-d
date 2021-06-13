@@ -7847,9 +7847,9 @@ module.exports = grammar({
     // https://dlang.org/spec/module.html#Packages
     packages: $ =>
       seq(
-        optional(
+        repeat(
           seq(
-            $.packages,
+            $._package_name,
             ".",
           ),
         ),

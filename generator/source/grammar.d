@@ -229,8 +229,12 @@ struct Grammar
 
 				// If the definition name is the plural of the name of another definition,
 				// then this is almost certainly used for repetition.
-				(name.endsWith("s" ) && name[0 .. $-1] in defs) ||
-				(name.endsWith("es") && name[0 .. $-2] in defs);
+				["s", "es"].any!(pluralSuffix =>
+					name.endsWith(pluralSuffix) &&
+					["", "Name"].any!(singularSuffix =>
+						name[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
+					)
+				);
 
 			if (shouldDeRecurse)
 			{
