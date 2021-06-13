@@ -167,6 +167,45 @@ struct Grammar
 				(ref _) {},
 			);
 
+			// Transform choice(a, seq(b, a), seq(c, a)...) into seq(optional(choice(b, c, ...)), a)
+			// Same as the above transformation, but lifting the suffix instead of the prefix.
+			node.match!(
+				(ref Choice choiceNode)
+				{
+					if (choiceNode.nodes.length < 2)
+						return;
+					auto suffix = choiceNode.nodes[0].match!(
+						(ref Seq seqNode) => seqNode.nodes,
+						(_) => choiceNode.nodes[0 .. 1],
+					);
+					if (!suffix)
+						return;
+
+					bool sameSuffix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+						(ref Seq seqNode) => seqNode.nodes.endsWith(suffix),
+						(_) => false,
+					)).all;
+					if (!sameSuffix)
+						return;
+
+					node = seq(
+						optional(
+							choice(
+								choiceNode.nodes[1 .. $].map!((ref n) => seq(
+									n.tryMatch!(
+										(ref Seq seqNode) => seqNode.nodes[0 .. $ - suffix.length],
+									)
+								))
+								.array,
+							)
+						) ~
+						suffix
+					);
+					optimizeNode(node);
+				},
+				(ref _) {},
+			);
+
 			// Transform optional(choice(y...)) into choice(seq(), y...)
 			// This makes it easier to work with seq(..., choice(...)) nodes later.
 			node.match!(
