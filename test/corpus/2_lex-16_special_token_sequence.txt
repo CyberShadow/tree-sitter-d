@@ -1,0 +1,14 @@
+====================
+SpecialTokenSequence
+====================
+
+#line 1
+# line 2
+# line 3 "file.d"
+
+---
+
+(source_file
+  (special_token_sequence (integer_literal))
+  (special_token_sequence (integer_literal))
+  (special_token_sequence (integer_literal) (filespec)))
