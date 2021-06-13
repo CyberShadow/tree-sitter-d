@@ -9017,12 +9017,12 @@ module.exports = grammar({
     conditional_expression: $ =>
       seq(
         $.or_or_expression,
-        repeat(
+        optional(
           seq(
             "?",
             $._expression,
             ":",
-            $.or_or_expression,
+            $.conditional_expression,
           ),
         ),
       ),
@@ -12713,12 +12713,12 @@ module.exports = grammar({
     asm_exp: $ =>
       seq(
         $.asm_log_or_exp,
-        repeat(
+        optional(
           seq(
             "?",
             $.asm_exp,
             ":",
-            $.asm_log_or_exp,
+            $.asm_exp,
           ),
         ),
       ),

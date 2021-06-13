@@ -8,6 +8,7 @@ import std.sumtype;
 
 import ae.utils.aa;
 import ae.utils.meta;
+import ae.utils.text;
 
 import ddoc;
 
@@ -227,9 +228,29 @@ struct Grammar
 		{
 			optimizeNode(def.node);
 
-			// Transform x := seq(y, optional(x)) into x := repeat1(y)
-			// (attempt to remove recursion)
+			// Attempt to remove recursion
+
+			// In the D grammar, recursion is used for two purposes:
+			// - Repetition (e.g. Characters)
+			// - Nested constructs (e.g. binary expressions)
+			// We only want to de-recurse the first kind.
+			bool shouldDeRecurse =
+
+				// We must always de-recurse token fragments,
+				// because we can't use tree-sitter recursion with them.
+				def.kind == Def.Kind.chars ||
+
+				// Lists of things generally involve repetition.
+				name.splitByCamelCase.canFind("List") ||
+
+				// If the definition name is the plural of the name of another definition,
+				// then this is almost certainly used for repetition.
+				(name.endsWith("s" ) && name[0 .. $-1] in defs) ||
+				(name.endsWith("es") && name[0 .. $-2] in defs);
+
+			if (shouldDeRecurse)
 			{
+				// Transform x := seq(y, optional(x)) into x := repeat1(y)
 				def.node.match!(
 					(ref Seq seqNode)
 					{
@@ -256,11 +277,8 @@ struct Grammar
 					},
 					(_) {}
 				);
-			}
 
-			// Transform x := seq(y, optional(seq(z, x))) into x := seq(y, repeat(seq(z, y)))
-			// (attempt to remove recursion)
-			{
+				// Transform x := seq(y, optional(seq(z, x))) into x := seq(y, repeat(seq(z, y)))
 				def.node.match!(
 					(ref Seq seqNode1)
 					{
@@ -301,11 +319,8 @@ struct Grammar
 					},
 					(_) {}
 				);
-			}
 
-			// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
-			// (attempt to remove recursion)
-			{
+				// Transform x := seq(y, optional(seq(z, optional(x)))) into x := seq(y, repeat(seq(z, y)), optional(z))
 				def.node.match!(
 					(ref Seq seqNode1)
 					{
