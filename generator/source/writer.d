@@ -117,6 +117,11 @@ private:
 
 		void list(T)(string fun, T[] children, void delegate(ref T) childWriter)
 		{
+			if (!children.length)
+			{
+				line(fun ~ "(),");
+				return;
+			}
 			line(fun ~ "(");
 			indent += 2;
 			foreach (ref child; children)

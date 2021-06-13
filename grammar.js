@@ -8948,8 +8948,7 @@ module.exports = grammar({
       seq(
         $.conditional_expression,
         choice(
-          seq(
-          ),
+          seq(),
           seq(
             "=",
             $.assign_expression,
@@ -9521,8 +9520,7 @@ module.exports = grammar({
       seq(
         $.assign_expression,
         choice(
-          seq(
-          ),
+          seq(),
           seq(
             ",",
             $.slice,
@@ -11718,8 +11716,7 @@ module.exports = grammar({
       seq(
         $.identifier,
         choice(
-          seq(
-          ),
+          seq(),
           $.template_type_parameter_specialization,
           $.template_type_parameter_default,
           seq(
@@ -11760,8 +11757,7 @@ module.exports = grammar({
         $.basic_type,
         $._declarator,
         choice(
-          seq(
-          ),
+          seq(),
           $.template_value_parameter_specialization,
           $.template_value_parameter_default,
           seq(
@@ -12185,8 +12181,7 @@ module.exports = grammar({
       seq(
         "debug",
         choice(
-          seq(
-          ),
+          seq(),
           seq(
             "(",
             $.integer_literal,
