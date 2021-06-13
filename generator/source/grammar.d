@@ -75,6 +75,7 @@ struct Grammar
 	{
 		checkReferences();
 		optimize();
+		extractBodies();
 		checkKinds();
 		scanUsed(roots);
 		scanHidden();
@@ -416,6 +417,103 @@ struct Grammar
 					(_) {}
 				);
 			}
+		}
+	}
+
+	// Refactor some definitions into a descending part and an
+	// implementation part, so that we can hide the descending
+	// part to avoid excessive nesting in the tree-sitter AST.
+	// This aims to solve the problem described in
+	// http://tree-sitter.github.io/tree-sitter/creating-parsers#structuring-rules-well ,
+	// though using a different approach.
+	private void extractBodies()
+	{
+		foreach (defName; defs.keys)
+		{
+			auto def = &defs[defName];
+
+			/*
+				x := seq(
+				  y... ,
+				  optional(
+					choice( // implied (with one child) if absent
+					  seq( a... , x , p... ), // Contains x anywhere
+					  seq( b... , x , q... ),
+					  ...
+					)
+			      )
+				  z... ,
+				)
+
+				=>
+
+				x := choice(
+				  seq(y ... , z ...),
+				  x_ts_body,
+				)
+
+				x_ts_body := choice(
+				  seq( y... , a... , x , p... , z... ),
+				  seq( y... , b... , x , q... , z... ),
+				  ...
+				)
+			*/
+			auto x = reference(defName);
+			def.node.match!(
+				(ref Seq seqNode1)
+				{
+					auto optionalIndex =
+						seqNode1.nodes.countUntil!((ref Node node) => node.match!(
+							(ref Optional optionalNode) => optionalNode.node[0] == x || optionalNode.node[0].match!(
+								(ref Choice choiceNode) => choiceNode.nodes.all!((ref Node node) => node == x || node.match!(
+									(ref Seq seqNode2) => seqNode2.nodes.canFind(x),
+									(ref _) => false,
+								)),
+								(ref Seq seqNode2) => seqNode2.nodes.canFind(x),
+								(ref _) => false
+							),
+							(ref _) => false
+						));
+					if (optionalIndex < 0)
+						return;
+
+					Node[][] choices =
+						seqNode1.nodes[optionalIndex].tryMatch!(
+							(ref Optional optionalNode) => optionalNode.node[0].match!(
+								(ref Choice choiceNode) => choiceNode.nodes.map!((ref Node node) => node.tryMatch!(
+									(ref Seq seqNode2) => seqNode2.nodes,
+								)).array,
+								(ref Seq seqNode2) => [seqNode2.nodes],
+								(ref _) => [[x]]
+							)
+						);
+
+					auto y = seqNode1.nodes[0 .. optionalIndex];
+					auto z = seqNode1.nodes[optionalIndex + 1 .. $];
+
+					auto bodyName = defName ~ "TSBody";
+					def.node = choice([
+						seq(y ~ z),
+						reference(bodyName),
+					]);
+					def.tail ~= bodyName;
+					def.publicName = "Maybe" ~ (def.publicName ? def.publicName : defName);
+
+					Def bodyDef;
+					bodyDef.node = choice(
+						choices.map!(choiceNodes => seq(y ~ choiceNodes ~ z)).array,
+					);
+					bodyDef.kind = Def.Kind.tokens;
+					bodyDef.synthetic = true;
+					bodyDef.publicName = defName;
+
+					optimizeNode(def.node);
+					optimizeNode(bodyDef.node);
+
+					defs[bodyName] = bodyDef;
+				},
+				(ref _) {}
+			);
 		}
 	}
 
