@@ -121,19 +121,19 @@ struct Grammar
 
 			// Transform choice(a, seq(a, b)) into seq(a, optional(b))
 			node.value.match!(
-				(ref Choice choice)
+				(ref Choice choiceNode)
 				{
-					if (choice.nodes.length < 2)
+					if (choiceNode.nodes.length < 2)
 						return;
-					auto prefix = choice.nodes[0].match!(
-						(ref Seq seq) => seq.nodes,
-						(_) => choice.nodes[0 .. 1],
+					auto prefix = choiceNode.nodes[0].match!(
+						(ref Seq seqNode) => seqNode.nodes,
+						(_) => choiceNode.nodes[0 .. 1],
 					);
 					if (!prefix)
 						return;
 
-					bool samePrefix = choice.nodes[1 .. $].map!((ref n) => n.match!(
-						(ref Seq seq) => seq.nodes.startsWith(prefix),
+					bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+						(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
 						(_) => false,
 					)).all;
 					if (!samePrefix)
@@ -143,9 +143,9 @@ struct Grammar
 						prefix ~
 						Node(NodeValue(Optional([
 							Node(NodeValue(Choice(
-								choice.nodes[1 .. $].map!((ref n) => Node(NodeValue(Seq(
+								choiceNode.nodes[1 .. $].map!((ref n) => Node(NodeValue(Seq(
 									n.tryMatch!(
-										(ref Seq seq) => seq.nodes[prefix.length .. $],
+										(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
 									)
 								))))
 								.array,
@@ -166,21 +166,21 @@ struct Grammar
 			// (attempt to remove recursion)
 			{
 				def.node.match!(
-					(ref Seq seq)
+					(ref Seq seqNode)
 					{
-						if (seq.nodes.length != 2)
+						if (seqNode.nodes.length != 2)
 							return;
-						seq.nodes[1].match!(
-							(ref Optional optional)
+						seqNode.nodes[1].match!(
+							(ref Optional optionalNode)
 							{
-								optional.node[0].match!(
-									(ref Reference reference)
+								optionalNode.node[0].match!(
+									(ref Reference referenceNode)
 									{
-										if (reference.name != name)
+										if (referenceNode.name != name)
 											return;
 
 										def.node = Node(NodeValue(Repeat1([
-											seq.nodes[0],
+											seqNode.nodes[0],
 										])));
 									},
 									(_) {}
@@ -197,30 +197,30 @@ struct Grammar
 			// (attempt to remove recursion)
 			{
 				def.node.match!(
-					(ref Seq seq1)
+					(ref Seq seqNode1)
 					{
-						if (seq1.nodes.length < 2)
+						if (seqNode1.nodes.length < 2)
 							return;
-						seq1.nodes[$-1].match!(
-							(ref Optional optional)
+						seqNode1.nodes[$-1].match!(
+							(ref Optional optionalNode)
 							{
-								optional.node[0].match!(
-									(ref Seq seq2)
+								optionalNode.node[0].match!(
+									(ref Seq seqNode2)
 									{
-										if (seq2.nodes.length < 2)
+										if (seqNode2.nodes.length < 2)
 											return;
-										seq2.nodes[$-1].match!(
-											(ref Reference reference)
+										seqNode2.nodes[$-1].match!(
+											(ref Reference referenceNode)
 											{
-												if (reference.name != name)
+												if (referenceNode.name != name)
 													return;
 
 												def.node = Node(NodeValue(Seq(
-													seq1.nodes[0 .. $-1] ~
+													seqNode1.nodes[0 .. $-1] ~
 													Node(NodeValue(Repeat([
 														Node(NodeValue(Seq(
-															seq2.nodes[0 .. $-1] ~
-															seq1.nodes[0 .. $-1],
+															seqNode2.nodes[0 .. $-1] ~
+															seqNode1.nodes[0 .. $-1],
 														))),
 													]))),
 												)));
@@ -242,29 +242,29 @@ struct Grammar
 			// (attempt to remove recursion)
 			{
 				def.node.match!(
-					(ref Seq seq1)
+					(ref Seq seqNode1)
 					{
-						if (seq1.nodes.length < 2)
+						if (seqNode1.nodes.length < 2)
 							return;
-						auto y = seq1.nodes[0 .. $-1];
-						seq1.nodes[$-1].match!(
-							(ref Optional optional1)
+						auto y = seqNode1.nodes[0 .. $-1];
+						seqNode1.nodes[$-1].match!(
+							(ref Optional optionalNode1)
 							{
-								optional1.node[0].match!(
-									(ref Seq seq2)
+								optionalNode1.node[0].match!(
+									(ref Seq seqNode2)
 									{
-										if (seq2.nodes.length < 2)
+										if (seqNode2.nodes.length < 2)
 											return;
-										auto z = seq2.nodes[0 .. $-1];
-										seq2.nodes[$-1].match!(
-											(ref Optional optional1)
+										auto z = seqNode2.nodes[0 .. $-1];
+										seqNode2.nodes[$-1].match!(
+											(ref Optional optionalNode1)
 											{
-												optional1.node[0].match!(
-													(ref Reference reference)
+												optionalNode1.node[0].match!(
+													(ref Reference referenceNode)
 													{
-														if (reference.name != name)
+														if (referenceNode.name != name)
 															return;
-														auto x = reference;
+														auto x = referenceNode;
 
 														def.node = Node(NodeValue(Seq(
 															y ~
