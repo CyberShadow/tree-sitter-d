@@ -13,15 +13,17 @@ import ddoc;
 
 struct Grammar
 {
-	struct RegExp { string regexp; }
-	struct LiteralChars { string chars; } // Describes contiguous characters (e.g. number syntax)
-	struct LiteralToken { string literal; } // May be surrounded by whitespace/comments
-	struct Reference { string name; }
-	struct Choice { Node[] nodes; }
-	struct Seq { Node[] nodes; }
-	struct Repeat { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
-	struct Repeat1 { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
-	struct Optional { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
+	struct RegExp { string regexp; } /// Regular expression, generally with the intent to describe some character set.
+	struct LiteralChars { string chars; } /// Describes contiguous characters (e.g. number syntax)
+	struct LiteralToken { string literal; } /// May be surrounded by whitespace/comments
+	struct Reference { string name; } /// Reference to another definition.
+	struct Choice { Node[] nodes; } /// Choice of multiple possible nodes.
+	struct Seq { Node[] nodes; } /// Consecutive sequence of nodes.
+	// https://issues.dlang.org/show_bug.cgi?id=22010
+	struct Repeat { Node[/*1*/] node; } /// Zero-or-more occurrences of the given node.
+	struct Repeat1 { Node[/*1*/] node; } /// One-or-more occurrences of the given node.
+	struct Optional { Node[/*1*/] node; } /// Zero-or-one occurrences of the given node.
+
 	// https://issues.dlang.org/show_bug.cgi?id=22003
 	alias NodeValue = SumType!(
 		RegExp,
@@ -34,26 +36,33 @@ struct Grammar
 		Seq,
 		Optional,
 	);
+
+	/// A grammar node.
 	struct Node
 	{
 		NodeValue value;
 		alias value this;
 	}
+
+	/// A grammar definition.
+	/// Emitted as `name: $ => ...`
 	struct Def
 	{
-		Node node;
+		Node node; /// The root AST node.
 
+		/// How to emit this definition in the grammar.
 		enum Kind
 		{
-			tokens,
-			chars,
+			tokens, /// As a regular rule.
+			chars, /// As a token(...) rule.
 		}
-		Kind kind;
+		Kind kind; /// ditto
 
-		bool used;
-		bool hidden;
+		bool used; /// Include the definition in the generated grammar.
+		bool hidden; /// Hide in the tree-sitter AST (by prefixing the name with _).
 	}
 
+	/// All definitions in the grammar, indexed by their official names.
 	Def[string] defs;
 
 	/// Pre-process and prepare for writing
