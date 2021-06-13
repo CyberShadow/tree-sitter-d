@@ -84,8 +84,12 @@ EOF");
 
 		f.writef(q"EOF
 
+    // https://dlang.org/spec/%s.html#%s
     %s: $ =>
-EOF", convertRuleName(defName));
+EOF",
+			currentFile,
+			defName,
+			convertRuleName(defName));
 		writeRuleBody(defName);
 	}
 
