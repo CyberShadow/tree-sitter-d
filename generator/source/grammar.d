@@ -206,22 +206,6 @@ struct Grammar
 				},
 				(ref _) {},
 			);
-
-			// Transform optional(choice(y...)) into choice(seq(), y...)
-			// This makes it easier to work with seq(..., choice(...)) nodes later.
-			node.match!(
-				(ref Optional optionalNode)
-				{
-					optionalNode.node[0].match!(
-						(ref Choice choiceNode)
-						{
-							node = choice(seq([]) ~ choiceNode.nodes);
-						},
-						(ref _) {}
-					);
-				},
-				(ref _) {}
-			);
 		}
 
 		foreach (name, ref def; defs)
