@@ -244,9 +244,9 @@ struct Grammar
 				def.node.match!(
 					(ref Seq seqNode)
 					{
-						if (seqNode.nodes.length != 2)
+						if (seqNode.nodes.length < 2)
 							return;
-						seqNode.nodes[1].match!(
+						seqNode.nodes[$-1].match!(
 							(ref Optional optionalNode)
 							{
 								optionalNode.node[0].match!(
@@ -256,8 +256,11 @@ struct Grammar
 											return;
 
 										def.node = repeat1(
-											seqNode.nodes[0],
+											seq(
+												seqNode.nodes[0 .. $ - 1],
+											)
 										);
+										optimizeNode(def.node);
 									},
 									(_) {}
 								);

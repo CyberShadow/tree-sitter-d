@@ -10637,11 +10637,10 @@ module.exports = grammar({
 
     // https://dlang.org/spec/statement.html#AsmInstructionList
     asm_instruction_list: $ =>
-      seq(
-        $.asm_instruction,
-        ";",
-        optional(
-          $.asm_instruction_list,
+      repeat1(
+        seq(
+          $.asm_instruction,
+          ";",
         ),
       ),
 
