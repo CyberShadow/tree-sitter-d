@@ -831,6 +831,14 @@ struct Grammar
 			// We make a definition hidden if it always contains at most one other definition.
 			// Definitions which directly contain tokens are never hidden.
 
+			// Exception: nodes which contain only one reference and nothing else
+			// are implicitly understood to have semantic meaning, and are not hidden.
+			if (def.node.match!(
+				(ref Reference    v) => true,
+				(ref              _) => false,
+			))
+				continue;
+
 			size_t scanNode(ref Node node)
 			{
 				return node.match!(
