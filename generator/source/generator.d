@@ -14,6 +14,7 @@ import ae.utils.main;
 
 import ddoc;
 import grammar;
+import parser;
 import writer;
 
 enum dlangOrgPath = "dlang.org";

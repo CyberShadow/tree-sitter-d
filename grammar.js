@@ -9136,64 +9136,63 @@ module.exports = grammar({
     assign_expression: $ =>
       seq(
         $.conditional_expression,
-        optional(
-          choice(
-            seq(
-              "=",
-              $.assign_expression,
-            ),
-            seq(
-              "+=",
-              $.assign_expression,
-            ),
-            seq(
-              "-=",
-              $.assign_expression,
-            ),
-            seq(
-              "*=",
-              $.assign_expression,
-            ),
-            seq(
-              "/=",
-              $.assign_expression,
-            ),
-            seq(
-              "%=",
-              $.assign_expression,
-            ),
-            seq(
-              "&=",
-              $.assign_expression,
-            ),
-            seq(
-              "|=",
-              $.assign_expression,
-            ),
-            seq(
-              "^=",
-              $.assign_expression,
-            ),
-            seq(
-              "~=",
-              $.assign_expression,
-            ),
-            seq(
-              "<<=",
-              $.assign_expression,
-            ),
-            seq(
-              ">>=",
-              $.assign_expression,
-            ),
-            seq(
-              ">>>=",
-              $.assign_expression,
-            ),
-            seq(
-              "^^=",
-              $.assign_expression,
-            ),
+        choice(
+          seq(),
+          seq(
+            "=",
+            $.assign_expression,
+          ),
+          seq(
+            "+=",
+            $.assign_expression,
+          ),
+          seq(
+            "-=",
+            $.assign_expression,
+          ),
+          seq(
+            "*=",
+            $.assign_expression,
+          ),
+          seq(
+            "/=",
+            $.assign_expression,
+          ),
+          seq(
+            "%=",
+            $.assign_expression,
+          ),
+          seq(
+            "&=",
+            $.assign_expression,
+          ),
+          seq(
+            "|=",
+            $.assign_expression,
+          ),
+          seq(
+            "^=",
+            $.assign_expression,
+          ),
+          seq(
+            "~=",
+            $.assign_expression,
+          ),
+          seq(
+            "<<=",
+            $.assign_expression,
+          ),
+          seq(
+            ">>=",
+            $.assign_expression,
+          ),
+          seq(
+            ">>>=",
+            $.assign_expression,
+          ),
+          seq(
+            "^^=",
+            $.assign_expression,
           ),
         ),
       ),
@@ -9709,22 +9708,21 @@ module.exports = grammar({
     slice: $ =>
       seq(
         $.assign_expression,
-        optional(
-          choice(
-            seq(
-              ",",
-              $.slice,
-            ),
-            seq(
-              "..",
-              $.assign_expression,
-            ),
-            seq(
-              "..",
-              $.assign_expression,
-              ",",
-              $.slice,
-            ),
+        choice(
+          seq(),
+          seq(
+            ",",
+            $.slice,
+          ),
+          seq(
+            "..",
+            $.assign_expression,
+          ),
+          seq(
+            "..",
+            $.assign_expression,
+            ",",
+            $.slice,
           ),
         ),
       ),
@@ -11906,14 +11904,13 @@ module.exports = grammar({
     template_type_parameter: $ =>
       seq(
         $.identifier,
-        optional(
-          choice(
+        choice(
+          seq(),
+          $.template_type_parameter_specialization,
+          $.template_type_parameter_default,
+          seq(
             $.template_type_parameter_specialization,
             $.template_type_parameter_default,
-            seq(
-              $.template_type_parameter_specialization,
-              $.template_type_parameter_default,
-            ),
           ),
         ),
       ),
@@ -11948,14 +11945,13 @@ module.exports = grammar({
       seq(
         $.basic_type,
         $._declarator,
-        optional(
-          choice(
+        choice(
+          seq(),
+          $.template_value_parameter_specialization,
+          $.template_value_parameter_default,
+          seq(
             $.template_value_parameter_specialization,
             $.template_value_parameter_default,
-            seq(
-              $.template_value_parameter_specialization,
-              $.template_value_parameter_default,
-            ),
           ),
         ),
       ),
@@ -12373,18 +12369,17 @@ module.exports = grammar({
     debug_condition: $ =>
       seq(
         "debug",
-        optional(
-          choice(
-            seq(
-              "(",
-              $.integer_literal,
-              ")",
-            ),
-            seq(
-              "(",
-              $.identifier,
-              ")",
-            ),
+        choice(
+          seq(),
+          seq(
+            "(",
+            $.integer_literal,
+            ")",
+          ),
+          seq(
+            "(",
+            $.identifier,
+            ")",
           ),
         ),
       ),

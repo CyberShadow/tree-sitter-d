@@ -2,10 +2,8 @@ import std.algorithm.comparison;
 import std.algorithm.iteration;
 import std.algorithm.searching;
 import std.array;
-import std.conv;
 import std.exception;
 import std.format;
-import std.string;
 import std.sumtype;
 
 import ae.utils.aa;
@@ -15,15 +13,17 @@ import ddoc;
 
 struct Grammar
 {
-	struct RegExp { string regexp; }
-	struct LiteralChars { string chars; } // Describes contiguous characters (e.g. number syntax)
-	struct LiteralToken { string literal; } // May be surrounded by whitespace/comments
-	struct Reference { string name; }
-	struct Choice { Node[] nodes; }
-	struct Seq { Node[] nodes; }
-	struct Repeat { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
-	struct Repeat1 { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
-	struct Optional { Node[/*1*/] node; } // https://issues.dlang.org/show_bug.cgi?id=22010
+	struct RegExp { string regexp; } /// Regular expression, generally with the intent to describe some character set.
+	struct LiteralChars { string chars; } /// Describes contiguous characters (e.g. number syntax)
+	struct LiteralToken { string literal; } /// May be surrounded by whitespace/comments
+	struct Reference { string name; } /// Reference to another definition.
+	struct Choice { Node[] nodes; } /// Choice of multiple possible nodes.
+	struct Seq { Node[] nodes; } /// Consecutive sequence of nodes.
+	// https://issues.dlang.org/show_bug.cgi?id=22010
+	struct Repeat { Node[/*1*/] node; } /// Zero-or-more occurrences of the given node.
+	struct Repeat1 { Node[/*1*/] node; } /// One-or-more occurrences of the given node.
+	struct Optional { Node[/*1*/] node; } /// Zero-or-one occurrences of the given node.
+
 	// https://issues.dlang.org/show_bug.cgi?id=22003
 	alias NodeValue = SumType!(
 		RegExp,
@@ -36,617 +36,35 @@ struct Grammar
 		Seq,
 		Optional,
 	);
+
+	/// A grammar node.
 	struct Node
 	{
 		NodeValue value;
 		alias value this;
 	}
+
+	/// A grammar definition.
+	/// Emitted as `name: $ => ...`
 	struct Def
 	{
-		Node node;
+		Node node; /// The root AST node.
 
+		/// How to emit this definition in the grammar.
 		enum Kind
 		{
-			tokens,
-			chars,
+			tokens, /// As a regular rule.
+			chars, /// As a token(...) rule.
 		}
-		Kind kind;
+		Kind kind; /// ditto
 
-		bool used;
-		bool hidden;
+		bool used; /// Include the definition in the generated grammar.
+		bool hidden; /// Hide in the tree-sitter AST (by prefixing the name with _).
+		bool synthetic; /// We made this one up - don't emit a dlang.org link.
 	}
 
+	/// All definitions in the grammar, indexed by their official names.
 	Def[string] defs;
-
-	// Parsing:
-
-	private static DDoc preprocess(const DDoc ddoc)
-	{
-		DDoc result;
-		foreach (ref node; ddoc)
-			if (node.type != .Node.Type.call)
-				result ~= node;
-			else
-			if (node.isCallTo("MULTICOLS"))
-				result ~= node.call.splitArguments()[1];
-			else
-			{
-				.Node node2 = node;
-				node2.call.contents = preprocess(node.call.contents);
-				result ~= node2;
-			}
-		return result;
-	}
-
-	private struct ParseContext
-	{
-		string currentName;
-		DDoc[string] macros;
-		Def.Kind kind;
-	}
-
-	private static Node[] parseDefinition(const DDoc line, ref const ParseContext context)
-	{
-		scope(failure) { import std.stdio : stderr; stderr.writeln("Error with line: ", line); }
-		Node[] seqNodes;
-		foreach (ref node; line)
-		{
-			if (node.type == .Node.Type.text)
-				enforce(!node.text.strip.length, "Bare text node (%(%s%)) in grammar: %s".format([node.text], line));
-			else
-			if (node.isCallTo("I"))
-			{
-				auto text = node.getSingleTextChild();
-				switch (text)
-				{
-					case "any Unicode character":
-						seqNodes ~= Node(NodeValue(RegExp(`/[\s\S]/`)));
-						break;
-					case "physical end of the file":
-						seqNodes ~= Node(NodeValue(RegExp(`/$/m`))); // illustrative
-						break;
-					case "Letter":
-						seqNodes ~= Node(NodeValue(RegExp(`/[A-Za-z]/`)));
-						break;
-					case "UniversalAlpha":
-						// src/dmd/utf.d
-						static immutable wchar[2][] ALPHA_TABLE =
-						[
-							[0x00AA, 0x00AA],
-							[0x00B5, 0x00B5],
-							[0x00B7, 0x00B7],
-							[0x00BA, 0x00BA],
-							[0x00C0, 0x00D6],
-							[0x00D8, 0x00F6],
-							[0x00F8, 0x01F5],
-							[0x01FA, 0x0217],
-							[0x0250, 0x02A8],
-							[0x02B0, 0x02B8],
-							[0x02BB, 0x02BB],
-							[0x02BD, 0x02C1],
-							[0x02D0, 0x02D1],
-							[0x02E0, 0x02E4],
-							[0x037A, 0x037A],
-							[0x0386, 0x0386],
-							[0x0388, 0x038A],
-							[0x038C, 0x038C],
-							[0x038E, 0x03A1],
-							[0x03A3, 0x03CE],
-							[0x03D0, 0x03D6],
-							[0x03DA, 0x03DA],
-							[0x03DC, 0x03DC],
-							[0x03DE, 0x03DE],
-							[0x03E0, 0x03E0],
-							[0x03E2, 0x03F3],
-							[0x0401, 0x040C],
-							[0x040E, 0x044F],
-							[0x0451, 0x045C],
-							[0x045E, 0x0481],
-							[0x0490, 0x04C4],
-							[0x04C7, 0x04C8],
-							[0x04CB, 0x04CC],
-							[0x04D0, 0x04EB],
-							[0x04EE, 0x04F5],
-							[0x04F8, 0x04F9],
-							[0x0531, 0x0556],
-							[0x0559, 0x0559],
-							[0x0561, 0x0587],
-							[0x05B0, 0x05B9],
-							[0x05BB, 0x05BD],
-							[0x05BF, 0x05BF],
-							[0x05C1, 0x05C2],
-							[0x05D0, 0x05EA],
-							[0x05F0, 0x05F2],
-							[0x0621, 0x063A],
-							[0x0640, 0x0652],
-							[0x0660, 0x0669],
-							[0x0670, 0x06B7],
-							[0x06BA, 0x06BE],
-							[0x06C0, 0x06CE],
-							[0x06D0, 0x06DC],
-							[0x06E5, 0x06E8],
-							[0x06EA, 0x06ED],
-							[0x06F0, 0x06F9],
-							[0x0901, 0x0903],
-							[0x0905, 0x0939],
-							[0x093D, 0x094D],
-							[0x0950, 0x0952],
-							[0x0958, 0x0963],
-							[0x0966, 0x096F],
-							[0x0981, 0x0983],
-							[0x0985, 0x098C],
-							[0x098F, 0x0990],
-							[0x0993, 0x09A8],
-							[0x09AA, 0x09B0],
-							[0x09B2, 0x09B2],
-							[0x09B6, 0x09B9],
-							[0x09BE, 0x09C4],
-							[0x09C7, 0x09C8],
-							[0x09CB, 0x09CD],
-							[0x09DC, 0x09DD],
-							[0x09DF, 0x09E3],
-							[0x09E6, 0x09F1],
-							[0x0A02, 0x0A02],
-							[0x0A05, 0x0A0A],
-							[0x0A0F, 0x0A10],
-							[0x0A13, 0x0A28],
-							[0x0A2A, 0x0A30],
-							[0x0A32, 0x0A33],
-							[0x0A35, 0x0A36],
-							[0x0A38, 0x0A39],
-							[0x0A3E, 0x0A42],
-							[0x0A47, 0x0A48],
-							[0x0A4B, 0x0A4D],
-							[0x0A59, 0x0A5C],
-							[0x0A5E, 0x0A5E],
-							[0x0A66, 0x0A6F],
-							[0x0A74, 0x0A74],
-							[0x0A81, 0x0A83],
-							[0x0A85, 0x0A8B],
-							[0x0A8D, 0x0A8D],
-							[0x0A8F, 0x0A91],
-							[0x0A93, 0x0AA8],
-							[0x0AAA, 0x0AB0],
-							[0x0AB2, 0x0AB3],
-							[0x0AB5, 0x0AB9],
-							[0x0ABD, 0x0AC5],
-							[0x0AC7, 0x0AC9],
-							[0x0ACB, 0x0ACD],
-							[0x0AD0, 0x0AD0],
-							[0x0AE0, 0x0AE0],
-							[0x0AE6, 0x0AEF],
-							[0x0B01, 0x0B03],
-							[0x0B05, 0x0B0C],
-							[0x0B0F, 0x0B10],
-							[0x0B13, 0x0B28],
-							[0x0B2A, 0x0B30],
-							[0x0B32, 0x0B33],
-							[0x0B36, 0x0B39],
-							[0x0B3D, 0x0B43],
-							[0x0B47, 0x0B48],
-							[0x0B4B, 0x0B4D],
-							[0x0B5C, 0x0B5D],
-							[0x0B5F, 0x0B61],
-							[0x0B66, 0x0B6F],
-							[0x0B82, 0x0B83],
-							[0x0B85, 0x0B8A],
-							[0x0B8E, 0x0B90],
-							[0x0B92, 0x0B95],
-							[0x0B99, 0x0B9A],
-							[0x0B9C, 0x0B9C],
-							[0x0B9E, 0x0B9F],
-							[0x0BA3, 0x0BA4],
-							[0x0BA8, 0x0BAA],
-							[0x0BAE, 0x0BB5],
-							[0x0BB7, 0x0BB9],
-							[0x0BBE, 0x0BC2],
-							[0x0BC6, 0x0BC8],
-							[0x0BCA, 0x0BCD],
-							[0x0BE7, 0x0BEF],
-							[0x0C01, 0x0C03],
-							[0x0C05, 0x0C0C],
-							[0x0C0E, 0x0C10],
-							[0x0C12, 0x0C28],
-							[0x0C2A, 0x0C33],
-							[0x0C35, 0x0C39],
-							[0x0C3E, 0x0C44],
-							[0x0C46, 0x0C48],
-							[0x0C4A, 0x0C4D],
-							[0x0C60, 0x0C61],
-							[0x0C66, 0x0C6F],
-							[0x0C82, 0x0C83],
-							[0x0C85, 0x0C8C],
-							[0x0C8E, 0x0C90],
-							[0x0C92, 0x0CA8],
-							[0x0CAA, 0x0CB3],
-							[0x0CB5, 0x0CB9],
-							[0x0CBE, 0x0CC4],
-							[0x0CC6, 0x0CC8],
-							[0x0CCA, 0x0CCD],
-							[0x0CDE, 0x0CDE],
-							[0x0CE0, 0x0CE1],
-							[0x0CE6, 0x0CEF],
-							[0x0D02, 0x0D03],
-							[0x0D05, 0x0D0C],
-							[0x0D0E, 0x0D10],
-							[0x0D12, 0x0D28],
-							[0x0D2A, 0x0D39],
-							[0x0D3E, 0x0D43],
-							[0x0D46, 0x0D48],
-							[0x0D4A, 0x0D4D],
-							[0x0D60, 0x0D61],
-							[0x0D66, 0x0D6F],
-							[0x0E01, 0x0E3A],
-							[0x0E40, 0x0E5B],
-							[0x0E81, 0x0E82],
-							[0x0E84, 0x0E84],
-							[0x0E87, 0x0E88],
-							[0x0E8A, 0x0E8A],
-							[0x0E8D, 0x0E8D],
-							[0x0E94, 0x0E97],
-							[0x0E99, 0x0E9F],
-							[0x0EA1, 0x0EA3],
-							[0x0EA5, 0x0EA5],
-							[0x0EA7, 0x0EA7],
-							[0x0EAA, 0x0EAB],
-							[0x0EAD, 0x0EAE],
-							[0x0EB0, 0x0EB9],
-							[0x0EBB, 0x0EBD],
-							[0x0EC0, 0x0EC4],
-							[0x0EC6, 0x0EC6],
-							[0x0EC8, 0x0ECD],
-							[0x0ED0, 0x0ED9],
-							[0x0EDC, 0x0EDD],
-							[0x0F00, 0x0F00],
-							[0x0F18, 0x0F19],
-							[0x0F20, 0x0F33],
-							[0x0F35, 0x0F35],
-							[0x0F37, 0x0F37],
-							[0x0F39, 0x0F39],
-							[0x0F3E, 0x0F47],
-							[0x0F49, 0x0F69],
-							[0x0F71, 0x0F84],
-							[0x0F86, 0x0F8B],
-							[0x0F90, 0x0F95],
-							[0x0F97, 0x0F97],
-							[0x0F99, 0x0FAD],
-							[0x0FB1, 0x0FB7],
-							[0x0FB9, 0x0FB9],
-							[0x10A0, 0x10C5],
-							[0x10D0, 0x10F6],
-							[0x1E00, 0x1E9B],
-							[0x1EA0, 0x1EF9],
-							[0x1F00, 0x1F15],
-							[0x1F18, 0x1F1D],
-							[0x1F20, 0x1F45],
-							[0x1F48, 0x1F4D],
-							[0x1F50, 0x1F57],
-							[0x1F59, 0x1F59],
-							[0x1F5B, 0x1F5B],
-							[0x1F5D, 0x1F5D],
-							[0x1F5F, 0x1F7D],
-							[0x1F80, 0x1FB4],
-							[0x1FB6, 0x1FBC],
-							[0x1FBE, 0x1FBE],
-							[0x1FC2, 0x1FC4],
-							[0x1FC6, 0x1FCC],
-							[0x1FD0, 0x1FD3],
-							[0x1FD6, 0x1FDB],
-							[0x1FE0, 0x1FEC],
-							[0x1FF2, 0x1FF4],
-							[0x1FF6, 0x1FFC],
-							[0x203F, 0x2040],
-							[0x207F, 0x207F],
-							[0x2102, 0x2102],
-							[0x2107, 0x2107],
-							[0x210A, 0x2113],
-							[0x2115, 0x2115],
-							[0x2118, 0x211D],
-							[0x2124, 0x2124],
-							[0x2126, 0x2126],
-							[0x2128, 0x2128],
-							[0x212A, 0x2131],
-							[0x2133, 0x2138],
-							[0x2160, 0x2182],
-							[0x3005, 0x3007],
-							[0x3021, 0x3029],
-							[0x3041, 0x3093],
-							[0x309B, 0x309C],
-							[0x30A1, 0x30F6],
-							[0x30FB, 0x30FC],
-							[0x3105, 0x312C],
-							[0x4E00, 0x9FA5],
-							[0xAC00, 0xD7A3],
-						];
-						seqNodes ~= Node(NodeValue(RegExp(`/[%-(%s%)]/`.format(ALPHA_TABLE.map!(r =>
-							r[0] == r[1]
-							? `\u%04x`.format(r[0])
-							: `\u%04x-\u%04x`.format(r[0], r[1])
-						)))));
-						break;
-					default:
-						throw new Exception("Unknown I: " ~ text);
-				}
-			}
-			else
-			if (node.isCallTo("B"))
-			{
-				auto text = node.call.contents.toString();
-				enforce(context.kind == Def.Kind.chars, `B in GRAMMAR block: ` ~ text);
-				if (text.length == 6 && text.startsWith(`\u`))
-					seqNodes ~= Node(NodeValue(LiteralChars(wchar(text[2 .. $].to!ushort(16)).to!string)));
-				else
-				{
-					// These are to aid fixing usage of $(D ...)/$(B ...) in the spec
-					enforce(text.among(
-						"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-						"a", "b", "c", "d", "e", "f",
-						"A", "B", "C", "D", "E", "F",
-						"/*",
-						"*/",
-						"//",
-						"/+",
-						"+/",
-						`r"`,
-						`"`,
-						"`",
-						"'",
-						"c",
-						"w",
-						"d",
-						`q"`,
-						`(`, `[`, `<`, `{`,
-						`)`, `]`, `>`, `}`,
-						"L", "u", "U",
-						"Lu", "LU",
-						"uL", "UL",
-						"0b",
-						"0B",
-						"_",
-						".",
-						`\'`,
-						`\"`,
-						`\?`,
-						`\`,
-						`\0`,
-						`\a`,
-						`\b`,
-						`\f`,
-						`\n`,
-						`\r`,
-						`\t`,
-						`\v`,
-						`\x`,
-						`\\`,
-						`\u`,
-						`\U`,
-						`x"`,
-						`e+`,
-						`E+`,
-						`e-`,
-						`E-`,
-						`0x`,
-						`0X`,
-						`p`,
-						`P`,
-						`p+`,
-						`P+`,
-						`p-`,
-						`P-`,
-						`i`,
-						`&`,
-						`;`,
-						`#!`,
-					), "Unknown B: " ~ text);
-					seqNodes ~= Node(NodeValue(LiteralChars(text)));
-				}
-			}
-			else
-			if (node.isCallTo("D"))
-			{
-				// ditto
-				auto text = node.call.contents.toString();
-				enforce(text.length);
-				foreach (word; text.split)
-				{
-					enforce(
-						// keywords
-						(word.length >= 2 && word.representation.all!(c => "abcdefghijklmnopqrstuvwxyz_".representation.canFind(c))) ||
-						// traits
-						(["is", "has", "get"].any!(prefix => word.startsWith(prefix)) && word.representation.all!(c => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".representation.canFind(c))) ||
-						// magic keywords
-						(word.startsWith("__") && word.endsWith("__") && word[2 .. $-2].representation.all!(c => "ABCDEFGHIJKLMNOPQRSTUVWXYZ_".representation.canFind(c))) ||
-						// registers
-						(word.length >= 2 && "ABCDEFGHIJKLMNOPQRSTUVWXYZ".representation.canFind(word[0]) && word.representation.all!(c => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()".representation.canFind(c))) ||
-						// other tokens
-						word.among(
-							"/",
-							"/=",
-							".",
-							"..",
-							"...",
-							"&",
-							"&=",
-							"&&",
-							"|",
-							"|=",
-							"||",
-							"-",
-							"-=",
-							"--",
-							"+",
-							"+=",
-							"++",
-							"<",
-							"<=",
-							"<<",
-							"<<=",
-							">",
-							">=",
-							">>=",
-							">>>=",
-							">>",
-							">>>",
-							"!",
-							"!=",
-							"(",
-							")",
-							"[",
-							"]",
-							"{",
-							"}",
-							"?",
-							",",
-							";",
-							":",
-							"$",
-							"=",
-							"==",
-							"*",
-							"*=",
-							"%",
-							"%=",
-							"^",
-							"^=",
-							"^^",
-							"^^=",
-							"~",
-							"~=",
-							"@",
-							"=>",
-							"#",
-
-							`q{`,
-
-							"C",
-							"C++",
-							"D",
-							"Windows",
-							"System",
-							"Objective-C",
-
-							"classInstanceSize", // should have been getClassInstanceSize
-							"allMembers",        // should have been getAllMembers
-							"derivedMembers",    // should have been getDerivedMembers
-							"toType",
-
-							"__LOCAL_SIZE",
-						), "Unknown D: " ~ word);
-					seqNodes ~= Node(NodeValue(LiteralToken(word)));
-				}
-			}
-			else
-			if (node.isCallTo("GLINK") || node.isCallTo("GLINK_LEX"))
-			{
-				auto text = node.getSingleTextChild();
-				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
-				seqNodes ~= Node(NodeValue(Reference(text)));
-			}
-			else
-			if (node.isCallTo("GLINK2"))
-			{
-				auto arguments = node.call.splitArguments();
-				enforce(arguments.length == 2);
-				auto text = arguments[1].toString();
-				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
-				seqNodes ~= Node(NodeValue(Reference(text)));
-			}
-			else
-			if (node.isCallTo("LINK2") || node.isCallTo("RELATIVE_LINK2"))
-			{
-				auto arguments = node.call.splitArguments();
-				enforce(arguments.length == 2);
-				seqNodes ~= parseDefinition(arguments[1], context);
-			}
-			else
-			if (node.isCallTo("GSELF"))
-			{
-				auto text = node.getSingleTextChild();
-				enforce(text == context.currentName, "GSELF to %(%s%) should be GLINK or to %(%s%)".format([text], [context.currentName]));
-				seqNodes ~= Node(NodeValue(Reference(text)));
-			}
-			else
-			if (node.isCallTo("OPT"))
-			{
-				enforce(seqNodes.length);
-				seqNodes[$-1] = Node(NodeValue(Optional([seqNodes[$-1]])));
-			}
-			else
-			if (node.isCallTo("GDEPRECATED"))
-				seqNodes ~= parseDefinition(node.call.contents, context);
-			else
-			if (node.isCallTo("GRESERVED"))
-				seqNodes ~= parseDefinition(node.call.contents, context);
-			else
-			if (node.isCallToEmpty("CODE_AMP"))
-				seqNodes ~= Node(NodeValue(LiteralToken("&")));
-			else
-			if (node.isCallToEmpty("CODE_LCURL"))
-				seqNodes ~= Node(NodeValue(LiteralToken("{")));
-			else
-			if (node.isCallToEmpty("CODE_RCURL"))
-				seqNodes ~= Node(NodeValue(LiteralToken("}")));
-			else
-			if (node.isCallToEmpty("CODE_PERCENT"))
-				seqNodes ~= Node(NodeValue(LiteralToken("%")));
-			else
-			if (auto pdefinition = node.call.macroName in context.macros)
-				seqNodes ~= parseDefinition(node.call.expand(*pdefinition), context);
-			else
-				throw new Exception("Unknown macro call (%(%s%)) in grammar".format([node.call.macroName]));
-		}
-		return seqNodes;
-	}
-
-	/// Parse and accumulate definitions from DDoc AST
-	string[] parse(const DDoc ddoc, DDoc[string] macros, Def.Kind kind)
-	{
-		ParseContext context;
-		context.macros = macros;
-		context.kind = kind;
-
-		Node[] currentDefs;
-		string[] newDefs;
-
-		void flush()
-		{
-			if (!context.currentName)
-				return;
-
-			auto newDef = Def(Node(NodeValue(Choice(currentDefs))), kind);
-			defs.update(context.currentName,
-				{ newDefs ~= context.currentName; return newDef; },
-				(ref Def def) { enforce(def == newDef, "Definition mismatch for " ~ context.currentName); }
-			);
-			context.currentName = null;
-			currentDefs = null;
-		}
-
-		foreach (line; preprocess(ddoc).split('\n'))
-		{
-			if (!line.length || (line.length == 1 && line[0].isText("")))
-			{}  // Empty line
-			else
-			if (line.length == 2 && line[0].isCallTo("GNAME") && line[1].isText(":"))
-			{
-				// Definition
-				flush();
-				context.currentName = line[0].getSingleTextChild();
-			}
-			else
-			if (line.length >= 2 && line[0].isText("    "))
-			{
-				// Possible declaration
-				enforce(context.currentName, "Body line without definition line");
-				currentDefs ~= Node(NodeValue(Seq(parseDefinition(line, context))));
-			}
-			else
-				throw new Exception(format!"Can't parse grammar from: %s"(line));
-		}
-		flush();
-
-		return newDefs;
-	}
 
 	/// Pre-process and prepare for writing
 	void analyze(string[] roots)
@@ -663,7 +81,7 @@ struct Grammar
 	{
 		void scan(Node node)
 		{
-			node.value.match!(
+			node.match!(
 				(ref RegExp       v) {},
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
@@ -686,7 +104,7 @@ struct Grammar
 		void optimizeNode(ref Node node)
 		{
 			// Optimize children
-			node.value.match!(
+			node.match!(
 				(ref RegExp       v) {},
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
@@ -699,7 +117,7 @@ struct Grammar
 			);
 
 			// Optimize node
-			node = node.value.match!(
+			node = node.match!(
 				(ref RegExp       v) => node,
 				(ref LiteralChars v) => node,
 				(ref LiteralToken v) => node,
@@ -712,41 +130,57 @@ struct Grammar
 			);
 
 			// Transform choice(a, seq(a, b)) into seq(a, optional(b))
-			node.value.match!(
-				(ref Choice choice)
+			node.match!(
+				(ref Choice choiceNode)
 				{
-					if (choice.nodes.length < 2)
+					if (choiceNode.nodes.length < 2)
 						return;
-					auto prefix = choice.nodes[0].match!(
-						(ref Seq seq) => seq.nodes,
-						(_) => choice.nodes[0 .. 1],
+					auto prefix = choiceNode.nodes[0].match!(
+						(ref Seq seqNode) => seqNode.nodes,
+						(_) => choiceNode.nodes[0 .. 1],
 					);
 					if (!prefix)
 						return;
 
-					bool samePrefix = choice.nodes[1 .. $].map!((ref n) => n.match!(
-						(ref Seq seq) => seq.nodes.startsWith(prefix),
+					bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+						(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
 						(_) => false,
 					)).all;
 					if (!samePrefix)
 						return;
 
-					node = Node(NodeValue(Seq(
+					node = seq(
 						prefix ~
-						Node(NodeValue(Optional([
-							Node(NodeValue(Choice(
-								choice.nodes[1 .. $].map!((ref n) => Node(NodeValue(Seq(
+						optional(
+							choice(
+								choiceNode.nodes[1 .. $].map!((ref n) => seq(
 									n.tryMatch!(
-										(ref Seq seq) => seq.nodes[prefix.length .. $],
+										(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
 									)
-								))))
+								))
 								.array,
-							)))
-						])))
-					)));
+							)
+						)
+					);
 					optimizeNode(node);
 				},
 				(ref _) {},
+			);
+
+			// Transform optional(choice(y...)) into choice(seq(), y...)
+			// This makes it easier to work with seq(..., choice(...)) nodes later.
+			node.match!(
+				(ref Optional optionalNode)
+				{
+					optionalNode.node[0].match!(
+						(ref Choice choiceNode)
+						{
+							node = choice(seq([]) ~ choiceNode.nodes);
+						},
+						(ref _) {}
+					);
+				},
+				(ref _) {}
 			);
 		}
 
@@ -758,22 +192,22 @@ struct Grammar
 			// (attempt to remove recursion)
 			{
 				def.node.match!(
-					(ref Seq seq)
+					(ref Seq seqNode)
 					{
-						if (seq.nodes.length != 2)
+						if (seqNode.nodes.length != 2)
 							return;
-						seq.nodes[1].match!(
-							(ref Optional optional)
+						seqNode.nodes[1].match!(
+							(ref Optional optionalNode)
 							{
-								optional.node[0].match!(
-									(ref Reference reference)
+								optionalNode.node[0].match!(
+									(ref Reference referenceNode)
 									{
-										if (reference.name != name)
+										if (referenceNode.name != name)
 											return;
 
-										def.node = Node(NodeValue(Repeat1([
-											seq.nodes[0],
-										])));
+										def.node = repeat1(
+											seqNode.nodes[0],
+										);
 									},
 									(_) {}
 								);
@@ -789,33 +223,33 @@ struct Grammar
 			// (attempt to remove recursion)
 			{
 				def.node.match!(
-					(ref Seq seq1)
+					(ref Seq seqNode1)
 					{
-						if (seq1.nodes.length < 2)
+						if (seqNode1.nodes.length < 2)
 							return;
-						seq1.nodes[$-1].match!(
-							(ref Optional optional)
+						seqNode1.nodes[$-1].match!(
+							(ref Optional optionalNode)
 							{
-								optional.node[0].match!(
-									(ref Seq seq2)
+								optionalNode.node[0].match!(
+									(ref Seq seqNode2)
 									{
-										if (seq2.nodes.length < 2)
+										if (seqNode2.nodes.length < 2)
 											return;
-										seq2.nodes[$-1].match!(
-											(ref Reference reference)
+										seqNode2.nodes[$-1].match!(
+											(ref Reference referenceNode)
 											{
-												if (reference.name != name)
+												if (referenceNode.name != name)
 													return;
 
-												def.node = Node(NodeValue(Seq(
-													seq1.nodes[0 .. $-1] ~
-													Node(NodeValue(Repeat([
-														Node(NodeValue(Seq(
-															seq2.nodes[0 .. $-1] ~
-															seq1.nodes[0 .. $-1],
-														))),
-													]))),
-												)));
+												def.node = seq(
+													seqNode1.nodes[0 .. $-1] ~
+													repeat(
+														seq(
+															seqNode2.nodes[0 .. $-1] ~
+															seqNode1.nodes[0 .. $-1],
+														),
+													),
+												);
 											},
 											(_) {}
 										);
@@ -834,44 +268,44 @@ struct Grammar
 			// (attempt to remove recursion)
 			{
 				def.node.match!(
-					(ref Seq seq1)
+					(ref Seq seqNode1)
 					{
-						if (seq1.nodes.length < 2)
+						if (seqNode1.nodes.length < 2)
 							return;
-						auto y = seq1.nodes[0 .. $-1];
-						seq1.nodes[$-1].match!(
-							(ref Optional optional1)
+						auto y = seqNode1.nodes[0 .. $-1];
+						seqNode1.nodes[$-1].match!(
+							(ref Optional optionalNode1)
 							{
-								optional1.node[0].match!(
-									(ref Seq seq2)
+								optionalNode1.node[0].match!(
+									(ref Seq seqNode2)
 									{
-										if (seq2.nodes.length < 2)
+										if (seqNode2.nodes.length < 2)
 											return;
-										auto z = seq2.nodes[0 .. $-1];
-										seq2.nodes[$-1].match!(
-											(ref Optional optional1)
+										auto z = seqNode2.nodes[0 .. $-1];
+										seqNode2.nodes[$-1].match!(
+											(ref Optional optionalNode1)
 											{
-												optional1.node[0].match!(
-													(ref Reference reference)
+												optionalNode1.node[0].match!(
+													(ref Reference referenceNode)
 													{
-														if (reference.name != name)
+														if (referenceNode.name != name)
 															return;
-														auto x = reference;
+														auto x = referenceNode;
 
-														def.node = Node(NodeValue(Seq(
+														def.node = seq(
 															y ~
-															Node(NodeValue(Repeat([
-																Node(NodeValue(Seq(
+															repeat(
+																seq(
 																	z ~
 																	y
-																)))
-															]))) ~
-															Node(NodeValue(Optional([
-																Node(NodeValue(Seq(
+																)
+															) ~
+															optional(
+																seq(
 																	z
-																)))
-															])))
-														)));
+																)
+															)
+														);
 														optimizeNode(def.node);
 													},
 													(_) {}
@@ -927,7 +361,7 @@ struct Grammar
 
 						State scanNode(ref Node node)
 						{
-							return node.value.match!(
+							return node.match!(
 								(ref RegExp       v) => State.init,
 								(ref LiteralChars v) => State.hasChars,
 								(ref LiteralToken v) => State.hasToken,
@@ -950,7 +384,7 @@ struct Grammar
 				{
 					void scanNode(ref Node node)
 					{
-						node.value.match!(
+						node.match!(
 							(ref RegExp       v) {},
 							(ref LiteralChars v) { throw new Exception("Definition %s with kind %s has literal chars: %(%s%)".format(defName, def.kind, [v.chars])); },
 							(ref LiteralToken v) {},
@@ -983,7 +417,7 @@ struct Grammar
 
 			void scanNode(ref Node node)
 			{
-				node.value.match!(
+				node.match!(
 					(ref RegExp       v) {},
 					(ref LiteralChars v) {},
 					(ref LiteralToken v) {},
@@ -1016,7 +450,7 @@ struct Grammar
 
 			size_t scanNode(ref Node node)
 			{
-				return node.value.match!(
+				return node.match!(
 					(ref RegExp       v) => enforce(0),
 					(ref LiteralChars v) => enforce(0),
 					(ref LiteralToken v) => 2,
@@ -1032,3 +466,14 @@ struct Grammar
 		}
 	}
 }
+
+/// Convenience factory functions.
+Grammar.Node regexp      (string         regexp ) { return Grammar.Node(Grammar.NodeValue(Grammar.RegExp      ( regexp  ))); }
+Grammar.Node literalChars(string         chars  ) { return Grammar.Node(Grammar.NodeValue(Grammar.LiteralChars( chars   ))); } /// ditto
+Grammar.Node literalToken(string         literal) { return Grammar.Node(Grammar.NodeValue(Grammar.LiteralToken( literal ))); } /// ditto
+Grammar.Node reference   (string         name   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Reference   ( name    ))); } /// ditto
+Grammar.Node choice      (Grammar.Node[] nodes  ) { return Grammar.Node(Grammar.NodeValue(Grammar.Choice      ( nodes   ))); } /// ditto
+Grammar.Node seq         (Grammar.Node[] nodes  ) { return Grammar.Node(Grammar.NodeValue(Grammar.Seq         ( nodes   ))); } /// ditto
+Grammar.Node repeat      (Grammar.Node   node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Repeat      ([node   ]))); } /// ditto
+Grammar.Node repeat1     (Grammar.Node   node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Repeat1     ([node   ]))); } /// ditto
+Grammar.Node optional    (Grammar.Node   node   ) { return Grammar.Node(Grammar.NodeValue(Grammar.Optional    ([node   ]))); } /// ditto
