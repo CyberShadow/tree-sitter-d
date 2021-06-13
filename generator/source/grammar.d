@@ -4,6 +4,7 @@ import std.algorithm.searching;
 import std.array;
 import std.exception;
 import std.format;
+import std.range;
 import std.sumtype;
 
 import ae.utils.aa;
@@ -132,20 +133,34 @@ struct Grammar
 			(ref Optional     v) => node,
 		);
 
+		// Returns the index of the shortest node in `nodes` (for the purposes of prefix/suffix lifting).
+		size_t shortestIndex(Node[] nodes)
+		{
+			auto lengths = nodes.map!((ref Node node) => node.match!(
+				(ref Seq seqNode) => seqNode.nodes.length,
+				(ref _) => 1,
+			));
+			auto shortestLength = lengths.reduce!min;
+			auto shortestIndex = lengths.countUntil(shortestLength);
+			return shortestIndex;
+		}
+
 		// Transform choice(a, seq(a, b), seq(a, c)...) into seq(a, optional(choice(b, c, ...)))
 		node.match!(
 			(ref Choice choiceNode)
 			{
 				if (choiceNode.nodes.length < 2)
 					return;
-				auto prefix = choiceNode.nodes[0].match!(
+				auto prefixIndex = shortestIndex(choiceNode.nodes);
+				auto prefix = choiceNode.nodes[prefixIndex].match!(
 					(ref Seq seqNode) => seqNode.nodes,
-					(_) => choiceNode.nodes[0 .. 1],
+					(_) => choiceNode.nodes[prefixIndex .. prefixIndex + 1],
 				);
 				if (!prefix)
 					return;
 
-				bool samePrefix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+				auto remainder = choiceNode.nodes[0 .. prefixIndex] ~ choiceNode.nodes[prefixIndex + 1 .. $];
+				bool samePrefix = remainder.map!((ref Node node) => node.match!(
 					(ref Seq seqNode) => seqNode.nodes.startsWith(prefix),
 					(_) => false,
 				)).all;
@@ -156,7 +171,7 @@ struct Grammar
 					prefix ~
 					optional(
 						choice(
-							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+							remainder.map!((ref n) => seq(
 								n.tryMatch!(
 									(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
 								)
@@ -177,14 +192,16 @@ struct Grammar
 			{
 				if (choiceNode.nodes.length < 2)
 					return;
-				auto suffix = choiceNode.nodes[0].match!(
+				auto suffixIndex = shortestIndex(choiceNode.nodes);
+				auto suffix = choiceNode.nodes[suffixIndex].match!(
 					(ref Seq seqNode) => seqNode.nodes,
-					(_) => choiceNode.nodes[0 .. 1],
+					(_) => choiceNode.nodes[suffixIndex .. suffixIndex + 1],
 				);
 				if (!suffix)
 					return;
 
-				bool sameSuffix = choiceNode.nodes[1 .. $].map!((ref n) => n.match!(
+				auto remainder = choiceNode.nodes[0 .. suffixIndex] ~ choiceNode.nodes[suffixIndex + 1 .. $];
+				bool sameSuffix = remainder.map!((ref n) => n.match!(
 					(ref Seq seqNode) => seqNode.nodes.endsWith(suffix),
 					(_) => false,
 				)).all;
@@ -194,7 +211,7 @@ struct Grammar
 				node = seq(
 					optional(
 						choice(
-							choiceNode.nodes[1 .. $].map!((ref n) => seq(
+							remainder.map!((ref n) => seq(
 								n.tryMatch!(
 									(ref Seq seqNode) => seqNode.nodes[0 .. $ - suffix.length],
 								)

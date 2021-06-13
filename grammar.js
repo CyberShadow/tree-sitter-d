@@ -18,17 +18,11 @@ module.exports = grammar({
 
     // https://dlang.org/spec/lex.html#SourceFile
     source_file: $ =>
-      choice(
-        seq(
-          $.byte_order_mark,
-          optional(
-            $.module,
-          ),
-        ),
-        seq(
-          $.shebang,
-          optional(
-            $.module,
+      seq(
+        optional(
+          choice(
+            $.byte_order_mark,
+            $.shebang,
           ),
         ),
         optional(
@@ -7756,10 +7750,9 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#Module
     module: $ =>
-      choice(
-        seq(
+      seq(
+        optional(
           $.module_declaration,
-          $.decl_defs,
         ),
         $.decl_defs,
       ),
@@ -12086,17 +12079,16 @@ module.exports = grammar({
 
     // https://dlang.org/spec/template-mixin.html#MixinTemplateName
     mixin_template_name: $ =>
-      choice(
-        seq(
-          ".",
-          $.mixin_qualified_identifier,
+      seq(
+        optional(
+          seq(
+            optional(
+              $.typeof,
+            ),
+            ".",
+          ),
         ),
         $.mixin_qualified_identifier,
-        seq(
-          $.typeof,
-          ".",
-          $.mixin_qualified_identifier,
-        ),
       ),
 
     // https://dlang.org/spec/template-mixin.html#MixinQualifiedIdentifier
