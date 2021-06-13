@@ -9060,10 +9060,7 @@ module.exports = grammar({
 
     // https://dlang.org/spec/expression.html#StringLiterals
     string_literals: $ =>
-      seq(
-        repeat(
-          $._string_literal,
-        ),
+      repeat1(
         $._string_literal,
       ),
 

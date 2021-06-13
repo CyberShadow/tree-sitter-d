@@ -346,6 +346,35 @@ struct Grammar
 					(_) {}
 				);
 
+				// Transform x := ( | x ) y into x := ( y )+
+				def.node.match!(
+					(ref SeqChoice sc1)
+					{
+						if (sc1.nodes.length != 1)
+							return; // Single choice
+						if (sc1.nodes[0].length < 2)
+							return;
+
+						auto y = sc1.nodes[0][1 .. $];
+
+						sc1.nodes[0][0].match!(
+							(ref SeqChoice sc2)
+							{
+								sc2.nodes.sort();
+								if (sc2.nodes != [[], [x]])
+									return;
+
+								def.node = repeat1(
+									seqChoice([y])
+								);
+								optimizeNode(def.node);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+
 				// Transform x := y ( | z x ) into x := y ( | ( z y )+ )
 				def.node.match!(
 					(ref SeqChoice sc1)
