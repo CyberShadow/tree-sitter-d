@@ -82,13 +82,14 @@ EOF");
 			sectionHeaderPending = false;
 		}
 
-		f.writef(q"EOF
+		f.writeln();
+		if (!def.synthetic)
+			f.writefln("    // https://dlang.org/spec/%s.html#%s",
+				currentFile,
+				defName,
+			);
 
-    // https://dlang.org/spec/%s.html#%s
-    %s: $ =>
-EOF",
-			currentFile,
-			defName,
+		f.writefln("    %s: $ =>",
 			convertRuleName(defName));
 		writeRuleBody(defName);
 	}

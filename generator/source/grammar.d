@@ -60,6 +60,7 @@ struct Grammar
 
 		bool used; /// Include the definition in the generated grammar.
 		bool hidden; /// Hide in the tree-sitter AST (by prefixing the name with _).
+		bool synthetic; /// We made this one up - don't emit a dlang.org link.
 	}
 
 	/// All definitions in the grammar, indexed by their official names.
