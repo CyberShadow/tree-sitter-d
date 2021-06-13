@@ -92,6 +92,9 @@ EOF");
 		f.writefln("    %s: $ =>",
 			convertRuleName(defName));
 		writeRuleBody(defName);
+
+		foreach (tail; def.tail)
+			writeRule(tail);
 	}
 
 	void close()

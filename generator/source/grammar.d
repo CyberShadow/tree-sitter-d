@@ -64,6 +64,7 @@ struct Grammar
 		bool synthetic; /// We made this one up - don't emit a dlang.org link.
 
 		string publicName; /// If set, use this name instead of the `defs` key.
+		string[] tail; /// Also write these (synthetic) rules after this one
 	}
 
 	/// All definitions in the grammar, indexed by their official names.
