@@ -64,13 +64,13 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 				switch (text)
 				{
 					case "any Unicode character":
-						seqNodes ~= Node(NodeValue(RegExp(`/[\s\S]/`)));
+						seqNodes ~= regexp(`/[\s\S]/`);
 						break;
 					case "physical end of the file":
-						seqNodes ~= Node(NodeValue(RegExp(`/$/m`))); // illustrative
+						seqNodes ~= regexp(`/$/m`); // illustrative
 						break;
 					case "Letter":
-						seqNodes ~= Node(NodeValue(RegExp(`/[A-Za-z]/`)));
+						seqNodes ~= regexp(`/[A-Za-z]/`);
 						break;
 					case "UniversalAlpha":
 						// src/dmd/utf.d
@@ -322,11 +322,11 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 							[0x4E00, 0x9FA5],
 							[0xAC00, 0xD7A3],
 						];
-						seqNodes ~= Node(NodeValue(RegExp(`/[%-(%s%)]/`.format(ALPHA_TABLE.map!(r =>
+						seqNodes ~= regexp(`/[%-(%s%)]/`.format(ALPHA_TABLE.map!(r =>
 							r[0] == r[1]
 							? `\u%04x`.format(r[0])
 							: `\u%04x-\u%04x`.format(r[0], r[1])
-						)))));
+						)));
 						break;
 					default:
 						throw new Exception("Unknown I: " ~ text);
@@ -338,7 +338,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 				auto text = node.call.contents.toString();
 				enforce(context.kind == Def.Kind.chars, `B in GRAMMAR block: ` ~ text);
 				if (text.length == 6 && text.startsWith(`\u`))
-					seqNodes ~= Node(NodeValue(LiteralChars(wchar(text[2 .. $].to!ushort(16)).to!string)));
+					seqNodes ~= literalChars(wchar(text[2 .. $].to!ushort(16)).to!string);
 				else
 				{
 					// These are to aid fixing usage of $(D ...)/$(B ...) in the spec
@@ -402,7 +402,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 						`;`,
 						`#!`,
 					), "Unknown B: " ~ text);
-					seqNodes ~= Node(NodeValue(LiteralChars(text)));
+					seqNodes ~= literalChars(text);
 				}
 			}
 			else
@@ -496,7 +496,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 
 							"__LOCAL_SIZE",
 						), "Unknown D: " ~ word);
-					seqNodes ~= Node(NodeValue(LiteralToken(word)));
+					seqNodes ~= literalToken(word);
 				}
 			}
 			else
@@ -504,7 +504,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 			{
 				auto text = node.getSingleTextChild();
 				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
-				seqNodes ~= Node(NodeValue(Reference(text)));
+				seqNodes ~= reference(text);
 			}
 			else
 			if (node.isCallTo("GLINK2"))
@@ -513,7 +513,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 				enforce(arguments.length == 2);
 				auto text = arguments[1].toString();
 				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
-				seqNodes ~= Node(NodeValue(Reference(text)));
+				seqNodes ~= reference(text);
 			}
 			else
 			if (node.isCallTo("LINK2") || node.isCallTo("RELATIVE_LINK2"))
@@ -527,13 +527,13 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 			{
 				auto text = node.getSingleTextChild();
 				enforce(text == context.currentName, "GSELF to %(%s%) should be GLINK or to %(%s%)".format([text], [context.currentName]));
-				seqNodes ~= Node(NodeValue(Reference(text)));
+				seqNodes ~= reference(text);
 			}
 			else
 			if (node.isCallTo("OPT"))
 			{
 				enforce(seqNodes.length);
-				seqNodes[$-1] = Node(NodeValue(Optional([seqNodes[$-1]])));
+				seqNodes[$-1] = optional(seqNodes[$-1]);
 			}
 			else
 			if (node.isCallTo("GDEPRECATED"))
@@ -543,16 +543,16 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 				seqNodes ~= parseDefinition(node.call.contents, context);
 			else
 			if (node.isCallToEmpty("CODE_AMP"))
-				seqNodes ~= Node(NodeValue(LiteralToken("&")));
+				seqNodes ~= literalToken("&");
 			else
 			if (node.isCallToEmpty("CODE_LCURL"))
-				seqNodes ~= Node(NodeValue(LiteralToken("{")));
+				seqNodes ~= literalToken("{");
 			else
 			if (node.isCallToEmpty("CODE_RCURL"))
-				seqNodes ~= Node(NodeValue(LiteralToken("}")));
+				seqNodes ~= literalToken("}");
 			else
 			if (node.isCallToEmpty("CODE_PERCENT"))
-				seqNodes ~= Node(NodeValue(LiteralToken("%")));
+				seqNodes ~= literalToken("%");
 			else
 			if (auto pdefinition = node.call.macroName in context.macros)
 				seqNodes ~= parseDefinition(node.call.expand(*pdefinition), context);
@@ -576,7 +576,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 			if (!context.currentName)
 				return;
 
-			auto newDef = Def(Node(NodeValue(Choice(currentDefs))), kind);
+			auto newDef = Def(choice(currentDefs), kind);
 			grammar.defs.update(context.currentName,
 				{ newDefs ~= context.currentName; return newDef; },
 				(ref Def def) { enforce(def == newDef, "Definition mismatch for " ~ context.currentName); }
@@ -601,7 +601,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 			{
 				// Possible declaration
 				enforce(context.currentName, "Body line without definition line");
-				currentDefs ~= Node(NodeValue(Seq(parseDefinition(line, context))));
+				currentDefs ~= seq(parseDefinition(line, context));
 			}
 			else
 				throw new Exception(format!"Can't parse grammar from: %s"(line));

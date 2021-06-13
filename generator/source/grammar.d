@@ -139,19 +139,19 @@ struct Grammar
 					if (!samePrefix)
 						return;
 
-					node = Node(NodeValue(Seq(
+					node = seq(
 						prefix ~
-						Node(NodeValue(Optional([
-							Node(NodeValue(Choice(
-								choiceNode.nodes[1 .. $].map!((ref n) => Node(NodeValue(Seq(
+						optional(
+							choice(
+								choiceNode.nodes[1 .. $].map!((ref n) => seq(
 									n.tryMatch!(
 										(ref Seq seqNode) => seqNode.nodes[prefix.length .. $],
 									)
-								))))
+								))
 								.array,
-							)))
-						])))
-					)));
+							)
+						)
+					);
 					optimizeNode(node);
 				},
 				(ref _) {},
@@ -179,9 +179,9 @@ struct Grammar
 										if (referenceNode.name != name)
 											return;
 
-										def.node = Node(NodeValue(Repeat1([
+										def.node = repeat1(
 											seqNode.nodes[0],
-										])));
+										);
 									},
 									(_) {}
 								);
@@ -215,15 +215,15 @@ struct Grammar
 												if (referenceNode.name != name)
 													return;
 
-												def.node = Node(NodeValue(Seq(
+												def.node = seq(
 													seqNode1.nodes[0 .. $-1] ~
-													Node(NodeValue(Repeat([
-														Node(NodeValue(Seq(
+													repeat(
+														seq(
 															seqNode2.nodes[0 .. $-1] ~
 															seqNode1.nodes[0 .. $-1],
-														))),
-													]))),
-												)));
+														),
+													),
+												);
 											},
 											(_) {}
 										);
@@ -266,20 +266,20 @@ struct Grammar
 															return;
 														auto x = referenceNode;
 
-														def.node = Node(NodeValue(Seq(
+														def.node = seq(
 															y ~
-															Node(NodeValue(Repeat([
-																Node(NodeValue(Seq(
+															repeat(
+																seq(
 																	z ~
 																	y
-																)))
-															]))) ~
-															Node(NodeValue(Optional([
-																Node(NodeValue(Seq(
+																)
+															) ~
+															optional(
+																seq(
 																	z
-																)))
-															])))
-														)));
+																)
+															)
+														);
 														optimizeNode(def.node);
 													},
 													(_) {}
