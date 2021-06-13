@@ -105,7 +105,10 @@ EOF");
 private:
 	string convertRuleName(string name)
 	{
-		return (grammar.defs[name].hidden ? "_" : "") ~ name.splitByCamelCase.map!toLower.join("_");
+		string publicName = name;
+		if (auto defPublicName = grammar.defs[name].publicName)
+			publicName = defPublicName;
+		return (grammar.defs[name].hidden ? "_" : "") ~ publicName.splitByCamelCase.map!toLower.join("_");
 	}
 
 	void writeRuleBody(string defName)
