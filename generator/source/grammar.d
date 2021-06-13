@@ -4,6 +4,7 @@ import std.algorithm.searching;
 import std.array;
 import std.exception;
 import std.format;
+import std.functional;
 import std.range;
 import std.sumtype;
 
@@ -449,6 +450,9 @@ struct Grammar
 		{
 			auto def = &defs[defName];
 
+			if (def.kind != Def.Kind.tokens)
+				continue;
+
 			/*
 				x := seq(
 				  y... ,
@@ -475,10 +479,11 @@ struct Grammar
 				  ...
 				)
 			*/
-			auto x = reference(defName);
 			def.node.match!(
 				(ref Seq seqNode1)
 				{
+					auto x = reference(defName);
+
 					auto optionalIndex =
 						seqNode1.nodes.countUntil!((ref Node node) => node.match!(
 							(ref Optional optionalNode) => optionalNode.node[0] == x || optionalNode.node[0].match!(
@@ -519,6 +524,80 @@ struct Grammar
 					Def bodyDef;
 					bodyDef.node = choice(
 						choices.map!(choiceNodes => seq(y ~ choiceNodes ~ z)).array,
+					);
+					bodyDef.kind = Def.Kind.tokens;
+					bodyDef.synthetic = true;
+					bodyDef.publicName = defName;
+
+					optimizeNode(def.node);
+					optimizeNode(bodyDef.node);
+
+					defs[bodyName] = bodyDef;
+				},
+				(ref _) {}
+			);
+
+			/*
+			  x := choice(
+			    // Some choices are references (descending part)
+				reference(...),
+				reference(...),
+
+				// Some choices are sequences (implementation part)
+				seq(...),
+				seq(...),
+			  )
+
+			  =>
+
+			  x := choice(
+				reference(...),
+				reference(...),
+				reference(x_ts_body),
+			  )
+
+			  x_ts_body := choice(
+				seq(...),
+				seq(...),
+			  )
+			*/
+			def.node.match!(
+				(ref Choice choiceNode)
+				{
+					alias isRecursive = delegate bool (ref Node node) => node.match!(
+						(ref RegExp       v) => false,
+						(ref LiteralChars v) => false,
+						(ref LiteralToken v) => false,
+						(ref Reference    v) => v.name == defName,
+						(ref Choice       v) => v.nodes.any!isRecursive,
+						(ref Seq          v) => v.nodes.any!isRecursive,
+						(ref Repeat       v) => v.node[0].I!isRecursive,
+						(ref Repeat1      v) => v.node[0].I!isRecursive,
+						(ref Optional     v) => v.node[0].I!isRecursive,
+					);
+					if (isRecursive(def.node))
+						return;
+
+					alias isReference = (ref Node node) => node.match!(
+						(ref Reference    v) => true,
+						(_) => false,
+					);
+					auto references = choiceNode.nodes.filter!isReference.array;
+					auto remainder  = choiceNode.nodes.filter!(not!isReference).array;
+					if (!references || !remainder)
+						return;
+
+					auto bodyName = defName ~ "TSBody";
+					def.node = choice(
+						references ~
+						reference(bodyName),
+					);
+					def.tail ~= bodyName;
+					def.publicName = "Maybe" ~ (def.publicName ? def.publicName : defName);
+
+					Def bodyDef;
+					bodyDef.node = choice(
+						remainder,
 					);
 					bodyDef.kind = Def.Kind.tokens;
 					bodyDef.synthetic = true;

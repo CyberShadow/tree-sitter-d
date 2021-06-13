@@ -175,7 +175,7 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/lex.html#TokenNoBraces
-    token_no_braces: $ =>
+    _maybe_token_no_braces: $ =>
       choice(
         $.identifier,
         $._string_literal,
@@ -183,6 +183,11 @@ module.exports = grammar({
         $.integer_literal,
         $.float_literal,
         $.keyword,
+        $.token_no_braces,
+      ),
+
+    token_no_braces: $ =>
+      choice(
         "/",
         "/=",
         ".",
@@ -1275,20 +1280,23 @@ module.exports = grammar({
     // https://dlang.org/spec/lex.html#TokenStringTokens
     token_string_tokens: $ =>
       repeat1(
-        $.token_string_token,
+        $._maybe_token_string_token,
       ),
 
     // https://dlang.org/spec/lex.html#TokenStringToken
-    token_string_token: $ =>
+    _maybe_token_string_token: $ =>
       choice(
-        $.token_no_braces,
-        seq(
-          "{",
-          optional(
-            $.token_string_tokens,
-          ),
-          "}",
+        $._maybe_token_no_braces,
+        $.token_string_token,
+      ),
+
+    token_string_token: $ =>
+      seq(
+        "{",
+        optional(
+          $.token_string_tokens,
         ),
+        "}",
       ),
 
     // ---
@@ -7768,7 +7776,7 @@ module.exports = grammar({
       choice(
         $.attribute_specifier,
         $._declaration,
-        $.constructor,
+        $._maybe_constructor,
         $.destructor,
         $.postblit,
         $.allocator,
@@ -7945,11 +7953,11 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#Declaration
     _declaration: $ =>
       choice(
-        $.func_declaration,
-        $.var_declarations,
+        $._maybe_func_declaration,
+        $._maybe_var_declarations,
         $.alias_declaration,
         $._aggregate_declaration,
-        $.enum_declaration,
+        $._maybe_enum_declaration,
         $.import_declaration,
         $.conditional_declaration,
         $.static_foreach_declaration,
@@ -7959,23 +7967,26 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/declaration.html#VarDeclarations
-    var_declarations: $ =>
+    _maybe_var_declarations: $ =>
       choice(
-        seq(
-          optional(
-            $.storage_classes,
-          ),
-          $.basic_type,
-          $.declarators,
-          ";",
-        ),
         $.auto_declaration,
+        $.var_declarations,
+      ),
+
+    var_declarations: $ =>
+      seq(
+        optional(
+          $.storage_classes,
+        ),
+        $._maybe_basic_type,
+        $.declarators,
+        ";",
       ),
 
     // https://dlang.org/spec/declaration.html#Declarators
     declarators: $ =>
       seq(
-        $.declarator_initializer,
+        $._maybe_declarator_initializer,
         optional(
           seq(
             ",",
@@ -7985,9 +7996,15 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/declaration.html#DeclaratorInitializer
-    declarator_initializer: $ =>
+    _maybe_declarator_initializer: $ =>
       choice(
         $.var_declarator,
+        $.alt_declarator,
+        $.declarator_initializer,
+      ),
+
+    declarator_initializer: $ =>
+      choice(
         seq(
           $.var_declarator,
           optional(
@@ -7996,7 +8013,6 @@ module.exports = grammar({
           "=",
           $._initializer,
         ),
-        $.alt_declarator,
         seq(
           $.alt_declarator,
           "=",
@@ -8106,7 +8122,7 @@ module.exports = grammar({
             $.type_suffixes,
           ),
           "(",
-          $.alt_declarator_inner,
+          $._maybe_alt_declarator_inner,
           ")",
         ),
         seq(
@@ -8114,7 +8130,7 @@ module.exports = grammar({
             $.type_suffixes,
           ),
           "(",
-          $.alt_declarator_inner,
+          $._maybe_alt_declarator_inner,
           ")",
           $.alt_func_declarator_suffix,
         ),
@@ -8123,29 +8139,28 @@ module.exports = grammar({
             $.type_suffixes,
           ),
           "(",
-          $.alt_declarator_inner,
+          $._maybe_alt_declarator_inner,
           ")",
           $.alt_declarator_suffixes,
         ),
       ),
 
     // https://dlang.org/spec/declaration.html#AltDeclaratorInner
-    alt_declarator_inner: $ =>
+    _maybe_alt_declarator_inner: $ =>
       choice(
-        seq(
-          optional(
-            $.type_suffixes,
-          ),
-          $.identifier,
+        $.alt_declarator,
+        $.alt_declarator_inner,
+      ),
+
+    alt_declarator_inner: $ =>
+      seq(
+        optional(
+          $.type_suffixes,
         ),
-        seq(
-          optional(
-            $.type_suffixes,
-          ),
-          $.identifier,
+        $.identifier,
+        optional(
           $.alt_func_declarator_suffix,
         ),
-        $.alt_declarator,
       ),
 
     // https://dlang.org/spec/declaration.html#AltDeclaratorSuffixes
@@ -8187,14 +8202,20 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#StorageClasses
     storage_classes: $ =>
       repeat1(
-        $.storage_class,
+        $._maybe_storage_class,
       ),
 
     // https://dlang.org/spec/declaration.html#StorageClass
-    storage_class: $ =>
+    _maybe_storage_class: $ =>
       choice(
         $.linkage_attribute,
         $.align_attribute,
+        $.property,
+        $.storage_class,
+      ),
+
+    storage_class: $ =>
+      choice(
         "enum",
         "static",
         "extern",
@@ -8209,7 +8230,6 @@ module.exports = grammar({
         "inout",
         "shared",
         "__gshared",
-        $.property,
         "nothrow",
         "pure",
         "ref",
@@ -8353,7 +8373,7 @@ module.exports = grammar({
           optional(
             $.storage_classes,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           $.declarators,
           ";",
         ),
@@ -8362,7 +8382,7 @@ module.exports = grammar({
           optional(
             $.storage_classes,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           $.func_declarator,
           ";",
         ),
@@ -8405,7 +8425,7 @@ module.exports = grammar({
             $.template_parameters,
           ),
           "=",
-          $.function_literal,
+          $._maybe_function_literal,
         ),
         seq(
           $.identifier,
@@ -8416,7 +8436,7 @@ module.exports = grammar({
           optional(
             $.storage_classes,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           $.parameters,
           optional(
             $.member_function_attributes,
@@ -8440,7 +8460,7 @@ module.exports = grammar({
         optional(
           $.type_ctors,
         ),
-        $.basic_type,
+        $._maybe_basic_type,
         optional(
           $.type_suffixes,
         ),
@@ -8462,15 +8482,23 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/type.html#BasicType
-    basic_type: $ =>
+    _maybe_basic_type: $ =>
       choice(
         $.fundamental_type,
+        $.qualified_identifier,
+        $.typeof,
+        $.vector,
+        $.traits_expression,
+        $.mixin_type,
+        $.basic_type,
+      ),
+
+    basic_type: $ =>
+      choice(
         seq(
           ".",
           $.qualified_identifier,
         ),
-        $.qualified_identifier,
-        $.typeof,
         seq(
           $.typeof,
           ".",
@@ -8482,9 +8510,6 @@ module.exports = grammar({
           $.type,
           ")",
         ),
-        $.vector,
-        $.traits_expression,
-        $.mixin_type,
       ),
 
     // https://dlang.org/spec/type.html#Vector
@@ -8645,23 +8670,30 @@ module.exports = grammar({
     attribute_specifier: $ =>
       choice(
         seq(
-          $.attribute,
+          $._maybe_attribute,
           ":",
         ),
         seq(
-          $.attribute,
-          $.declaration_block,
+          $._maybe_attribute,
+          $._maybe_declaration_block,
         ),
       ),
 
     // https://dlang.org/spec/attribute.html#Attribute
-    attribute: $ =>
+    _maybe_attribute: $ =>
       choice(
         $.linkage_attribute,
         $.align_attribute,
         $.deprecated_attribute,
         $.visibility_attribute,
         $.pragma,
+        $._maybe_at_attribute,
+        $.function_attribute_kwd,
+        $.attribute,
+      ),
+
+    attribute: $ =>
+      choice(
         "static",
         "extern",
         "abstract",
@@ -8675,8 +8707,6 @@ module.exports = grammar({
         "inout",
         "shared",
         "__gshared",
-        $.at_attribute,
-        $.function_attribute_kwd,
         "ref",
         "return",
       ),
@@ -8689,6 +8719,13 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/attribute.html#AtAttribute
+    _maybe_at_attribute: $ =>
+      choice(
+        $.property,
+        $.user_defined_attribute,
+        $.at_attribute,
+      ),
+
     at_attribute: $ =>
       choice(
         seq(
@@ -8703,7 +8740,6 @@ module.exports = grammar({
           "@",
           "live",
         ),
-        $.property,
         seq(
           "@",
           "safe",
@@ -8716,7 +8752,6 @@ module.exports = grammar({
           "@",
           "trusted",
         ),
-        $.user_defined_attribute,
       ),
 
     // https://dlang.org/spec/attribute.html#Property
@@ -8727,16 +8762,19 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/attribute.html#DeclarationBlock
-    declaration_block: $ =>
+    _maybe_declaration_block: $ =>
       choice(
         $._decl_def,
-        seq(
-          "{",
-          optional(
-            $.decl_defs,
-          ),
-          "}",
+        $.declaration_block,
+      ),
+
+    declaration_block: $ =>
+      seq(
+        "{",
+        optional(
+          $.decl_defs,
         ),
+        "}",
       ),
 
     // ---
@@ -9367,38 +9405,35 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/expression.html#NewExpression
-    new_expression: $ =>
+    _maybe_new_expression: $ =>
       choice(
-        seq(
-          "new",
-          optional(
-            $.allocator_arguments,
-          ),
-          $.type,
-        ),
-        seq(
-          "new",
-          optional(
-            $.allocator_arguments,
-          ),
-          $.type,
-          "[",
-          $._maybe_assign_expression,
-          "]",
-        ),
-        seq(
-          "new",
-          optional(
-            $.allocator_arguments,
-          ),
-          $.type,
-          "(",
-          optional(
-            $.argument_list,
-          ),
-          ")",
-        ),
         $.new_anon_class_expression,
+        $.new_expression,
+      ),
+
+    new_expression: $ =>
+      seq(
+        "new",
+        optional(
+          $.allocator_arguments,
+        ),
+        $.type,
+        optional(
+          choice(
+            seq(
+              "[",
+              $._maybe_assign_expression,
+              "]",
+            ),
+            seq(
+              "(",
+              optional(
+                $.argument_list,
+              ),
+              ")",
+            ),
+          ),
+        ),
       ),
 
     // https://dlang.org/spec/expression.html#AllocatorArguments
@@ -9477,7 +9512,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#PostfixExpression
     postfix_expression: $ =>
       choice(
-        $.primary_expression,
+        $._maybe_primary_expression,
         seq(
           $.postfix_expression,
           ".",
@@ -9491,7 +9526,7 @@ module.exports = grammar({
         seq(
           $.postfix_expression,
           ".",
-          $.new_expression,
+          $._maybe_new_expression,
         ),
         seq(
           $.postfix_expression,
@@ -9513,7 +9548,7 @@ module.exports = grammar({
           optional(
             $.type_ctors,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           "(",
           optional(
             $.argument_list,
@@ -9583,14 +9618,35 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/expression.html#PrimaryExpression
-    primary_expression: $ =>
+    _maybe_primary_expression: $ =>
       choice(
         $.identifier,
+        $.template_instance,
+        $.integer_literal,
+        $.float_literal,
+        $.character_literal,
+        $._maybe_string_literals,
+        $.array_literal,
+        $.assoc_array_literal,
+        $._maybe_function_literal,
+        $.assert_expression,
+        $.mixin_expression,
+        $.import_expression,
+        $._maybe_new_expression,
+        $.typeof,
+        $.typeid_expression,
+        $.is_expression,
+        $.special_keyword,
+        $.traits_expression,
+        $.primary_expression,
+      ),
+
+    primary_expression: $ =>
+      choice(
         seq(
           ".",
           $.identifier,
         ),
-        $.template_instance,
         seq(
           ".",
           $.template_instance,
@@ -9601,17 +9657,6 @@ module.exports = grammar({
         "true",
         "false",
         "$",
-        $.integer_literal,
-        $.float_literal,
-        $.character_literal,
-        $._maybe_string_literals,
-        $.array_literal,
-        $.assoc_array_literal,
-        $.function_literal,
-        $.assert_expression,
-        $.mixin_expression,
-        $.import_expression,
-        $.new_expression,
         seq(
           $.fundamental_type,
           ".",
@@ -9644,16 +9689,11 @@ module.exports = grammar({
           ),
           ")",
         ),
-        $.typeof,
-        $.typeid_expression,
-        $.is_expression,
         seq(
           "(",
           $._expression,
           ")",
         ),
-        $.special_keyword,
-        $.traits_expression,
       ),
 
     // ---
@@ -9724,6 +9764,12 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/expression.html#FunctionLiteral
+    _maybe_function_literal: $ =>
+      choice(
+        $._function_literal_body,
+        $.function_literal,
+      ),
+
     function_literal: $ =>
       choice(
         seq(
@@ -9737,7 +9783,7 @@ module.exports = grammar({
           optional(
             $.parameter_with_attributes,
           ),
-          $.function_literal_body2,
+          $._maybe_function_literal_body2,
         ),
         seq(
           "delegate",
@@ -9750,16 +9796,15 @@ module.exports = grammar({
           optional(
             $.parameter_with_member_attributes,
           ),
-          $.function_literal_body2,
+          $._maybe_function_literal_body2,
         ),
         seq(
           optional(
             "ref",
           ),
           $.parameter_with_member_attributes,
-          $.function_literal_body2,
+          $._maybe_function_literal_body2,
         ),
-        $._function_literal_body,
         seq(
           $.identifier,
           "=>",
@@ -9786,13 +9831,16 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/expression.html#FunctionLiteralBody2
-    function_literal_body2: $ =>
+    _maybe_function_literal_body2: $ =>
       choice(
-        seq(
-          "=>",
-          $._maybe_assign_expression,
-        ),
         $._function_literal_body,
+        $.function_literal_body2,
+      ),
+
+    function_literal_body2: $ =>
+      seq(
+        "=>",
+        $._maybe_assign_expression,
       ),
 
     // ---
@@ -9878,7 +9926,7 @@ module.exports = grammar({
           "(",
           $.type,
           ":",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ")",
         ),
         seq(
@@ -9886,7 +9934,7 @@ module.exports = grammar({
           "(",
           $.type,
           "==",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ")",
         ),
         seq(
@@ -9894,7 +9942,7 @@ module.exports = grammar({
           "(",
           $.type,
           ":",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ",",
           $.template_parameter_list,
           ")",
@@ -9904,7 +9952,7 @@ module.exports = grammar({
           "(",
           $.type,
           "==",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ",",
           $.template_parameter_list,
           ")",
@@ -9922,7 +9970,7 @@ module.exports = grammar({
           $.type,
           $.identifier,
           ":",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ")",
         ),
         seq(
@@ -9931,7 +9979,7 @@ module.exports = grammar({
           $.type,
           $.identifier,
           "==",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ")",
         ),
         seq(
@@ -9940,7 +9988,7 @@ module.exports = grammar({
           $.type,
           $.identifier,
           ":",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ",",
           $.template_parameter_list,
           ")",
@@ -9951,7 +9999,7 @@ module.exports = grammar({
           $.type,
           $.identifier,
           "==",
-          $.type_specialization,
+          $._maybe_type_specialization,
           ",",
           $.template_parameter_list,
           ")",
@@ -9959,9 +10007,14 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/expression.html#TypeSpecialization
-    type_specialization: $ =>
+    _maybe_type_specialization: $ =>
       choice(
         $.type,
+        $.type_specialization,
+      ),
+
+    type_specialization: $ =>
+      choice(
         "struct",
         "union",
         "class",
@@ -10175,7 +10228,7 @@ module.exports = grammar({
               optional(
                 $.type_ctors,
               ),
-              $.basic_type,
+              $._maybe_basic_type,
               $._declarator,
               "=",
             ),
@@ -10225,7 +10278,7 @@ module.exports = grammar({
       seq(
         "for",
         "(",
-        $.initialize,
+        $._maybe_initialize,
         optional(
           $._test,
         ),
@@ -10238,11 +10291,14 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/statement.html#Initialize
-    initialize: $ =>
+    _maybe_initialize: $ =>
       choice(
-        ";",
         $._no_scope_non_empty_statement,
+        $.initialize,
       ),
+
+    initialize: $ =>
+      ";",
 
     // https://dlang.org/spec/statement.html#Test
     _test: $ =>
@@ -10298,7 +10354,7 @@ module.exports = grammar({
           optional(
             $.foreach_type_attributes,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           $._declarator,
         ),
         seq(
@@ -10319,7 +10375,7 @@ module.exports = grammar({
     // https://dlang.org/spec/statement.html#ForeachTypeAttributes
     foreach_type_attributes: $ =>
       seq(
-        $.foreach_type_attribute,
+        $._maybe_foreach_type_attribute,
         optional(
           optional(
             $.foreach_type_attributes,
@@ -10328,10 +10384,15 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/statement.html#ForeachTypeAttribute
+    _maybe_foreach_type_attribute: $ =>
+      choice(
+        $.type_ctor,
+        $.foreach_type_attribute,
+      ),
+
     foreach_type_attribute: $ =>
       choice(
         "ref",
-        $.type_ctor,
         "enum",
       ),
 
@@ -10602,7 +10663,7 @@ module.exports = grammar({
     // https://dlang.org/spec/statement.html#CatchParameter
     catch_parameter: $ =>
       seq(
-        $.basic_type,
+        $._maybe_basic_type,
         optional(
           $.identifier,
         ),
@@ -10697,13 +10758,20 @@ module.exports = grammar({
     // https://dlang.org/spec/struct.html#AggregateDeclaration
     _aggregate_declaration: $ =>
       choice(
-        $.class_declaration,
-        $.interface_declaration,
-        $.struct_declaration,
-        $.union_declaration,
+        $._maybe_class_declaration,
+        $._maybe_interface_declaration,
+        $._maybe_struct_declaration,
+        $._maybe_union_declaration,
       ),
 
     // https://dlang.org/spec/struct.html#StructDeclaration
+    _maybe_struct_declaration: $ =>
+      choice(
+        $.struct_template_declaration,
+        $.anon_struct_declaration,
+        $.struct_declaration,
+      ),
+
     struct_declaration: $ =>
       choice(
         seq(
@@ -10716,8 +10784,6 @@ module.exports = grammar({
           $.identifier,
           $.aggregate_body,
         ),
-        $.struct_template_declaration,
-        $.anon_struct_declaration,
       ),
 
     // https://dlang.org/spec/struct.html#AnonStructDeclaration
@@ -10728,6 +10794,13 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/struct.html#UnionDeclaration
+    _maybe_union_declaration: $ =>
+      choice(
+        $.union_template_declaration,
+        $.anon_union_declaration,
+        $.union_declaration,
+      ),
+
     union_declaration: $ =>
       choice(
         seq(
@@ -10740,8 +10813,6 @@ module.exports = grammar({
           $.identifier,
           $.aggregate_body,
         ),
-        $.union_template_declaration,
-        $.anon_union_declaration,
       ),
 
     // https://dlang.org/spec/struct.html#AnonUnionDeclaration
@@ -10817,6 +10888,12 @@ module.exports = grammar({
     // ------------------------------------------------------------------------
 
     // https://dlang.org/spec/class.html#ClassDeclaration
+    _maybe_class_declaration: $ =>
+      choice(
+        $.class_template_declaration,
+        $.class_declaration,
+      ),
+
     class_declaration: $ =>
       choice(
         seq(
@@ -10832,7 +10909,6 @@ module.exports = grammar({
           ),
           $.aggregate_body,
         ),
-        $.class_template_declaration,
       ),
 
     // https://dlang.org/spec/class.html#BaseClassList
@@ -10850,7 +10926,7 @@ module.exports = grammar({
 
     // https://dlang.org/spec/class.html#SuperClassOrInterface
     _super_class_or_interface: $ =>
-      $.basic_type,
+      $._maybe_basic_type,
 
     // https://dlang.org/spec/class.html#Interfaces
     interfaces: $ =>
@@ -10866,22 +10942,25 @@ module.exports = grammar({
 
     // https://dlang.org/spec/class.html#Interface
     _interface: $ =>
-      $.basic_type,
+      $._maybe_basic_type,
 
     // ---
 
     // https://dlang.org/spec/class.html#Constructor
-    constructor: $ =>
+    _maybe_constructor: $ =>
       choice(
-        seq(
-          "this",
-          $.parameters,
-          optional(
-            $.member_function_attributes,
-          ),
-          $._function_body,
-        ),
         $.constructor_template,
+        $.constructor,
+      ),
+
+    constructor: $ =>
+      seq(
+        "this",
+        $.parameters,
+        optional(
+          $.member_function_attributes,
+        ),
+        $._function_body,
       ),
 
     // ---
@@ -11083,6 +11162,12 @@ module.exports = grammar({
     // ------------------------------------------------------------------------
 
     // https://dlang.org/spec/interface.html#InterfaceDeclaration
+    _maybe_interface_declaration: $ =>
+      choice(
+        $.interface_template_declaration,
+        $.interface_declaration,
+      ),
+
     interface_declaration: $ =>
       choice(
         seq(
@@ -11098,7 +11183,6 @@ module.exports = grammar({
           ),
           $.aggregate_body,
         ),
-        $.interface_template_declaration,
       ),
 
     // https://dlang.org/spec/interface.html#BaseInterfaceList
@@ -11113,6 +11197,12 @@ module.exports = grammar({
     // ------------------------------------------------------------------------
 
     // https://dlang.org/spec/enum.html#EnumDeclaration
+    _maybe_enum_declaration: $ =>
+      choice(
+        $.anonymous_enum_declaration,
+        $.enum_declaration,
+      ),
+
     enum_declaration: $ =>
       choice(
         seq(
@@ -11127,7 +11217,6 @@ module.exports = grammar({
           $._enum_base_type,
           $.enum_body,
         ),
-        $.anonymous_enum_declaration,
       ),
 
     // https://dlang.org/spec/enum.html#EnumBaseType
@@ -11163,18 +11252,21 @@ module.exports = grammar({
     // https://dlang.org/spec/enum.html#EnumMemberAttributes
     enum_member_attributes: $ =>
       repeat1(
-        $.enum_member_attribute,
+        $._maybe_enum_member_attribute,
       ),
 
     // https://dlang.org/spec/enum.html#EnumMemberAttribute
-    enum_member_attribute: $ =>
+    _maybe_enum_member_attribute: $ =>
       choice(
         $.deprecated_attribute,
         $.user_defined_attribute,
-        seq(
-          "@",
-          "disable",
-        ),
+        $.enum_member_attribute,
+      ),
+
+    enum_member_attribute: $ =>
+      seq(
+        "@",
+        "disable",
       ),
 
     // https://dlang.org/spec/enum.html#EnumMember
@@ -11220,11 +11312,11 @@ module.exports = grammar({
     // https://dlang.org/spec/enum.html#AnonymousEnumMembers
     anonymous_enum_members: $ =>
       seq(
-        $.anonymous_enum_member,
+        $._maybe_anonymous_enum_member,
         repeat(
           seq(
             ",",
-            $.anonymous_enum_member,
+            $._maybe_anonymous_enum_member,
           ),
         ),
         optional(
@@ -11233,15 +11325,18 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/enum.html#AnonymousEnumMember
-    anonymous_enum_member: $ =>
+    _maybe_anonymous_enum_member: $ =>
       choice(
         $.enum_member,
-        seq(
-          $.type,
-          $.identifier,
-          "=",
-          $._maybe_assign_expression,
-        ),
+        $.anonymous_enum_member,
+      ),
+
+    anonymous_enum_member: $ =>
+      seq(
+        $.type,
+        $.identifier,
+        "=",
+        $._maybe_assign_expression,
       ),
 
     // ------------------------------------------------------------------------
@@ -11249,17 +11344,20 @@ module.exports = grammar({
     // ------------------------------------------------------------------------
 
     // https://dlang.org/spec/function.html#FuncDeclaration
-    func_declaration: $ =>
+    _maybe_func_declaration: $ =>
       choice(
-        seq(
-          optional(
-            $.storage_classes,
-          ),
-          $.basic_type,
-          $.func_declarator,
-          $._function_body,
-        ),
         $.auto_func_declaration,
+        $.func_declaration,
+      ),
+
+    func_declaration: $ =>
+      seq(
+        optional(
+          $.storage_classes,
+        ),
+        $._maybe_basic_type,
+        $.func_declarator,
+        $._function_body,
       ),
 
     // https://dlang.org/spec/function.html#AutoFuncDeclaration
@@ -11336,14 +11434,14 @@ module.exports = grammar({
           optional(
             $.parameter_attributes,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           $._declarator,
         ),
         seq(
           optional(
             $.parameter_attributes,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           $._declarator,
           "...",
         ),
@@ -11351,7 +11449,7 @@ module.exports = grammar({
           optional(
             $.parameter_attributes,
           ),
-          $.basic_type,
+          $._maybe_basic_type,
           $._declarator,
           "=",
           $._maybe_assign_expression,
@@ -11374,11 +11472,11 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html#ParameterAttributes
     parameter_attributes: $ =>
       choice(
-        $.in_out,
+        $._maybe_in_out,
         $.user_defined_attribute,
         seq(
           $.parameter_attributes,
-          $.in_out,
+          $._maybe_in_out,
         ),
         seq(
           $.parameter_attributes,
@@ -11388,10 +11486,15 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/function.html#InOut
+    _maybe_in_out: $ =>
+      choice(
+        $.type_ctor,
+        $.in_out,
+      ),
+
     in_out: $ =>
       choice(
         "auto",
-        $.type_ctor,
         "final",
         "in",
         "lazy",
@@ -11438,10 +11541,16 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html#MemberFunctionAttributes
     member_function_attributes: $ =>
       repeat1(
-        $.member_function_attribute,
+        $._maybe_member_function_attribute,
       ),
 
     // https://dlang.org/spec/function.html#MemberFunctionAttribute
+    _maybe_member_function_attribute: $ =>
+      choice(
+        $._function_attribute,
+        $.member_function_attribute,
+      ),
+
     member_function_attribute: $ =>
       choice(
         "const",
@@ -11449,7 +11558,6 @@ module.exports = grammar({
         "inout",
         "return",
         "shared",
-        $._function_attribute,
       ),
 
     // ---
@@ -11680,7 +11788,7 @@ module.exports = grammar({
         ),
         seq(
           "!",
-          $.template_single_argument,
+          $._maybe_template_single_argument,
         ),
       ),
 
@@ -11734,7 +11842,7 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/template.html#TemplateSingleArgument
-    template_single_argument: $ =>
+    _maybe_template_single_argument: $ =>
       choice(
         $.identifier,
         $.fundamental_type,
@@ -11742,11 +11850,16 @@ module.exports = grammar({
         $._string_literal,
         $.integer_literal,
         $.float_literal,
+        $.special_keyword,
+        $.template_single_argument,
+      ),
+
+    template_single_argument: $ =>
+      choice(
         "true",
         "false",
         "null",
         "this",
-        $.special_keyword,
       ),
 
     // ---
@@ -11795,7 +11908,7 @@ module.exports = grammar({
     // https://dlang.org/spec/template.html#TemplateValueParameter
     template_value_parameter: $ =>
       seq(
-        $.basic_type,
+        $._maybe_basic_type,
         $._declarator,
         optional(
           choice(
@@ -11846,7 +11959,7 @@ module.exports = grammar({
         ),
         seq(
           "alias",
-          $.basic_type,
+          $._maybe_basic_type,
           $._declarator,
           optional(
             $.template_alias_parameter_specialization,
@@ -12116,13 +12229,13 @@ module.exports = grammar({
       choice(
         seq(
           $._condition,
-          $.declaration_block,
+          $._maybe_declaration_block,
         ),
         seq(
           $._condition,
-          $.declaration_block,
+          $._maybe_declaration_block,
           "else",
-          $.declaration_block,
+          $._maybe_declaration_block,
         ),
         seq(
           $._condition,
@@ -12133,7 +12246,7 @@ module.exports = grammar({
         ),
         seq(
           $._condition,
-          $.declaration_block,
+          $._maybe_declaration_block,
           "else",
           ":",
           optional(
@@ -12288,7 +12401,7 @@ module.exports = grammar({
       choice(
         seq(
           $.static_foreach,
-          $.declaration_block,
+          $._maybe_declaration_block,
         ),
         seq(
           $.static_foreach,
@@ -13005,29 +13118,34 @@ module.exports = grammar({
           "~",
           $.asm_una_exp,
         ),
-        $.asm_primary_exp,
+        $._maybe_asm_primary_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmPrimaryExp
-    asm_primary_exp: $ =>
+    _maybe_asm_primary_exp: $ =>
       choice(
         $.integer_literal,
         $.float_literal,
+        $.register,
+        $.register64,
+        $.dot_identifier,
+        $.asm_primary_exp,
+      ),
+
+    asm_primary_exp: $ =>
+      choice(
         "__LOCAL_SIZE",
         "$",
-        $.register,
         seq(
           $.register,
           ":",
           $._maybe_asm_exp,
         ),
-        $.register64,
         seq(
           $.register64,
           ":",
           $._maybe_asm_exp,
         ),
-        $.dot_identifier,
         "this",
       ),
 
