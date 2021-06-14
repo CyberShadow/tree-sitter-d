@@ -237,6 +237,39 @@ struct Grammar
 			(ref              _) {},
 		);
 
+		// Collapse redundantly-optional repetition into non-optional repetition.
+		// x ( | repeat1(x) ) => repeat1(x)
+		// ( | repeat1(x) ) x => repeat1(x)
+		node.match!(
+			(ref SeqChoice v)
+			{
+				foreach (ref choice; v.nodes)
+					foreach_reverse (i; 1 .. choice.length)
+					{
+						bool check(size_t i, size_t j)
+						{
+							return choice[j].match!(
+								(ref SeqChoice sc)
+								{
+									auto choices = sc.nodes;
+									if (!extractOptional(choices))
+										return false;
+									if (choices != [[repeat1(choice[i])]])
+										return false;
+
+									choice = choice[0 .. min(i, j)] ~ repeat1(choice[i]) ~ choice[max(i, j) + 1 .. $];
+									return true;
+								},
+								(ref _) => false,
+							);
+						}
+
+						check(i-1, i) || check(i, i-1);
+					}
+			},
+			(ref _) {},
+		);
+
 		// Lift the common part (prefix or suffix) out of SeqChoice choices, e.g, transform:
 		// x | x a | x b | ... => x ( | a | b | ... )
 		// We do this if at least two choices have a non-empty common prefix or suffix,
