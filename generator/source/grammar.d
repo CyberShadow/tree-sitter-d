@@ -396,33 +396,37 @@ struct Grammar
 			{
 				auto x = reference(defName);
 
-				// Transform x := y ( | x ) into x := ( y )+
+				// Transform x := a | b | c x into x := ( | ( c )+ ) ( a | b )
 				def.node.match!(
 					(ref SeqChoice sc1)
 					{
-						if (sc1.nodes.length != 1)
-							return; // Single choice
-						if (sc1.nodes[0].length < 2)
-							return;
+						auto choices = sc1.nodes;
+						choices = choices.map!flattenChoices.join;
 
-						auto y = sc1.nodes[0][0 .. $-1];
+						auto recursiveChoiceIndices = choices.length.iota.filter!(
+							i => choices[i].canFind(x),
+						).array;
+						if (recursiveChoiceIndices.length != 1)
+							return; // Single path to recursion
+						auto recursiveChoiceIndex = recursiveChoiceIndices.front;
+						auto recursiveChoice = choices[recursiveChoiceIndex];
+						if (recursiveChoice.countUntil(x) + 1 != recursiveChoice.length)
+							return; // More rules follow after recursion
 
-						sc1.nodes[0][$-1].match!(
-							(ref SeqChoice sc2)
-							{
-								auto choices = sc2.nodes;
-								if (!extractOptional(choices))
-									return;
-								if (choices != [[x]])
-									return;
-
-								def.node = repeat1(
-									seqChoice([y])
-								);
-								optimizeNode(def.node);
-							},
-							(_) {}
-						);
+						def.node = seqChoice([[
+							// Recursive part
+							seqChoice([
+								[], // Optional (zero-or-more)
+								[repeat1(seqChoice([
+									recursiveChoice[0 .. $ - 1]
+								]))],
+							]),
+							// Non-recursive parts
+							seqChoice(
+								choices[0 .. recursiveChoiceIndex] ~ choices[recursiveChoiceIndex + 1 .. $],
+							),
+						]]);
+						optimizeNode(def.node);
 					},
 					(_) {}
 				);

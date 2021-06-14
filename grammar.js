@@ -3404,17 +3404,17 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#ImportList
     import_list: $ =>
-      choice(
-        seq(
-          $.import,
-          optional(
-            seq(
-              ",",
-              $.import_list,
-            ),
+      seq(
+        repeat(
+          seq(
+            $.import,
+            ",",
           ),
         ),
-        $.import_bindings,
+        choice(
+          $.import,
+          $.import_bindings,
+        ),
       ),
 
     // https://dlang.org/spec/module.html#Import
@@ -3440,13 +3440,13 @@ module.exports = grammar({
     // https://dlang.org/spec/module.html#ImportBindList
     import_bind_list: $ =>
       seq(
-        $.import_bind,
         repeat(
           seq(
-            ",",
             $.import_bind,
+            ",",
           ),
         ),
+        $.import_bind,
       ),
 
     // https://dlang.org/spec/module.html#ImportBind
@@ -3551,13 +3551,13 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#DeclaratorIdentifierList
     declarator_identifier_list: $ =>
       seq(
-        $._declarator_identifier,
         repeat(
           seq(
-            ",",
             $._declarator_identifier,
+            ",",
           ),
         ),
+        $._declarator_identifier,
       ),
 
     // https://dlang.org/spec/declaration.html#DeclaratorIdentifier
@@ -5041,13 +5041,13 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#KeyValuePairs
     key_value_pairs: $ =>
       seq(
-        $.key_value_pair,
         repeat(
           seq(
-            ",",
             $.key_value_pair,
+            ",",
           ),
         ),
+        $.key_value_pair,
       ),
 
     // https://dlang.org/spec/expression.html#KeyValuePair
@@ -5591,13 +5591,13 @@ module.exports = grammar({
     // https://dlang.org/spec/statement.html#ForeachTypeList
     foreach_type_list: $ =>
       seq(
-        $.foreach_type,
         repeat(
           seq(
-            ",",
             $.foreach_type,
+            ",",
           ),
         ),
+        $.foreach_type,
       ),
 
     // https://dlang.org/spec/statement.html#ForeachType
@@ -6121,13 +6121,13 @@ module.exports = grammar({
     // https://dlang.org/spec/class.html#Interfaces
     interfaces: $ =>
       seq(
-        $.interface,
         repeat(
           seq(
-            ",",
             $.interface,
+            ",",
           ),
         ),
+        $.interface,
       ),
 
     // https://dlang.org/spec/class.html#Interface
@@ -6557,19 +6557,19 @@ module.exports = grammar({
 
     // https://dlang.org/spec/function.html#ParameterList
     parameter_list: $ =>
-      choice(
-        seq(
-          $.parameter,
-          optional(
-            seq(
-              ",",
-              $.parameter_list,
-            ),
+      seq(
+        repeat(
+          seq(
+            $.parameter,
+            ",",
           ),
         ),
-        seq(
-          $.variadic_arguments_attributes,
-          "...",
+        choice(
+          $.parameter,
+          seq(
+            $.variadic_arguments_attributes,
+            "...",
+          ),
         ),
       ),
 
@@ -7562,13 +7562,13 @@ module.exports = grammar({
     // https://dlang.org/spec/traits.html#TraitsArguments
     traits_arguments: $ =>
       seq(
-        $._traits_argument,
         repeat(
           seq(
-            ",",
             $._traits_argument,
+            ",",
           ),
         ),
+        $._traits_argument,
       ),
 
     // https://dlang.org/spec/traits.html#TraitsArgument
@@ -7641,13 +7641,13 @@ module.exports = grammar({
     // https://dlang.org/spec/iasm.html#Operands
     operands: $ =>
       seq(
-        $.operand,
         repeat(
           seq(
-            ",",
             $.operand,
+            ",",
           ),
         ),
+        $.operand,
       ),
 
     // ---
