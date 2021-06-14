@@ -686,6 +686,7 @@ struct Grammar
 							"BasicType",
 							"Parameters",
 							"InOutStatement",
+							"IntegerLiteral",
 						),
 						(ref _) => false,
 				)),

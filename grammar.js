@@ -8093,20 +8093,14 @@ module.exports = grammar({
           ),
           $.asm_una_exp,
         ),
-        $._maybe_asm_primary_exp,
-      ),
-
-    // https://dlang.org/spec/iasm.html#AsmPrimaryExp
-    _maybe_asm_primary_exp: $ =>
-      choice(
-        $.integer_literal,
-        $.float_literal,
-        $.dot_identifier,
         $.asm_primary_exp,
       ),
 
+    // https://dlang.org/spec/iasm.html#AsmPrimaryExp
     asm_primary_exp: $ =>
       choice(
+        $.integer_literal,
+        $.float_literal,
         "__LOCAL_SIZE",
         "$",
         seq(
@@ -8121,6 +8115,7 @@ module.exports = grammar({
             ),
           ),
         ),
+        $.dot_identifier,
         "this",
       ),
 
