@@ -72,12 +72,13 @@ module.exports = grammar({
       token(
         // EndOfLine
         choice(
-          "\r",
-          "\n",
           seq(
             "\r",
-            "\n",
+            optional(
+              "\n",
+            ),
           ),
+          "\n",
           "\u2028",
           "\u2029",
           // EndOfFile
@@ -137,12 +138,13 @@ module.exports = grammar({
             ),
             // EndOfLine
             choice(
-              "\r",
-              "\n",
               seq(
                 "\r",
-                "\n",
+                optional(
+                  "\n",
+                ),
               ),
+              "\n",
               "\u2028",
               "\u2029",
               // EndOfFile
@@ -311,12 +313,13 @@ module.exports = grammar({
                 /[\s\S]/,
                 // EndOfLine
                 choice(
-                  "\r",
-                  "\n",
                   seq(
                     "\r",
-                    "\n",
+                    optional(
+                      "\n",
+                    ),
                   ),
+                  "\n",
                   "\u2028",
                   "\u2029",
                   // EndOfFile
@@ -356,12 +359,13 @@ module.exports = grammar({
                 /[\s\S]/,
                 // EndOfLine
                 choice(
-                  "\r",
-                  "\n",
                   seq(
                     "\r",
-                    "\n",
+                    optional(
+                      "\n",
+                    ),
                   ),
+                  "\n",
                   "\u2028",
                   "\u2029",
                   // EndOfFile
@@ -414,618 +418,394 @@ module.exports = grammar({
                   "\\t",
                   "\\v",
                   seq(
-                    "\\x",
-                    // HexDigit
                     choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    "\\",
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                    ),
-                  ),
-                  seq(
-                    "\\",
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                    ),
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                    ),
-                  ),
-                  seq(
-                    "\\",
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                    ),
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                    ),
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                    ),
-                  ),
-                  seq(
-                    "\\u",
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    "\\U",
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    "\\",
-                    // NamedCharacterEntity
-                    seq(
-                      "&",
-                      // Identifier
+                      "\\x",
                       seq(
-                        // IdentifierStart
                         choice(
-                          "_",
-                          /[A-Za-z]/,
-                          /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                        ),
-                        optional(
-                          // IdentifierChars
-                          repeat1(
-                            // IdentifierChar
+                          "\\u",
+                          seq(
+                            "\\U",
+                            // HexDigit
                             choice(
-                              // IdentifierStart
+                              // DecimalDigit
                               choice(
-                                "_",
-                                /[A-Za-z]/,
-                                /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
                               ),
-                              "0",
-                              // NonZeroDigit
+                              // HexLetter
                               choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
+                                "a",
+                                "b",
+                                "c",
+                                "d",
+                                "e",
+                                "f",
+                                "A",
+                                "B",
+                                "C",
+                                "D",
+                                "E",
+                                "F",
+                              ),
+                            ),
+                            // HexDigit
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              // HexLetter
+                              choice(
+                                "a",
+                                "b",
+                                "c",
+                                "d",
+                                "e",
+                                "f",
+                                "A",
+                                "B",
+                                "C",
+                                "D",
+                                "E",
+                                "F",
+                              ),
+                            ),
+                            // HexDigit
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              // HexLetter
+                              choice(
+                                "a",
+                                "b",
+                                "c",
+                                "d",
+                                "e",
+                                "f",
+                                "A",
+                                "B",
+                                "C",
+                                "D",
+                                "E",
+                                "F",
+                              ),
+                            ),
+                            // HexDigit
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              // HexLetter
+                              choice(
+                                "a",
+                                "b",
+                                "c",
+                                "d",
+                                "e",
+                                "f",
+                                "A",
+                                "B",
+                                "C",
+                                "D",
+                                "E",
+                                "F",
                               ),
                             ),
                           ),
                         ),
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
                       ),
-                      ";",
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    "\\",
+                    choice(
+                      // OctalDigit
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                      ),
+                      seq(
+                        // OctalDigit
+                        choice(
+                          "0",
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                        ),
+                        optional(
+                          // OctalDigit
+                          choice(
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                          ),
+                        ),
+                        // OctalDigit
+                        choice(
+                          "0",
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                        ),
+                      ),
+                      // NamedCharacterEntity
+                      seq(
+                        "&",
+                        // Identifier
+                        seq(
+                          // IdentifierStart
+                          choice(
+                            "_",
+                            /[A-Za-z]/,
+                            /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                          ),
+                          optional(
+                            // IdentifierChars
+                            repeat1(
+                              // IdentifierChar
+                              choice(
+                                // IdentifierStart
+                                choice(
+                                  "_",
+                                  /[A-Za-z]/,
+                                  /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                                ),
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        ";",
+                      ),
                     ),
                   ),
                 ),
                 // EndOfLine
                 choice(
-                  "\r",
-                  "\n",
                   seq(
                     "\r",
-                    "\n",
+                    optional(
+                      "\n",
+                    ),
                   ),
+                  "\n",
                   "\u2028",
                   "\u2029",
                   // EndOfFile
@@ -1107,12 +887,13 @@ module.exports = grammar({
                 ),
                 // EndOfLine
                 choice(
-                  "\r",
-                  "\n",
                   seq(
                     "\r",
-                    "\n",
+                    optional(
+                      "\n",
+                    ),
                   ),
+                  "\n",
                   "\u2028",
                   "\u2029",
                   // EndOfFile
@@ -1195,12 +976,13 @@ module.exports = grammar({
                 /[\s\S]/,
                 // EndOfLine
                 choice(
-                  "\r",
-                  "\n",
                   seq(
                     "\r",
-                    "\n",
+                    optional(
+                      "\n",
+                    ),
                   ),
+                  "\n",
                   "\u2028",
                   "\u2029",
                   // EndOfFile
@@ -1321,607 +1103,382 @@ module.exports = grammar({
               "\\t",
               "\\v",
               seq(
-                "\\x",
-                // HexDigit
                 choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-              ),
-              seq(
-                "\\",
-                // OctalDigit
-                choice(
-                  "0",
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                ),
-              ),
-              seq(
-                "\\",
-                // OctalDigit
-                choice(
-                  "0",
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                ),
-                // OctalDigit
-                choice(
-                  "0",
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                ),
-              ),
-              seq(
-                "\\",
-                // OctalDigit
-                choice(
-                  "0",
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                ),
-                // OctalDigit
-                choice(
-                  "0",
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                ),
-                // OctalDigit
-                choice(
-                  "0",
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                ),
-              ),
-              seq(
-                "\\u",
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-              ),
-              seq(
-                "\\U",
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-              ),
-              seq(
-                "\\",
-                // NamedCharacterEntity
-                seq(
-                  "&",
-                  // Identifier
+                  "\\x",
                   seq(
-                    // IdentifierStart
                     choice(
-                      "_",
-                      /[A-Za-z]/,
-                      /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                    ),
-                    optional(
-                      // IdentifierChars
-                      repeat1(
-                        // IdentifierChar
+                      "\\u",
+                      seq(
+                        "\\U",
+                        // HexDigit
                         choice(
-                          // IdentifierStart
+                          // DecimalDigit
                           choice(
-                            "_",
-                            /[A-Za-z]/,
-                            /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
                           ),
-                          "0",
-                          // NonZeroDigit
+                          // HexLetter
                           choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
                           ),
                         ),
                       ),
                     ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
                   ),
-                  ";",
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+                // HexDigit
+                choice(
+                  // DecimalDigit
+                  choice(
+                    "0",
+                    // NonZeroDigit
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  // HexLetter
+                  choice(
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                ),
+              ),
+              seq(
+                "\\",
+                choice(
+                  // OctalDigit
+                  choice(
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                  ),
+                  seq(
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                    optional(
+                      // OctalDigit
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                      ),
+                    ),
+                    // OctalDigit
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                  ),
+                  // NamedCharacterEntity
+                  seq(
+                    "&",
+                    // Identifier
+                    seq(
+                      // IdentifierStart
+                      choice(
+                        "_",
+                        /[A-Za-z]/,
+                        /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                      ),
+                      optional(
+                        // IdentifierChars
+                        repeat1(
+                          // IdentifierChar
+                          choice(
+                            // IdentifierStart
+                            choice(
+                              "_",
+                              /[A-Za-z]/,
+                              /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                            ),
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    ";",
+                  ),
                 ),
               ),
             ),
@@ -1942,18 +1499,6 @@ module.exports = grammar({
             // DecimalInteger
             choice(
               "0",
-              // NonZeroDigit
-              choice(
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-              ),
               seq(
                 // NonZeroDigit
                 choice(
@@ -1967,27 +1512,29 @@ module.exports = grammar({
                   "8",
                   "9",
                 ),
-                // DecimalDigitsUS
-                repeat1(
-                  // DecimalDigitUS
-                  choice(
-                    // DecimalDigit
+                optional(
+                  // DecimalDigitsUS
+                  repeat1(
+                    // DecimalDigitUS
                     choice(
-                      "0",
-                      // NonZeroDigit
+                      // DecimalDigit
                       choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
                       ),
+                      "_",
                     ),
-                    "_",
                   ),
                 ),
               ),
@@ -2000,68 +1547,27 @@ module.exports = grammar({
                 "0B",
               ),
               // BinaryDigitsNoSingleUS
-              choice(
+              seq(
+                optional(
+                  // BinaryDigitsUS
+                  repeat1(
+                    // BinaryDigitUS
+                    choice(
+                      // BinaryDigit
+                      choice(
+                        "0",
+                        "1",
+                      ),
+                      "_",
+                    ),
+                  ),
+                ),
                 // BinaryDigit
                 choice(
                   "0",
                   "1",
                 ),
-                seq(
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
-                  // BinaryDigitsUS
-                  repeat1(
-                    // BinaryDigitUS
-                    choice(
-                      // BinaryDigit
-                      choice(
-                        "0",
-                        "1",
-                      ),
-                      "_",
-                    ),
-                  ),
-                ),
-                seq(
-                  // BinaryDigitsUS
-                  repeat1(
-                    // BinaryDigitUS
-                    choice(
-                      // BinaryDigit
-                      choice(
-                        "0",
-                        "1",
-                      ),
-                      "_",
-                    ),
-                  ),
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
-                ),
-                seq(
-                  // BinaryDigitsUS
-                  repeat1(
-                    // BinaryDigitUS
-                    choice(
-                      // BinaryDigit
-                      choice(
-                        "0",
-                        "1",
-                      ),
-                      "_",
-                    ),
-                  ),
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
+                optional(
                   // BinaryDigitsUS
                   repeat1(
                     // BinaryDigitUS
@@ -2086,40 +1592,6 @@ module.exports = grammar({
               ),
               // HexDigitsNoSingleUS
               choice(
-                // HexDigit
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
                 seq(
                   // HexDigit
                   choice(
@@ -2155,45 +1627,47 @@ module.exports = grammar({
                       "F",
                     ),
                   ),
-                  // HexDigitsUS
-                  repeat1(
-                    // HexDigitUS
-                    choice(
-                      // HexDigit
+                  optional(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
                       choice(
-                        // DecimalDigit
+                        // HexDigit
                         choice(
-                          "0",
-                          // NonZeroDigit
+                          // DecimalDigit
                           choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
                           ),
                         ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
+                        "_",
                       ),
-                      "_",
                     ),
                   ),
                 ),
@@ -2299,1707 +1773,6 @@ module.exports = grammar({
       token(
         // FloatLiteral
         choice(
-          // Float
-          choice(
-            // DecimalFloat
-            choice(
-              seq(
-                // LeadingDecimal
-                choice(
-                  // DecimalInteger
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                    seq(
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                  seq(
-                    "0",
-                    // DecimalDigitsNoSingleUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                ".",
-              ),
-              seq(
-                // LeadingDecimal
-                choice(
-                  // DecimalInteger
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                    seq(
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                  seq(
-                    "0",
-                    // DecimalDigitsNoSingleUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                ".",
-                // DecimalDigits
-                repeat1(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                ),
-              ),
-              seq(
-                // DecimalDigits
-                repeat1(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                ),
-                ".",
-                // DecimalDigitsNoStartingUS
-                seq(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  optional(
-                    // DecimalDigitsUS
-                    repeat1(
-                      // DecimalDigitUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-                // DecimalExponent
-                seq(
-                  // DecimalExponentStart
-                  choice(
-                    "e",
-                    "E",
-                    "e+",
-                    "E+",
-                    "e-",
-                    "E-",
-                  ),
-                  // DecimalDigitsNoSingleUS
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    seq(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                    seq(
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              seq(
-                ".",
-                // DecimalInteger
-                choice(
-                  "0",
-                  // NonZeroDigit
-                  choice(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                  ),
-                  seq(
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                    // DecimalDigitsUS
-                    repeat1(
-                      // DecimalDigitUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              seq(
-                ".",
-                // DecimalInteger
-                choice(
-                  "0",
-                  // NonZeroDigit
-                  choice(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                  ),
-                  seq(
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                    // DecimalDigitsUS
-                    repeat1(
-                      // DecimalDigitUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-                // DecimalExponent
-                seq(
-                  // DecimalExponentStart
-                  choice(
-                    "e",
-                    "E",
-                    "e+",
-                    "E+",
-                    "e-",
-                    "E-",
-                  ),
-                  // DecimalDigitsNoSingleUS
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    seq(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                    seq(
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              seq(
-                // LeadingDecimal
-                choice(
-                  // DecimalInteger
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                    seq(
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                  seq(
-                    "0",
-                    // DecimalDigitsNoSingleUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // DecimalExponent
-                seq(
-                  // DecimalExponentStart
-                  choice(
-                    "e",
-                    "E",
-                    "e+",
-                    "E+",
-                    "e-",
-                    "E-",
-                  ),
-                  // DecimalDigitsNoSingleUS
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    seq(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                    seq(
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // HexFloat
-            seq(
-              // HexPrefix
-              choice(
-                "0x",
-                "0X",
-              ),
-              choice(
-                seq(
-                  // HexDigitsNoSingleUS
-                  choice(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    seq(
-                      // HexDigit
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                      // HexDigitsUS
-                      repeat1(
-                        // HexDigitUS
-                        choice(
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                    seq(
-                      // HexDigitsUS
-                      repeat1(
-                        // HexDigitUS
-                        choice(
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                      // HexDigit
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                    ),
-                  ),
-                  ".",
-                  // HexDigitsNoStartingUS
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    optional(
-                      // HexDigitsUS
-                      repeat1(
-                        // HexDigitUS
-                        choice(
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                seq(
-                  ".",
-                  // HexDigitsNoStartingUS
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    optional(
-                      // HexDigitsUS
-                      repeat1(
-                        // HexDigitUS
-                        choice(
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // HexDigitsNoSingleUS
-                choice(
-                  // HexDigit
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // HexLetter
-                    choice(
-                      "a",
-                      "b",
-                      "c",
-                      "d",
-                      "e",
-                      "f",
-                      "A",
-                      "B",
-                      "C",
-                      "D",
-                      "E",
-                      "F",
-                    ),
-                  ),
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // HexExponent
-              seq(
-                // HexExponentStart
-                choice(
-                  "p",
-                  "P",
-                  "p+",
-                  "P+",
-                  "p-",
-                  "P-",
-                ),
-                // DecimalDigitsNoSingleUS
-                choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  seq(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // DecimalDigitsUS
-                    repeat1(
-                      // DecimalDigitUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // DecimalDigitsUS
-                    repeat1(
-                      // DecimalDigitUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
           seq(
             // Float
             choice(
@@ -4011,18 +1784,6 @@ module.exports = grammar({
                     // DecimalInteger
                     choice(
                       "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
                       seq(
                         // NonZeroDigit
                         choice(
@@ -4036,68 +1797,7 @@ module.exports = grammar({
                           "8",
                           "9",
                         ),
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                    ),
-                    seq(
-                      "0",
-                      // DecimalDigitsNoSingleUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        seq(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
+                        optional(
                           // DecimalDigitsUS
                           repeat1(
                             // DecimalDigitUS
@@ -4119,6 +1819,55 @@ module.exports = grammar({
                                 ),
                               ),
                               "_",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    seq(
+                      "0",
+                      // DecimalDigitsNoSingleUS
+                      choice(
+                        seq(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          optional(
+                            // DecimalDigitsUS
+                            repeat1(
+                              // DecimalDigitUS
+                              choice(
+                                // DecimalDigit
+                                choice(
+                                  "0",
+                                  // NonZeroDigit
+                                  choice(
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                  ),
+                                ),
+                                "_",
+                              ),
                             ),
                           ),
                         ),
@@ -4166,68 +1915,137 @@ module.exports = grammar({
                       ),
                     ),
                   ),
-                  ".",
-                ),
-                seq(
-                  // LeadingDecimal
                   choice(
-                    // DecimalInteger
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                      seq(
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                        // DecimalDigitsUS
+                    seq(
+                      ".",
+                      optional(
+                        // DecimalDigits
                         repeat1(
-                          // DecimalDigitUS
+                          // DecimalDigit
                           choice(
-                            // DecimalDigit
+                            "0",
+                            // NonZeroDigit
                             choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
                             ),
-                            "_",
                           ),
                         ),
                       ),
                     ),
+                    // DecimalExponent
                     seq(
-                      "0",
+                      // DecimalExponentStart
+                      choice(
+                        "e",
+                        "E",
+                        "e+",
+                        "E+",
+                        "e-",
+                        "E-",
+                      ),
                       // DecimalDigitsNoSingleUS
                       choice(
+                        seq(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          optional(
+                            // DecimalDigitsUS
+                            repeat1(
+                              // DecimalDigitUS
+                              choice(
+                                // DecimalDigit
+                                choice(
+                                  "0",
+                                  // NonZeroDigit
+                                  choice(
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                  ),
+                                ),
+                                "_",
+                              ),
+                            ),
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                seq(
+                  choice(
+                    seq(
+                      // DecimalDigits
+                      repeat1(
                         // DecimalDigit
                         choice(
                           "0",
@@ -4244,173 +2062,96 @@ module.exports = grammar({
                             "9",
                           ),
                         ),
-                        seq(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                        ),
-                        seq(
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                        ),
                       ),
-                    ),
-                  ),
-                  ".",
-                  // DecimalDigits
-                  repeat1(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                  ),
-                ),
-                seq(
-                  // DecimalDigits
-                  repeat1(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                  ),
-                  ".",
-                  // DecimalDigitsNoStartingUS
-                  seq(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    optional(
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
+                      ".",
+                      // DecimalDigitsNoStartingUS
+                      seq(
+                        // DecimalDigit
                         choice(
-                          // DecimalDigit
+                          "0",
+                          // NonZeroDigit
                           choice(
-                            "0",
-                            // NonZeroDigit
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        optional(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
                             choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
                             ),
                           ),
-                          "_",
+                        ),
+                      ),
+                    ),
+                    seq(
+                      ".",
+                      // DecimalInteger
+                      choice(
+                        "0",
+                        seq(
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                          optional(
+                            // DecimalDigitsUS
+                            repeat1(
+                              // DecimalDigitUS
+                              choice(
+                                // DecimalDigit
+                                choice(
+                                  "0",
+                                  // NonZeroDigit
+                                  choice(
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                  ),
+                                ),
+                                "_",
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -4428,22 +2169,6 @@ module.exports = grammar({
                     ),
                     // DecimalDigitsNoSingleUS
                     choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
                       seq(
                         // DecimalDigit
                         choice(
@@ -4461,27 +2186,29 @@ module.exports = grammar({
                             "9",
                           ),
                         ),
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
+                        optional(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
                             choice(
-                              "0",
-                              // NonZeroDigit
+                              // DecimalDigit
                               choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
                               ),
+                              "_",
                             ),
-                            "_",
                           ),
                         ),
                       ),
@@ -4534,18 +2261,6 @@ module.exports = grammar({
                   // DecimalInteger
                   choice(
                     "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
                     seq(
                       // NonZeroDigit
                       choice(
@@ -4559,133 +2274,7 @@ module.exports = grammar({
                         "8",
                         "9",
                       ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                seq(
-                  ".",
-                  // DecimalInteger
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                    seq(
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                  // DecimalExponent
-                  seq(
-                    // DecimalExponentStart
-                    choice(
-                      "e",
-                      "E",
-                      "e+",
-                      "E+",
-                      "e-",
-                      "E-",
-                    ),
-                    // DecimalDigitsNoSingleUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
+                      optional(
                         // DecimalDigitsUS
                         repeat1(
                           // DecimalDigitUS
@@ -4707,322 +2296,6 @@ module.exports = grammar({
                               ),
                             ),
                             "_",
-                          ),
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                seq(
-                  // LeadingDecimal
-                  choice(
-                    // DecimalInteger
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                      seq(
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                    ),
-                    seq(
-                      "0",
-                      // DecimalDigitsNoSingleUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        seq(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                        ),
-                        seq(
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // DecimalExponent
-                  seq(
-                    // DecimalExponentStart
-                    choice(
-                      "e",
-                      "E",
-                      "e+",
-                      "E+",
-                      "e-",
-                      "E-",
-                    ),
-                    // DecimalDigitsNoSingleUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                      seq(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
                           ),
                         ),
                       ),
@@ -5039,280 +2312,167 @@ module.exports = grammar({
                 ),
                 choice(
                   seq(
-                    // HexDigitsNoSingleUS
-                    choice(
-                      // HexDigit
+                    optional(
+                      // HexDigitsNoSingleUS
                       choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
+                        seq(
+                          // HexDigit
                           choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                      seq(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
+                            // DecimalDigit
                             choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
                             ),
                           ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
+                          optional(
+                            // HexDigitsUS
+                            repeat1(
+                              // HexDigitUS
+                              choice(
+                                // HexDigit
+                                choice(
+                                  // DecimalDigit
+                                  choice(
+                                    "0",
+                                    // NonZeroDigit
+                                    choice(
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5",
+                                      "6",
+                                      "7",
+                                      "8",
+                                      "9",
+                                    ),
+                                  ),
+                                  // HexLetter
+                                  choice(
+                                    "a",
+                                    "b",
+                                    "c",
+                                    "d",
+                                    "e",
+                                    "f",
+                                    "A",
+                                    "B",
+                                    "C",
+                                    "D",
+                                    "E",
+                                    "F",
+                                  ),
+                                ),
+                                "_",
+                              ),
+                            ),
                           ),
                         ),
-                        // HexDigitsUS
-                        repeat1(
-                          // HexDigitUS
-                          choice(
-                            // HexDigit
+                        seq(
+                          // HexDigitsUS
+                          repeat1(
+                            // HexDigitUS
                             choice(
-                              // DecimalDigit
+                              // HexDigit
                               choice(
-                                "0",
-                                // NonZeroDigit
+                                // DecimalDigit
                                 choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
+                                  "0",
+                                  // NonZeroDigit
+                                  choice(
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                  ),
+                                ),
+                                // HexLetter
+                                choice(
+                                  "a",
+                                  "b",
+                                  "c",
+                                  "d",
+                                  "e",
+                                  "f",
+                                  "A",
+                                  "B",
+                                  "C",
+                                  "D",
+                                  "E",
+                                  "F",
                                 ),
                               ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
+                              "_",
                             ),
-                            "_",
                           ),
-                        ),
-                      ),
-                      seq(
-                        // HexDigitsUS
-                        repeat1(
-                          // HexDigitUS
+                          // HexDigit
                           choice(
-                            // HexDigit
+                            // DecimalDigit
                             choice(
-                              // DecimalDigit
+                              "0",
+                              // NonZeroDigit
                               choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
                               ),
                             ),
-                            "_",
-                          ),
-                        ),
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
+                            // HexLetter
                             choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
                             ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
                           ),
                         ),
                       ),
                     ),
-                    ".",
-                    // HexDigitsNoStartingUS
-                    seq(
-                      // HexDigit
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                      optional(
-                        // HexDigitsUS
-                        repeat1(
-                          // HexDigitUS
-                          choice(
-                            // HexDigit
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  seq(
                     ".",
                     // HexDigitsNoStartingUS
                     seq(
@@ -5397,40 +2557,6 @@ module.exports = grammar({
                   ),
                   // HexDigitsNoSingleUS
                   choice(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
                     seq(
                       // HexDigit
                       choice(
@@ -5466,45 +2592,47 @@ module.exports = grammar({
                           "F",
                         ),
                       ),
-                      // HexDigitsUS
-                      repeat1(
-                        // HexDigitUS
-                        choice(
-                          // HexDigit
+                      optional(
+                        // HexDigitsUS
+                        repeat1(
+                          // HexDigitUS
                           choice(
-                            // DecimalDigit
+                            // HexDigit
                             choice(
-                              "0",
-                              // NonZeroDigit
+                              // DecimalDigit
                               choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              // HexLetter
+                              choice(
+                                "a",
+                                "b",
+                                "c",
+                                "d",
+                                "e",
+                                "f",
+                                "A",
+                                "B",
+                                "C",
+                                "D",
+                                "E",
+                                "F",
                               ),
                             ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
+                            "_",
                           ),
-                          "_",
                         ),
                       ),
                     ),
@@ -5600,22 +2728,6 @@ module.exports = grammar({
                   ),
                   // DecimalDigitsNoSingleUS
                   choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
                     seq(
                       // DecimalDigit
                       choice(
@@ -5633,27 +2745,29 @@ module.exports = grammar({
                           "9",
                         ),
                       ),
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
+                      optional(
+                        // DecimalDigitsUS
+                        repeat1(
+                          // DecimalDigitUS
                           choice(
-                            "0",
-                            // NonZeroDigit
+                            // DecimalDigit
                             choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
                             ),
+                            "_",
                           ),
-                          "_",
                         ),
                       ),
                     ),
@@ -5702,1419 +2816,314 @@ module.exports = grammar({
                 ),
               ),
             ),
-            // Suffix
+            optional(
+              // Suffix
+              choice(
+                // FloatSuffix
+                choice(
+                  "f",
+                  "F",
+                ),
+                // RealSuffix
+                "L",
+                seq(
+                  optional(
+                    choice(
+                      // FloatSuffix
+                      choice(
+                        "f",
+                        "F",
+                      ),
+                      // RealSuffix
+                      "L",
+                    ),
+                  ),
+                  // ImaginarySuffix
+                  "i",
+                ),
+              ),
+            ),
+          ),
+          seq(
+            // Integer
+            choice(
+              // DecimalInteger
+              choice(
+                "0",
+                seq(
+                  // NonZeroDigit
+                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
+                  optional(
+                    // DecimalDigitsUS
+                    repeat1(
+                      // DecimalDigitUS
+                      choice(
+                        // DecimalDigit
+                        choice(
+                          "0",
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // BinaryInteger
+              seq(
+                // BinPrefix
+                choice(
+                  "0b",
+                  "0B",
+                ),
+                // BinaryDigitsNoSingleUS
+                seq(
+                  optional(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                  // BinaryDigit
+                  choice(
+                    "0",
+                    "1",
+                  ),
+                  optional(
+                    // BinaryDigitsUS
+                    repeat1(
+                      // BinaryDigitUS
+                      choice(
+                        // BinaryDigit
+                        choice(
+                          "0",
+                          "1",
+                        ),
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // HexadecimalInteger
+              seq(
+                // HexPrefix
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                // HexDigitsNoSingleUS
+                choice(
+                  seq(
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                    optional(
+                      // HexDigitsUS
+                      repeat1(
+                        // HexDigitUS
+                        choice(
+                          // HexDigit
+                          choice(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            // HexLetter
+                            choice(
+                              "a",
+                              "b",
+                              "c",
+                              "d",
+                              "e",
+                              "f",
+                              "A",
+                              "B",
+                              "C",
+                              "D",
+                              "E",
+                              "F",
+                            ),
+                          ),
+                          "_",
+                        ),
+                      ),
+                    ),
+                  ),
+                  seq(
+                    // HexDigitsUS
+                    repeat1(
+                      // HexDigitUS
+                      choice(
+                        // HexDigit
+                        choice(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          // HexLetter
+                          choice(
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                          ),
+                        ),
+                        "_",
+                      ),
+                    ),
+                    // HexDigit
+                    choice(
+                      // DecimalDigit
+                      choice(
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                      ),
+                      // HexLetter
+                      choice(
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             choice(
               // FloatSuffix
               choice(
                 "f",
                 "F",
               ),
-              // RealSuffix
-              "L",
-              // ImaginarySuffix
-              "i",
               seq(
-                // FloatSuffix
-                choice(
-                  "f",
-                  "F",
+                optional(
+                  choice(
+                    // FloatSuffix
+                    choice(
+                      "f",
+                      "F",
+                    ),
+                    // RealSuffix
+                    "L",
+                  ),
                 ),
                 // ImaginarySuffix
                 "i",
               ),
-              seq(
-                // RealSuffix
-                "L",
-                // ImaginarySuffix
-                "i",
-              ),
             ),
-          ),
-          seq(
-            // Integer
-            choice(
-              // DecimalInteger
-              choice(
-                "0",
-                // NonZeroDigit
-                choice(
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                  "8",
-                  "9",
-                ),
-                seq(
-                  // NonZeroDigit
-                  choice(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                  ),
-                  // DecimalDigitsUS
-                  repeat1(
-                    // DecimalDigitUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      "_",
-                    ),
-                  ),
-                ),
-              ),
-              // BinaryInteger
-              seq(
-                // BinPrefix
-                choice(
-                  "0b",
-                  "0B",
-                ),
-                // BinaryDigitsNoSingleUS
-                choice(
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
-                  seq(
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // HexadecimalInteger
-              seq(
-                // HexPrefix
-                choice(
-                  "0x",
-                  "0X",
-                ),
-                // HexDigitsNoSingleUS
-                choice(
-                  // HexDigit
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // HexLetter
-                    choice(
-                      "a",
-                      "b",
-                      "c",
-                      "d",
-                      "e",
-                      "f",
-                      "A",
-                      "B",
-                      "C",
-                      "D",
-                      "E",
-                      "F",
-                    ),
-                  ),
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // FloatSuffix
-            choice(
-              "f",
-              "F",
-            ),
-          ),
-          seq(
-            // Integer
-            choice(
-              // DecimalInteger
-              choice(
-                "0",
-                // NonZeroDigit
-                choice(
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                  "8",
-                  "9",
-                ),
-                seq(
-                  // NonZeroDigit
-                  choice(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                  ),
-                  // DecimalDigitsUS
-                  repeat1(
-                    // DecimalDigitUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      "_",
-                    ),
-                  ),
-                ),
-              ),
-              // BinaryInteger
-              seq(
-                // BinPrefix
-                choice(
-                  "0b",
-                  "0B",
-                ),
-                // BinaryDigitsNoSingleUS
-                choice(
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
-                  seq(
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // HexadecimalInteger
-              seq(
-                // HexPrefix
-                choice(
-                  "0x",
-                  "0X",
-                ),
-                // HexDigitsNoSingleUS
-                choice(
-                  // HexDigit
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // HexLetter
-                    choice(
-                      "a",
-                      "b",
-                      "c",
-                      "d",
-                      "e",
-                      "f",
-                      "A",
-                      "B",
-                      "C",
-                      "D",
-                      "E",
-                      "F",
-                    ),
-                  ),
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // ImaginarySuffix
-            "i",
-          ),
-          seq(
-            // Integer
-            choice(
-              // DecimalInteger
-              choice(
-                "0",
-                // NonZeroDigit
-                choice(
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                  "8",
-                  "9",
-                ),
-                seq(
-                  // NonZeroDigit
-                  choice(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                  ),
-                  // DecimalDigitsUS
-                  repeat1(
-                    // DecimalDigitUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      "_",
-                    ),
-                  ),
-                ),
-              ),
-              // BinaryInteger
-              seq(
-                // BinPrefix
-                choice(
-                  "0b",
-                  "0B",
-                ),
-                // BinaryDigitsNoSingleUS
-                choice(
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
-                  seq(
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // HexadecimalInteger
-              seq(
-                // HexPrefix
-                choice(
-                  "0x",
-                  "0X",
-                ),
-                // HexDigitsNoSingleUS
-                choice(
-                  // HexDigit
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // HexLetter
-                    choice(
-                      "a",
-                      "b",
-                      "c",
-                      "d",
-                      "e",
-                      "f",
-                      "A",
-                      "B",
-                      "C",
-                      "D",
-                      "E",
-                      "F",
-                    ),
-                  ),
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // FloatSuffix
-            choice(
-              "f",
-              "F",
-            ),
-            // ImaginarySuffix
-            "i",
-          ),
-          seq(
-            // Integer
-            choice(
-              // DecimalInteger
-              choice(
-                "0",
-                // NonZeroDigit
-                choice(
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                  "8",
-                  "9",
-                ),
-                seq(
-                  // NonZeroDigit
-                  choice(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                  ),
-                  // DecimalDigitsUS
-                  repeat1(
-                    // DecimalDigitUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      "_",
-                    ),
-                  ),
-                ),
-              ),
-              // BinaryInteger
-              seq(
-                // BinPrefix
-                choice(
-                  "0b",
-                  "0B",
-                ),
-                // BinaryDigitsNoSingleUS
-                choice(
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
-                  seq(
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                  ),
-                  seq(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // BinaryDigit
-                    choice(
-                      "0",
-                      "1",
-                    ),
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // HexadecimalInteger
-              seq(
-                // HexPrefix
-                choice(
-                  "0x",
-                  "0X",
-                ),
-                // HexDigitsNoSingleUS
-                choice(
-                  // HexDigit
-                  choice(
-                    // DecimalDigit
-                    choice(
-                      "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // HexLetter
-                    choice(
-                      "a",
-                      "b",
-                      "c",
-                      "d",
-                      "e",
-                      "f",
-                      "A",
-                      "B",
-                      "C",
-                      "D",
-                      "E",
-                      "F",
-                    ),
-                  ),
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // RealSuffix
-            "L",
-            // ImaginarySuffix
-            "i",
           ),
         ),
       ),
@@ -7396,13 +3405,16 @@ module.exports = grammar({
     // https://dlang.org/spec/module.html#ImportList
     import_list: $ =>
       choice(
-        $.import,
-        $.import_bindings,
         seq(
           $.import,
-          ",",
-          $.import_list,
+          optional(
+            seq(
+              ",",
+              $.import_list,
+            ),
+          ),
         ),
+        $.import_bindings,
       ),
 
     // https://dlang.org/spec/module.html#Import
@@ -7439,13 +3451,12 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#ImportBind
     import_bind: $ =>
-      seq(
+      choice(
         $.identifier,
-        optional(
-          seq(
-            "=",
-            $.identifier,
-          ),
+        seq(
+          $.identifier,
+          "=",
+          $.identifier,
         ),
       ),
 
@@ -7525,10 +3536,11 @@ module.exports = grammar({
     declarator_initializer: $ =>
       seq(
         choice(
-          $.var_declarator,
           seq(
             $.var_declarator,
-            $.template_parameters,
+            optional(
+              $.template_parameters,
+            ),
           ),
           $.alt_declarator,
         ),
@@ -7572,38 +3584,28 @@ module.exports = grammar({
 
     // https://dlang.org/spec/declaration.html#AltDeclaratorIdentifier
     alt_declarator_identifier: $ =>
-      choice(
-        seq(
-          $.type_suffixes,
-          $.identifier,
-          optional(
+      seq(
+        choice(
+          seq(
+            $.type_suffixes,
+            $.identifier,
+            optional(
+              $.alt_declarator_suffixes,
+            ),
+          ),
+          seq(
+            optional(
+              $.type_suffixes,
+            ),
+            $.identifier,
             $.alt_declarator_suffixes,
           ),
         ),
-        seq(
-          $.type_suffixes,
-          $.identifier,
-          optional(
-            $.alt_declarator_suffixes,
+        optional(
+          seq(
+            "=",
+            $._initializer,
           ),
-          "=",
-          $._initializer,
-        ),
-        seq(
-          optional(
-            $.type_suffixes,
-          ),
-          $.identifier,
-          $.alt_declarator_suffixes,
-        ),
-        seq(
-          optional(
-            $.type_suffixes,
-          ),
-          $.identifier,
-          $.alt_declarator_suffixes,
-          "=",
-          $._initializer,
         ),
       ),
 
@@ -7636,41 +3638,34 @@ module.exports = grammar({
           ),
           seq(
             "(",
-            $.alt_declarator_inner,
+            $._maybe_alt_declarator_inner,
             ")",
-          ),
-          seq(
-            "(",
-            $.alt_declarator_inner,
-            ")",
-            $.alt_func_declarator_suffix,
-          ),
-          seq(
-            "(",
-            $.alt_declarator_inner,
-            ")",
-            $.alt_declarator_suffixes,
+            optional(
+              choice(
+                $.alt_func_declarator_suffix,
+                $.alt_declarator_suffixes,
+              ),
+            ),
           ),
         ),
       ),
 
     // https://dlang.org/spec/declaration.html#AltDeclaratorInner
-    alt_declarator_inner: $ =>
+    _maybe_alt_declarator_inner: $ =>
       choice(
-        seq(
-          optional(
-            $.type_suffixes,
-          ),
-          $.identifier,
+        $.alt_declarator,
+        $.alt_declarator_inner,
+      ),
+
+    alt_declarator_inner: $ =>
+      seq(
+        optional(
+          $.type_suffixes,
         ),
-        seq(
-          optional(
-            $.type_suffixes,
-          ),
-          $.identifier,
+        $.identifier,
+        optional(
           $.alt_func_declarator_suffix,
         ),
-        $.alt_declarator,
       ),
 
     // https://dlang.org/spec/declaration.html#AltDeclaratorSuffixes
@@ -7879,14 +3874,10 @@ module.exports = grammar({
               $.storage_classes,
             ),
             $._maybe_basic_type,
-            $.declarators,
-          ),
-          seq(
-            optional(
-              $.storage_classes,
+            choice(
+              $.declarators,
+              $.func_declarator,
             ),
-            $._maybe_basic_type,
-            $.func_declarator,
           ),
           $.alias_assignments,
         ),
@@ -7918,19 +3909,18 @@ module.exports = grammar({
             optional(
               $.storage_classes,
             ),
-            $.type,
+            choice(
+              $.type,
+              seq(
+                $._maybe_basic_type,
+                $.parameters,
+                optional(
+                  $.member_function_attributes,
+                ),
+              ),
+            ),
           ),
           $._maybe_function_literal,
-          seq(
-            optional(
-              $.storage_classes,
-            ),
-            $._maybe_basic_type,
-            $.parameters,
-            optional(
-              $.member_function_attributes,
-            ),
-          ),
         ),
       ),
 
@@ -7986,11 +3976,9 @@ module.exports = grammar({
     basic_type: $ =>
       choice(
         seq(
-          ".",
-          $.qualified_identifier,
-        ),
-        seq(
-          $.typeof,
+          optional(
+            $.typeof,
+          ),
           ".",
           $.qualified_identifier,
         ),
@@ -8056,23 +4044,17 @@ module.exports = grammar({
         "*",
         seq(
           "[",
-          "]",
-        ),
-        seq(
-          "[",
-          $._maybe_assign_expression,
-          "]",
-        ),
-        seq(
-          "[",
-          $._maybe_assign_expression,
-          "..",
-          $._maybe_assign_expression,
-          "]",
-        ),
-        seq(
-          "[",
-          $.type,
+          optional(
+            choice(
+              $._maybe_assign_expression,
+              seq(
+                $._maybe_assign_expression,
+                "..",
+                $._maybe_assign_expression,
+              ),
+              $.type,
+            ),
+          ),
           "]",
         ),
         seq(
@@ -8094,31 +4076,37 @@ module.exports = grammar({
     // https://dlang.org/spec/type.html#QualifiedIdentifier
     qualified_identifier: $ =>
       choice(
-        $.identifier,
         seq(
           $.identifier,
-          ".",
-          $.qualified_identifier,
+          optional(
+            choice(
+              seq(
+                optional(
+                  seq(
+                    "[",
+                    $._maybe_assign_expression,
+                    "]",
+                  ),
+                ),
+                ".",
+                $.qualified_identifier,
+              ),
+              seq(
+                "[",
+                $._maybe_assign_expression,
+                "]",
+              ),
+            ),
+          ),
         ),
-        $.template_instance,
         seq(
           $.template_instance,
-          ".",
-          $.qualified_identifier,
-        ),
-        seq(
-          $.identifier,
-          "[",
-          $._maybe_assign_expression,
-          "]",
-        ),
-        seq(
-          $.identifier,
-          "[",
-          $._maybe_assign_expression,
-          "]",
-          ".",
-          $.qualified_identifier,
+          optional(
+            seq(
+              ".",
+              $.qualified_identifier,
+            ),
+          ),
         ),
       ),
 
@@ -8256,12 +4244,10 @@ module.exports = grammar({
           seq(
             "C++",
             ",",
-            $.qualified_identifier,
-          ),
-          seq(
-            "C++",
-            ",",
-            $.namespace_list,
+            choice(
+              $.qualified_identifier,
+              $.namespace_list,
+            ),
           ),
         ),
         ")",
@@ -8329,12 +4315,15 @@ module.exports = grammar({
     visibility_attribute: $ =>
       choice(
         "private",
-        "package",
         seq(
           "package",
-          "(",
-          $.qualified_identifier,
-          ")",
+          optional(
+            seq(
+              "(",
+              $.qualified_identifier,
+              ")",
+            ),
+          ),
         ),
         "protected",
         "public",
@@ -8349,28 +4338,26 @@ module.exports = grammar({
         "@",
         choice(
           seq(
-            "(",
-            $.argument_list,
+            choice(
+              seq(
+                "(",
+                $.argument_list,
+              ),
+              seq(
+                choice(
+                  $.identifier,
+                  $.template_instance,
+                ),
+                "(",
+                optional(
+                  $.argument_list,
+                ),
+              ),
+            ),
             ")",
           ),
           $.identifier,
-          seq(
-            $.identifier,
-            "(",
-            optional(
-              $.argument_list,
-            ),
-            ")",
-          ),
           $.template_instance,
-          seq(
-            $.template_instance,
-            "(",
-            optional(
-              $.argument_list,
-            ),
-            ")",
-          ),
         ),
       ),
 
@@ -8599,10 +4586,11 @@ module.exports = grammar({
       seq(
         $._maybe_shift_expression,
         choice(
-          "<",
           seq(
             "<",
-            "=",
+            optional(
+              "=",
+            ),
           ),
           ">",
           ">=",
@@ -8658,15 +4646,16 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#AddExpression
     add_expression: $ =>
       choice(
-        $._maybe_mul_expression,
         seq(
-          $.add_expression,
-          "+",
-          $._maybe_mul_expression,
-        ),
-        seq(
-          $.add_expression,
-          "-",
+          optional(
+            seq(
+              $.add_expression,
+              choice(
+                "+",
+                "-",
+              ),
+            ),
+          ),
           $._maybe_mul_expression,
         ),
         $.cat_expression,
@@ -8708,31 +4697,15 @@ module.exports = grammar({
     unary_expression: $ =>
       choice(
         seq(
-          "&",
-          $.unary_expression,
-        ),
-        seq(
-          "++",
-          $.unary_expression,
-        ),
-        seq(
-          "--",
-          $.unary_expression,
-        ),
-        seq(
-          "*",
-          $.unary_expression,
-        ),
-        seq(
-          "-",
-          $.unary_expression,
-        ),
-        seq(
-          "+",
-          $.unary_expression,
-        ),
-        seq(
-          "!",
+          choice(
+            "&",
+            "++",
+            "--",
+            "*",
+            "-",
+            "+",
+            "!",
+          ),
           $.unary_expression,
         ),
         $.complement_expression,
@@ -8741,14 +4714,10 @@ module.exports = grammar({
           $.type,
           ")",
           ".",
-          $.identifier,
-        ),
-        seq(
-          "(",
-          $.type,
-          ")",
-          ".",
-          $.template_instance,
+          choice(
+            $.identifier,
+            $.template_instance,
+          ),
         ),
         $.delete_expression,
         $.cast_expression,
@@ -8776,41 +4745,24 @@ module.exports = grammar({
     new_expression: $ =>
       seq(
         "new",
-        choice(
-          $.type,
-          seq(
-            $.allocator_arguments,
-            $.type,
-          ),
-          seq(
-            $.type,
-            "[",
-            $._maybe_assign_expression,
-            "]",
-          ),
-          seq(
-            $.allocator_arguments,
-            $.type,
-            "[",
-            $._maybe_assign_expression,
-            "]",
-          ),
-          seq(
-            $.type,
-            "(",
-            optional(
-              $.argument_list,
+        optional(
+          $.allocator_arguments,
+        ),
+        $.type,
+        optional(
+          choice(
+            seq(
+              "[",
+              $._maybe_assign_expression,
+              "]",
             ),
-            ")",
-          ),
-          seq(
-            $.allocator_arguments,
-            $.type,
-            "(",
-            optional(
-              $.argument_list,
+            seq(
+              "(",
+              optional(
+                $.argument_list,
+              ),
+              ")",
             ),
-            ")",
           ),
         ),
       ),
@@ -8890,34 +4842,25 @@ module.exports = grammar({
         $.primary_expression,
         seq(
           $.postfix_expression,
-          ".",
-          $.identifier,
-        ),
-        seq(
-          $.postfix_expression,
-          ".",
-          $.template_instance,
-        ),
-        seq(
-          $.postfix_expression,
-          ".",
-          $._maybe_new_expression,
-        ),
-        seq(
-          $.postfix_expression,
-          "++",
-        ),
-        seq(
-          $.postfix_expression,
-          "--",
-        ),
-        seq(
-          $.postfix_expression,
-          "(",
-          optional(
-            $.argument_list,
+          choice(
+            seq(
+              ".",
+              choice(
+                $.identifier,
+                $.template_instance,
+                $._maybe_new_expression,
+              ),
+            ),
+            "++",
+            "--",
+            seq(
+              "(",
+              optional(
+                $.argument_list,
+              ),
+              ")",
+            ),
           ),
-          ")",
         ),
         seq(
           optional(
@@ -8970,18 +4913,18 @@ module.exports = grammar({
         optional(
           choice(
             seq(
+              optional(
+                seq(
+                  "..",
+                  $._maybe_assign_expression,
+                ),
+              ),
               ",",
               $.slice,
             ),
             seq(
               "..",
               $._maybe_assign_expression,
-            ),
-            seq(
-              "..",
-              $._maybe_assign_expression,
-              ",",
-              $.slice,
             ),
           ),
         ),
@@ -8992,14 +4935,29 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#PrimaryExpression
     primary_expression: $ =>
       choice(
-        $.identifier,
         seq(
-          ".",
+          optional(
+            seq(
+              optional(
+                choice(
+                  $.fundamental_type,
+                  seq(
+                    $.type_ctor,
+                    "(",
+                    $.type,
+                    ")",
+                  ),
+                ),
+              ),
+              ".",
+            ),
+          ),
           $.identifier,
         ),
-        $.template_instance,
         seq(
-          ".",
+          optional(
+            ".",
+          ),
           $.template_instance,
         ),
         "this",
@@ -9020,45 +4978,32 @@ module.exports = grammar({
         $.import_expression,
         $._maybe_new_expression,
         seq(
-          $.fundamental_type,
-          ".",
-          $.identifier,
-        ),
-        seq(
-          $.fundamental_type,
-          "(",
-          optional(
-            $.argument_list,
-          ),
-          ")",
-        ),
-        seq(
-          $.type_ctor,
-          "(",
-          $.type,
-          ")",
-          ".",
-          $.identifier,
-        ),
-        seq(
-          $.type_ctor,
-          "(",
-          $.type,
-          ")",
-          "(",
-          optional(
-            $.argument_list,
+          choice(
+            seq(
+              choice(
+                $.fundamental_type,
+                seq(
+                  $.type_ctor,
+                  "(",
+                  $.type,
+                  ")",
+                ),
+              ),
+              "(",
+              optional(
+                $.argument_list,
+              ),
+            ),
+            seq(
+              "(",
+              $.expression,
+            ),
           ),
           ")",
         ),
         $.typeof,
         $.typeid_expression,
         $.is_expression,
-        seq(
-          "(",
-          $.expression,
-          ")",
-        ),
         $.special_keyword,
         $.traits_expression,
       ),
@@ -9133,54 +5078,38 @@ module.exports = grammar({
     function_literal: $ =>
       choice(
         seq(
-          "function",
-          optional(
-            $.type,
+          choice(
+            seq(
+              "function",
+              optional(
+                "ref",
+              ),
+              optional(
+                $.type,
+              ),
+              optional(
+                $.parameter_with_attributes,
+              ),
+            ),
+            seq(
+              "delegate",
+              optional(
+                "ref",
+              ),
+              optional(
+                $.type,
+              ),
+              optional(
+                $.parameter_with_member_attributes,
+              ),
+            ),
+            seq(
+              optional(
+                "ref",
+              ),
+              $.parameter_with_member_attributes,
+            ),
           ),
-          optional(
-            $.parameter_with_attributes,
-          ),
-          $._maybe_function_literal_body2,
-        ),
-        seq(
-          "function",
-          "ref",
-          optional(
-            $.type,
-          ),
-          optional(
-            $.parameter_with_attributes,
-          ),
-          $._maybe_function_literal_body2,
-        ),
-        seq(
-          "delegate",
-          optional(
-            $.type,
-          ),
-          optional(
-            $.parameter_with_member_attributes,
-          ),
-          $._maybe_function_literal_body2,
-        ),
-        seq(
-          "delegate",
-          "ref",
-          optional(
-            $.type,
-          ),
-          optional(
-            $.parameter_with_member_attributes,
-          ),
-          $._maybe_function_literal_body2,
-        ),
-        seq(
-          $.parameter_with_member_attributes,
-          $._maybe_function_literal_body2,
-        ),
-        seq(
-          "ref",
-          $.parameter_with_member_attributes,
           $._maybe_function_literal_body2,
         ),
         seq(
@@ -9234,16 +5163,20 @@ module.exports = grammar({
 
     // https://dlang.org/spec/expression.html#AssertArguments
     assert_arguments: $ =>
-      seq(
-        $._maybe_assign_expression,
-        optional(
-          seq(
+      choice(
+        seq(
+          $._maybe_assign_expression,
+          optional(
             ",",
-            $._maybe_assign_expression,
           ),
         ),
-        optional(
+        seq(
+          $._maybe_assign_expression,
           ",",
+          $._maybe_assign_expression,
+          optional(
+            ",",
+          ),
         ),
       ),
 
@@ -9294,49 +5227,35 @@ module.exports = grammar({
         optional(
           choice(
             seq(
-              ":",
+              choice(
+                ":",
+                "==",
+              ),
               $._maybe_type_specialization,
-            ),
-            seq(
-              "==",
-              $._maybe_type_specialization,
-            ),
-            seq(
-              ":",
-              $._maybe_type_specialization,
-              ",",
-              $.template_parameter_list,
-            ),
-            seq(
-              "==",
-              $._maybe_type_specialization,
-              ",",
-              $.template_parameter_list,
-            ),
-            $.identifier,
-            seq(
-              $.identifier,
-              ":",
-              $._maybe_type_specialization,
+              optional(
+                seq(
+                  ",",
+                  $.template_parameter_list,
+                ),
+              ),
             ),
             seq(
               $.identifier,
-              "==",
-              $._maybe_type_specialization,
-            ),
-            seq(
-              $.identifier,
-              ":",
-              $._maybe_type_specialization,
-              ",",
-              $.template_parameter_list,
-            ),
-            seq(
-              $.identifier,
-              "==",
-              $._maybe_type_specialization,
-              ",",
-              $.template_parameter_list,
+              optional(
+                seq(
+                  choice(
+                    ":",
+                    "==",
+                  ),
+                  $._maybe_type_specialization,
+                  optional(
+                    seq(
+                      ",",
+                      $.template_parameter_list,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -9553,11 +5472,10 @@ module.exports = grammar({
       seq(
         choice(
           seq(
-            "auto",
-            $.identifier,
-          ),
-          seq(
-            $.type_ctors,
+            choice(
+              "auto",
+              $.type_ctors,
+            ),
             $.identifier,
           ),
           seq(
@@ -9693,9 +5611,10 @@ module.exports = grammar({
             $._maybe_basic_type,
             $._declarator,
           ),
-          $.identifier,
           seq(
-            "alias",
+            optional(
+              "alias",
+            ),
             $.identifier,
           ),
         ),
@@ -9886,10 +5805,11 @@ module.exports = grammar({
         choice(
           $.identifier,
           "default",
-          "case",
           seq(
             "case",
-            $.expression,
+            optional(
+              $.expression,
+            ),
           ),
         ),
         ";",
@@ -9935,10 +5855,11 @@ module.exports = grammar({
         "try",
         $._scope_statement,
         choice(
-          $.catches,
           seq(
             $.catches,
-            $.finally_statement,
+            optional(
+              $.finally_statement,
+            ),
           ),
           $.finally_statement,
         ),
@@ -10138,11 +6059,14 @@ module.exports = grammar({
         "invariant",
         choice(
           seq(
-            "(",
-            ")",
+            optional(
+              seq(
+                "(",
+                ")",
+              ),
+            ),
             $.block_statement,
           ),
-          $.block_statement,
           seq(
             "(",
             $.assert_arguments,
@@ -10169,9 +6093,10 @@ module.exports = grammar({
         $.identifier,
         choice(
           ";",
-          $.aggregate_body,
           seq(
-            $.base_class_list,
+            optional(
+              $.base_class_list,
+            ),
             $.aggregate_body,
           ),
         ),
@@ -10400,9 +6325,10 @@ module.exports = grammar({
         $.identifier,
         choice(
           ";",
-          $.aggregate_body,
           seq(
-            $.base_interface_list,
+            optional(
+              $.base_interface_list,
+            ),
             $.aggregate_body,
           ),
         ),
@@ -10510,12 +6436,12 @@ module.exports = grammar({
         "enum",
         choice(
           seq(
-            ":",
-            $.enum_base_type,
-            "{",
-            $.enum_members,
-          ),
-          seq(
+            optional(
+              seq(
+                ":",
+                $.enum_base_type,
+              ),
+            ),
             "{",
             $.enum_members,
           ),
@@ -10633,11 +6559,14 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html#ParameterList
     parameter_list: $ =>
       choice(
-        $.parameter,
         seq(
           $.parameter,
-          ",",
-          $.parameter_list,
+          optional(
+            seq(
+              ",",
+              $.parameter_list,
+            ),
+          ),
         ),
         seq(
           $.variadic_arguments_attributes,
@@ -10655,37 +6584,33 @@ module.exports = grammar({
           seq(
             $._maybe_basic_type,
             $._declarator,
+            optional(
+              choice(
+                "...",
+                seq(
+                  "=",
+                  $._maybe_assign_expression,
+                ),
+              ),
+            ),
           ),
-          seq(
-            $._maybe_basic_type,
-            $._declarator,
-            "...",
-          ),
-          seq(
-            $._maybe_basic_type,
-            $._declarator,
-            "=",
-            $._maybe_assign_expression,
-          ),
-          $.type,
           seq(
             $.type,
-            "...",
+            optional(
+              "...",
+            ),
           ),
         ),
       ),
 
     // https://dlang.org/spec/function.html#ParameterAttributes
     parameter_attributes: $ =>
-      choice(
-        $._maybe_in_out,
-        $.user_defined_attribute,
-        seq(
+      seq(
+        optional(
           $.parameter_attributes,
-          $._maybe_in_out,
         ),
-        seq(
-          $.parameter_attributes,
+        choice(
+          $._maybe_in_out,
           $.user_defined_attribute,
         ),
       ),
@@ -10704,9 +6629,10 @@ module.exports = grammar({
         "in",
         "lazy",
         "out",
-        "ref",
         seq(
-          "return",
+          optional(
+            "return",
+          ),
           "ref",
         ),
         "scope",
@@ -10783,14 +6709,15 @@ module.exports = grammar({
     specified_function_body: $ =>
       seq(
         choice(
-          optional(
-            "do",
-          ),
           seq(
             optional(
-              $.function_contracts,
+              seq(
+                optional(
+                  $.function_contracts,
+                ),
+                $._in_out_contract_expression,
+              ),
             ),
-            $._in_out_contract_expression,
             optional(
               "do",
             ),
@@ -10809,12 +6736,15 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html#MissingFunctionBody
     missing_function_body: $ =>
       choice(
-        ";",
         seq(
           optional(
-            $.function_contracts,
+            seq(
+              optional(
+                $.function_contracts,
+              ),
+              $._in_out_contract_expression,
+            ),
           ),
-          $._in_out_contract_expression,
           ";",
         ),
         seq(
@@ -11019,18 +6949,16 @@ module.exports = grammar({
 
     // https://dlang.org/spec/template.html#SymbolTail
     symbol_tail: $ =>
-      choice(
-        $.identifier,
-        seq(
+      seq(
+        choice(
           $.identifier,
-          ".",
-          $.symbol_tail,
-        ),
-        $.template_instance,
-        seq(
           $.template_instance,
-          ".",
-          $.symbol_tail,
+        ),
+        optional(
+          seq(
+            ".",
+            $.symbol_tail,
+          ),
         ),
       ),
 
@@ -11058,12 +6986,13 @@ module.exports = grammar({
         $.identifier,
         optional(
           choice(
-            $.template_type_parameter_specialization,
-            $.template_type_parameter_default,
             seq(
               $.template_type_parameter_specialization,
-              $.template_type_parameter_default,
+              optional(
+                $.template_type_parameter_default,
+              ),
             ),
+            $.template_type_parameter_default,
           ),
         ),
       ),
@@ -11100,12 +7029,13 @@ module.exports = grammar({
         $._declarator,
         optional(
           choice(
-            $.template_value_parameter_specialization,
-            $.template_value_parameter_default,
             seq(
               $.template_value_parameter_specialization,
-              $.template_value_parameter_default,
+              optional(
+                $.template_value_parameter_default,
+              ),
             ),
+            $.template_value_parameter_default,
           ),
         ),
       ),
@@ -11208,20 +7138,23 @@ module.exports = grammar({
         choice(
           ";",
           seq(
-            optional(
-              $.constraint,
-            ),
-            optional(
-              $.base_class_list,
-            ),
-            $.aggregate_body,
-          ),
-          seq(
-            optional(
-              $.base_class_list,
-            ),
-            optional(
-              $.constraint,
+            choice(
+              seq(
+                optional(
+                  $.constraint,
+                ),
+                optional(
+                  $.base_class_list,
+                ),
+              ),
+              seq(
+                optional(
+                  $.base_class_list,
+                ),
+                optional(
+                  $.constraint,
+                ),
+              ),
             ),
             $.aggregate_body,
           ),
@@ -11237,17 +7170,20 @@ module.exports = grammar({
         choice(
           ";",
           seq(
-            optional(
-              $.constraint,
+            choice(
+              seq(
+                optional(
+                  $.constraint,
+                ),
+                optional(
+                  $.base_interface_list,
+                ),
+              ),
+              seq(
+                $.base_interface_list,
+                $.constraint,
+              ),
             ),
-            optional(
-              $.base_interface_list,
-            ),
-            $.aggregate_body,
-          ),
-          seq(
-            $.base_interface_list,
-            $.constraint,
             $.aggregate_body,
           ),
         ),
@@ -11352,11 +7288,14 @@ module.exports = grammar({
     // https://dlang.org/spec/template-mixin.html#MixinQualifiedIdentifier
     mixin_qualified_identifier: $ =>
       choice(
-        $.identifier,
         seq(
           $.identifier,
-          ".",
-          $.mixin_qualified_identifier,
+          optional(
+            seq(
+              ".",
+              $.mixin_qualified_identifier,
+            ),
+          ),
         ),
         seq(
           $.template_instance,
@@ -11374,21 +7313,24 @@ module.exports = grammar({
       seq(
         $._condition,
         choice(
-          $._maybe_declaration_block,
           seq(
             $._maybe_declaration_block,
-            "else",
-            $._maybe_declaration_block,
-          ),
-          seq(
-            ":",
             optional(
-              $.decl_defs,
+              seq(
+                "else",
+                choice(
+                  $._maybe_declaration_block,
+                  seq(
+                    ":",
+                    optional(
+                      $.decl_defs,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
           seq(
-            $._maybe_declaration_block,
-            "else",
             ":",
             optional(
               $.decl_defs,
@@ -11399,14 +7341,16 @@ module.exports = grammar({
 
     // https://dlang.org/spec/version.html#ConditionalStatement
     conditional_statement: $ =>
-      seq(
-        $._condition,
-        $._no_scope_non_empty_statement,
-        optional(
-          seq(
-            "else",
-            $._no_scope_non_empty_statement,
-          ),
+      choice(
+        seq(
+          $._condition,
+          $._no_scope_non_empty_statement,
+        ),
+        seq(
+          $._condition,
+          $._no_scope_non_empty_statement,
+          "else",
+          $._no_scope_non_empty_statement,
         ),
       ),
 
@@ -11668,62 +7612,30 @@ module.exports = grammar({
         "even",
         "naked",
         seq(
-          "db",
+          choice(
+            "db",
+            "ds",
+            "di",
+            "dl",
+            "df",
+            "dd",
+            "de",
+            $.opcode,
+          ),
           $.operands,
         ),
         seq(
-          "ds",
-          $.operands,
-        ),
-        seq(
-          "di",
-          $.operands,
-        ),
-        seq(
-          "dl",
-          $.operands,
-        ),
-        seq(
-          "df",
-          $.operands,
-        ),
-        seq(
-          "dd",
-          $.operands,
-        ),
-        seq(
-          "de",
-          $.operands,
-        ),
-        seq(
-          "db",
-          $._string_literal,
-        ),
-        seq(
-          "ds",
-          $._string_literal,
-        ),
-        seq(
-          "di",
-          $._string_literal,
-        ),
-        seq(
-          "dl",
-          $._string_literal,
-        ),
-        seq(
-          "dw",
-          $._string_literal,
-        ),
-        seq(
-          "dq",
+          choice(
+            "db",
+            "ds",
+            "di",
+            "dl",
+            "dw",
+            "dq",
+          ),
           $._string_literal,
         ),
         $.opcode,
-        seq(
-          $.opcode,
-          $.operands,
-        ),
       ),
 
     // https://dlang.org/spec/iasm.html#Opcode
@@ -12085,10 +7997,11 @@ module.exports = grammar({
       seq(
         $._maybe_asm_rel_exp,
         choice(
-          "<",
           seq(
             "<",
-            "=",
+            optional(
+              "=",
+            ),
           ),
           ">",
           ">=",
@@ -12168,31 +8081,20 @@ module.exports = grammar({
     asm_una_exp: $ =>
       choice(
         seq(
-          $.asm_type_prefix,
+          choice(
+            $.asm_type_prefix,
+            "offsetof",
+            "seg",
+          ),
           $._maybe_asm_exp,
         ),
         seq(
-          "offsetof",
-          $._maybe_asm_exp,
-        ),
-        seq(
-          "seg",
-          $._maybe_asm_exp,
-        ),
-        seq(
-          "+",
-          $.asm_una_exp,
-        ),
-        seq(
-          "-",
-          $.asm_una_exp,
-        ),
-        seq(
-          "!",
-          $.asm_una_exp,
-        ),
-        seq(
-          "~",
+          choice(
+            "+",
+            "-",
+            "!",
+            "~",
+          ),
           $.asm_una_exp,
         ),
         $._maybe_asm_primary_exp,
@@ -12203,8 +8105,6 @@ module.exports = grammar({
       choice(
         $.integer_literal,
         $.float_literal,
-        $.register,
-        $.register64,
         $.dot_identifier,
         $.asm_primary_exp,
       ),
@@ -12214,14 +8114,16 @@ module.exports = grammar({
         "__LOCAL_SIZE",
         "$",
         seq(
-          $.register,
-          ":",
-          $._maybe_asm_exp,
-        ),
-        seq(
-          $.register64,
-          ":",
-          $._maybe_asm_exp,
+          choice(
+            $.register,
+            $.register64,
+          ),
+          optional(
+            seq(
+              ":",
+              $._maybe_asm_exp,
+            ),
+          ),
         ),
         "this",
       ),
@@ -12229,11 +8131,14 @@ module.exports = grammar({
     // https://dlang.org/spec/iasm.html#DotIdentifier
     dot_identifier: $ =>
       choice(
-        $.identifier,
         seq(
           $.identifier,
-          ".",
-          $.dot_identifier,
+          optional(
+            seq(
+              ".",
+              $.dot_identifier,
+            ),
+          ),
         ),
         seq(
           $.fundamental_type,

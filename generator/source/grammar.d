@@ -237,42 +237,66 @@ struct Grammar
 			(ref              _) {},
 		);
 
-		// Lift the common part (prefix or suffix) out of SeqChoice, e.g, transform:
+		// Lift the common part (prefix or suffix) out of SeqChoice choices, e.g, transform:
 		// x | x a | x b | ... => x ( | a | b | ... )
+		// We do this if at least two choices have a non-empty common prefix or suffix,
+		// for every such possible prefix / suffix.
 		node.match!(
 			(ref SeqChoice scNode)
 			{
 				auto choices = scNode.nodes;
-				auto optional = extractOptional(choices);
 
 				if (choices.length < 2)
 					return; // Must have at least two choices
 
-				auto prefix = choices          .fold!commonPrefix      ;
-				auto suffix = choices.map!retro.fold!commonPrefix.retro;
-				if (!prefix.length && !suffix.length)
-					return;
+				size_t bestCount;
 
-				// Avoid overlap
-				auto minLength = choices.map!(choiceSeq => choiceSeq.length).reduce!min;
-				while (prefix.length + suffix.length > minLength)
-					if (!suffix.empty)
-						suffix.popFront();
-					else
-					if (!prefix.empty)
-						prefix.popBack();
-					else
-						assert(false);
+				foreach (pass; [1, 2]) // Do a first pass to find the biggest group
+					foreach (i1; 0 .. choices.length)
+						foreach (i2; i1 + 1 .. choices.length)
+						{
+							auto choice1 = choices[i1];
+							auto choice2 = choices[i2];
+							auto prefix = commonPrefix(choice1      , choice2      )      ;
+							auto suffix = commonPrefix(choice1.retro, choice2.retro).retro;
+							if (prefix.length || suffix.length)
+							{
+								alias indexIsGrouped = i =>
+									choices[i].startsWith(prefix) &&
+									choices[i].endsWith(suffix) &&
+									choices[i].length >= prefix.length + suffix.length;
+								auto groupedIndices = choices.length.iota.filter!indexIsGrouped.array;
+								if (groupedIndices.length < 2)
+									continue;
 
-				node = seqChoice(optional ~ [
-					(prefix.length ? [seqChoice([prefix])] : []) ~
-					seqChoice(
-						choices.map!(choiceSeq => choiceSeq[prefix.length .. $ - suffix.length]).array,
-					) ~
-					(suffix.length ? [seqChoice([suffix])] : [])
-				]);
+								if (pass == 1)
+									bestCount = max(bestCount, groupedIndices.length);
+								else
+								if (groupedIndices.length == bestCount)
+								{
+									auto remainingIndices = choices.length.iota.filter!(not!indexIsGrouped);
+									// auto groupedChoices = groupedIndices.map!(i => choices[i]);
 
-				optimizeNode(node);
+									auto newChoices = remainingIndices.map!(i => choices[i]).array;
+									// Insert the new group at the first occurrence of the prefix/suffix
+									auto insertionPoint = groupedIndices.front;
+									newChoices =
+										newChoices[0 .. insertionPoint] ~
+										chain(
+											prefix,
+											seqChoice(
+												groupedIndices.map!(i => choices[i][prefix.length .. $ - suffix.length]).array
+											).only,
+											suffix,
+										).array.only.array ~
+										newChoices[insertionPoint .. $];
+
+									node = seqChoice(newChoices);
+									optimizeNode(node);
+									return;
+								}
+							}
+						}
 			},
 			(ref _) {},
 		);
@@ -591,6 +615,7 @@ struct Grammar
 					"Import",
 					"Slice", // needs to be de-recursed
 					"Symbol",
+					"AssertArguments", // uses AssignExpression
 				))
 				continue;
 
