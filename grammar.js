@@ -10665,7 +10665,6 @@ module.exports = grammar({
           $.parameter_attributes,
           $.user_defined_attribute,
         ),
-        $.parameter_attributes,
       ),
 
     // https://dlang.org/spec/function.html#InOut
