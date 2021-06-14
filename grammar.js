@@ -6605,10 +6605,7 @@ module.exports = grammar({
 
     // https://dlang.org/spec/function.html#ParameterAttributes
     parameter_attributes: $ =>
-      seq(
-        optional(
-          $.parameter_attributes,
-        ),
+      repeat1(
         choice(
           $._maybe_in_out,
           $.user_defined_attribute,

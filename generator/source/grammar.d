@@ -344,7 +344,12 @@ struct Grammar
 				def.kind == Def.Kind.chars ||
 
 				// Lists of things generally involve repetition.
-				isPlural(defName);
+				isPlural(defName) ||
+
+				// Additional rules.
+				defName.among(
+					"ParameterAttributes",
+				);
 
 			if (shouldDeRecurse)
 			{
