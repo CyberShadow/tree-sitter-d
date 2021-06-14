@@ -588,24 +588,42 @@ struct Grammar
 			// As far as I can see, there is no way to mechanically distinguish these cases
 			// from the majority of cases where body extraction is desirable.
 			if (defName.among(
-					"Module",
 					"Import",
-					"ImportBind",
-					"Declarators",
-					"VarDeclarator",
-					"VarDeclaratorIdentifier",
-					"ArrayMemberInitialization",
-					"StructMemberInitializer",
 					"Slice", // needs to be de-recursed
 					"Symbol",
-					"MixinTemplateName",
-					"CatchParameter",
-					"FuncDeclaratorSuffix",
-					"MissingFunctionBody",
-					"TemplateTypeParameter",
 				))
 				continue;
 
+			// One way we can decide whether to perform body
+			// extraction is to check if one of the choices that the
+			// definition can resolve to is a reference to a very
+			// generic rule, such as Identifier.  In this case, it is
+			// generally valuable to preserve this node in the AST, as
+			// it provides information over the generic rule.
+			bool wrapsGeneric = def.node.match!(
+				(ref SeqChoice sc) => sc.nodes.map!(choice => flattenChoices(choice)).joiner.any!(choice =>
+					choice.length == 1 && choice[0].match!(
+						(ref Reference r) => r.name.among(
+							"Identifier",
+							"DeclDefs",
+							"NonVoidInitializer",
+							// "AssignExpression", // Also used for descending
+							"BasicType",
+							"Parameters",
+							"InOutStatement",
+						),
+						(ref _) => false,
+				)),
+				(ref _) => false,
+			);
+			if (wrapsGeneric)
+				continue;
+
+			// Another heuristic we can use is to check if the name
+			// suggests repetition.  An example is Packages: it is
+			// recursive, but unlike e.g. OrOrExpression (which is
+			// also recursive), we don't want to perform body
+			// extraction on it.
 			if (isPlural(defName))
 				continue;
 
