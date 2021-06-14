@@ -244,28 +244,36 @@ struct Grammar
 			(ref SeqChoice v)
 			{
 				foreach (ref choice; v.nodes)
-					foreach_reverse (i; 1 .. choice.length)
-					{
-						bool check(size_t i, size_t j)
-						{
-							return choice[j].match!(
-								(ref SeqChoice sc)
-								{
-									auto choices = sc.nodes;
-									if (!extractOptional(choices))
-										return false;
-									if (choices != [[repeat1(choice[i])]])
-										return false;
+					foreach_reverse (i; 0 .. choice.length)
+						choice[i].match!(
+							(ref SeqChoice sc)
+							{
+								auto choices = sc.nodes;
+								if (!extractOptional(choices))
+									return;
+								if (choices.length != 1 || choices[0].length != 1)
+									return; // Not single-choice (bar optional) or single-length
 
-									choice = choice[0 .. min(i, j)] ~ repeat1(choice[i]) ~ choice[max(i, j) + 1 .. $];
-									return true;
-								},
-								(ref _) => false,
-							);
-						}
+								choices[0][0].match!(
+									(ref Repeat1 r)
+									{
+										// The list of repeating nodes to try to collapse
+										auto span = r.node[0].match!(
+											(ref SeqChoice scSpan) => scSpan.nodes.length == 1 ? scSpan.nodes[0] : r.node,
+											(ref _) => r.node,
+										);
 
-						check(i-1, i) || check(i, i-1);
-					}
+										if (choice[0 .. i].endsWith(span))
+											choice = choice[0 .. i - span.length] ~ choices[0] ~ choice[i + 1 .. $];
+										else
+										if (choice[i + 1 .. $].startsWith(span))
+											choice = choice[0 .. i] ~ choices[0] ~ choice[i + 1 + span.length .. $];
+									},
+									(ref _) {}
+								);
+							},
+							(ref _) {},
+						);
 			},
 			(ref _) {},
 		);
