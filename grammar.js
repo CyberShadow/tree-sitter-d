@@ -7530,11 +7530,10 @@ module.exports = grammar({
     declarator_initializer: $ =>
       seq(
         choice(
+          $.var_declarator,
           seq(
             $.var_declarator,
-            optional(
-              $.template_parameters,
-            ),
+            $.template_parameters,
           ),
           $.alt_declarator,
         ),
@@ -7649,7 +7648,7 @@ module.exports = grammar({
             "(",
             $._maybe_alt_declarator_inner,
             ")",
-            $.alt_func_declarator_suffix,
+            $._maybe_alt_func_declarator_suffix,
           ),
           seq(
             "(",
@@ -7663,18 +7662,25 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#AltDeclaratorInner
     _maybe_alt_declarator_inner: $ =>
       choice(
+        $.identifier,
         $.alt_declarator,
         $.alt_declarator_inner,
       ),
 
     alt_declarator_inner: $ =>
-      seq(
-        optional(
+      choice(
+        seq(
           $.type_suffixes,
+          $.identifier,
         ),
-        $.identifier,
-        optional(
-          $.alt_func_declarator_suffix,
+        seq(
+          $.identifier,
+          $._maybe_alt_func_declarator_suffix,
+        ),
+        seq(
+          $.type_suffixes,
+          $.identifier,
+          $._maybe_alt_func_declarator_suffix,
         ),
       ),
 
@@ -7698,12 +7704,16 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/declaration.html#AltFuncDeclaratorSuffix
+    _maybe_alt_func_declarator_suffix: $ =>
+      choice(
+        $.parameters,
+        $.alt_func_declarator_suffix,
+      ),
+
     alt_func_declarator_suffix: $ =>
       seq(
         $.parameters,
-        optional(
-          $.member_function_attributes,
-        ),
+        $.member_function_attributes,
       ),
 
     // ---
@@ -8781,24 +8791,41 @@ module.exports = grammar({
     new_expression: $ =>
       seq(
         "new",
-        optional(
-          $.allocator_arguments,
-        ),
-        $.type,
-        optional(
-          choice(
-            seq(
-              "[",
-              $._maybe_assign_expression,
-              "]",
+        choice(
+          $.type,
+          seq(
+            $.allocator_arguments,
+            $.type,
+          ),
+          seq(
+            $.type,
+            "[",
+            $._maybe_assign_expression,
+            "]",
+          ),
+          seq(
+            $.allocator_arguments,
+            $.type,
+            "[",
+            $._maybe_assign_expression,
+            "]",
+          ),
+          seq(
+            $.type,
+            "(",
+            optional(
+              $.argument_list,
             ),
-            seq(
-              "(",
-              optional(
-                $.argument_list,
-              ),
-              ")",
+            ")",
+          ),
+          seq(
+            $.allocator_arguments,
+            $.type,
+            "(",
+            optional(
+              $.argument_list,
             ),
+            ")",
           ),
         ),
       ),
@@ -9025,9 +9052,12 @@ module.exports = grammar({
         seq(
           $.fundamental_type,
           "(",
-          optional(
-            $.argument_list,
-          ),
+          ")",
+        ),
+        seq(
+          $.fundamental_type,
+          "(",
+          $.argument_list,
           ")",
         ),
         seq(
@@ -9044,9 +9074,15 @@ module.exports = grammar({
           $.type,
           ")",
           "(",
-          optional(
-            $.argument_list,
-          ),
+          ")",
+        ),
+        seq(
+          $.type_ctor,
+          "(",
+          $.type,
+          ")",
+          "(",
+          $.argument_list,
           ")",
         ),
         seq(
@@ -9128,34 +9164,52 @@ module.exports = grammar({
         seq(
           "function",
           optional(
-            "ref",
+            $.type,
           ),
+          optional(
+            $._maybe_parameter_with_attributes,
+          ),
+          $._maybe_function_literal_body2,
+        ),
+        seq(
+          "function",
+          "ref",
           optional(
             $.type,
           ),
           optional(
-            $.parameter_with_attributes,
+            $._maybe_parameter_with_attributes,
           ),
           $._maybe_function_literal_body2,
         ),
         seq(
           "delegate",
           optional(
-            "ref",
-          ),
-          optional(
             $.type,
           ),
           optional(
-            $.parameter_with_member_attributes,
+            $._maybe_parameter_with_member_attributes,
           ),
           $._maybe_function_literal_body2,
         ),
         seq(
+          "delegate",
+          "ref",
           optional(
-            "ref",
+            $.type,
           ),
-          $.parameter_with_member_attributes,
+          optional(
+            $._maybe_parameter_with_member_attributes,
+          ),
+          $._maybe_function_literal_body2,
+        ),
+        seq(
+          $._maybe_parameter_with_member_attributes,
+          $._maybe_function_literal_body2,
+        ),
+        seq(
+          "ref",
+          $._maybe_parameter_with_member_attributes,
           $._maybe_function_literal_body2,
         ),
         seq(
@@ -9166,21 +9220,29 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/expression.html#ParameterWithAttributes
+    _maybe_parameter_with_attributes: $ =>
+      choice(
+        $.parameters,
+        $.parameter_with_attributes,
+      ),
+
     parameter_with_attributes: $ =>
       seq(
         $.parameters,
-        optional(
-          $.function_attributes,
-        ),
+        $.function_attributes,
       ),
 
     // https://dlang.org/spec/expression.html#ParameterWithMemberAttributes
+    _maybe_parameter_with_member_attributes: $ =>
+      choice(
+        $.parameters,
+        $.parameter_with_member_attributes,
+      ),
+
     parameter_with_member_attributes: $ =>
       seq(
         $.parameters,
-        optional(
-          $.member_function_attributes,
-        ),
+        $.member_function_attributes,
       ),
 
     // https://dlang.org/spec/expression.html#FunctionLiteralBody2
@@ -10144,10 +10206,9 @@ module.exports = grammar({
         $.identifier,
         choice(
           ";",
+          $.aggregate_body,
           seq(
-            optional(
-              $.base_class_list,
-            ),
+            $.base_class_list,
             $.aggregate_body,
           ),
         ),
@@ -10376,10 +10437,9 @@ module.exports = grammar({
         $.identifier,
         choice(
           ";",
+          $.aggregate_body,
           seq(
-            optional(
-              $.base_interface_list,
-            ),
+            $.base_interface_list,
             $.aggregate_body,
           ),
         ),

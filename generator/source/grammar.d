@@ -286,6 +286,24 @@ struct Grammar
 			optimizeNode(def.node);
 	}
 
+	// Name-based heuristic to decide which nodes to perform
+	// de-recursion / body-extraction for.
+	private bool isPlural(string defName)
+	{
+		return
+			// Lists of things generally involve repetition.
+			defName.splitByCamelCase.canFind("List") ||
+
+			// If the definition name is the plural of the name of another definition,
+			// then this is almost certainly used for repetition.
+			["s", "es"].any!(pluralSuffix =>
+				defName.endsWith(pluralSuffix) &&
+				["", "Name"].any!(singularSuffix =>
+					defName[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
+				)
+			);
+	}
+
 	// Attempt to remove recursion as needed
 	private void deRecurse()
 	{
@@ -302,16 +320,7 @@ struct Grammar
 				def.kind == Def.Kind.chars ||
 
 				// Lists of things generally involve repetition.
-				defName.splitByCamelCase.canFind("List") ||
-
-				// If the definition name is the plural of the name of another definition,
-				// then this is almost certainly used for repetition.
-				["s", "es"].any!(pluralSuffix =>
-					defName.endsWith(pluralSuffix) &&
-					["", "Name"].any!(singularSuffix =>
-						defName[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
-					)
-				);
+				isPlural(defName);
 
 			if (shouldDeRecurse)
 			{
@@ -530,6 +539,29 @@ struct Grammar
 		}
 	}
 
+	// Recursively expand all nested choices into a flat list of all possible combinations.
+	// This form is used for some transformations.
+	private Node[][] flattenChoices(Node[] nodes)
+	{
+		foreach (i, ref node; nodes)
+		{
+			auto result = node.match!(
+				(ref SeqChoice sc)
+				{
+					assert(sc.nodes.length > 1);
+					Node[][] result;
+					foreach (choice; sc.nodes)
+						result ~= nodes[0 .. i] ~ choice ~ nodes[i + 1 .. $];
+					return result;
+				},
+				(ref _) => null,
+			);
+			if (result)
+				return result;
+		}
+		return [nodes];
+	}
+
 	// Refactor some definitions into a descending part and an
 	// implementation part, so that we can hide the descending
 	// part to avoid excessive nesting in the tree-sitter AST.
@@ -556,16 +588,25 @@ struct Grammar
 			// As far as I can see, there is no way to mechanically distinguish these cases
 			// from the majority of cases where body extraction is desirable.
 			if (defName.among(
+					"Module",
 					"Import",
 					"ImportBind",
 					"Declarators",
+					"VarDeclarator",
 					"VarDeclaratorIdentifier",
 					"ArrayMemberInitialization",
 					"StructMemberInitializer",
 					"Slice", // needs to be de-recursed
 					"Symbol",
 					"MixinTemplateName",
+					"CatchParameter",
+					"FuncDeclaratorSuffix",
+					"MissingFunctionBody",
+					"TemplateTypeParameter",
 				))
+				continue;
+
+			if (isPlural(defName))
 				continue;
 
 			auto x = reference(defName);
@@ -680,12 +721,15 @@ struct Grammar
 					if (isRecursive(def.node))
 						return;
 
+					auto choices = sc1.nodes;
+					choices = choices.map!(choice => flattenChoices(choice)).join;
+
 					alias isReference = (Node[] nodes) => nodes.length == 1 && nodes[0].match!(
 						(ref Reference    v) => true,
 						(_) => false,
 					);
-					auto references = sc1.nodes.filter!isReference.array;
-					auto remainder  = sc1.nodes.filter!(not!isReference).array;
+					auto references = choices.filter!isReference.array;
+					auto remainder  = choices.filter!(not!isReference).array;
 					if (!references || !remainder)
 						return;
 
