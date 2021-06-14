@@ -570,7 +570,7 @@ struct Grammar
 
 	// Recursively expand all nested choices into a flat list of all possible combinations.
 	// This form is used for some transformations.
-	private Node[][] flattenChoices(Node[] nodes)
+	private static Node[][] flattenChoices(Node[] nodes)
 	{
 		foreach (i, ref node; nodes)
 		{
@@ -631,7 +631,7 @@ struct Grammar
 			// generally valuable to preserve this node in the AST, as
 			// it provides information over the generic rule.
 			bool wrapsGeneric = def.node.match!(
-				(ref SeqChoice sc) => sc.nodes.map!(choice => flattenChoices(choice)).joiner.any!(choice =>
+				(ref SeqChoice sc) => sc.nodes.map!flattenChoices.joiner.any!(choice =>
 					choice.length == 1 && choice[0].match!(
 						(ref Reference r) => r.name.among(
 							"Identifier",
@@ -770,7 +770,7 @@ struct Grammar
 						return;
 
 					auto choices = sc1.nodes;
-					choices = choices.map!(choice => flattenChoices(choice)).join;
+					choices = choices.map!flattenChoices.join;
 
 					alias isReference = (Node[] nodes) => nodes.length == 1 && nodes[0].match!(
 						(ref Reference    v) => true,
