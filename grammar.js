@@ -3638,7 +3638,7 @@ module.exports = grammar({
           ),
           seq(
             "(",
-            $._maybe_alt_declarator_inner,
+            $.alt_declarator_inner,
             ")",
             optional(
               choice(
@@ -3651,21 +3651,18 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/declaration.html#AltDeclaratorInner
-    _maybe_alt_declarator_inner: $ =>
-      choice(
-        $.alt_declarator,
-        $.alt_declarator_inner,
-      ),
-
     alt_declarator_inner: $ =>
-      seq(
-        optional(
-          $.type_suffixes,
+      choice(
+        seq(
+          optional(
+            $.type_suffixes,
+          ),
+          $.identifier,
+          optional(
+            $.alt_func_declarator_suffix,
+          ),
         ),
-        $.identifier,
-        optional(
-          $.alt_func_declarator_suffix,
-        ),
+        $.alt_declarator,
       ),
 
     // https://dlang.org/spec/declaration.html#AltDeclaratorSuffixes

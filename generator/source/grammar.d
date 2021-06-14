@@ -625,7 +625,8 @@ struct Grammar
 					assert(sc.nodes.length > 1);
 					Node[][] result;
 					foreach (choice; sc.nodes)
-						result ~= nodes[0 .. i] ~ choice ~ nodes[i + 1 .. $];
+						foreach (rightChoice; flattenChoices(nodes[i + 1 .. $]))
+							result ~= nodes[0 .. i] ~ choice ~ rightChoice;
 					return result;
 				},
 				(ref _) => null,
@@ -662,6 +663,7 @@ struct Grammar
 			// As far as I can see, there is no way to mechanically distinguish these cases
 			// from the majority of cases where body extraction is desirable.
 			if (defName.among(
+					"SourceFile",
 					"Import",
 					"Slice", // needs to be de-recursed
 					"Symbol",
