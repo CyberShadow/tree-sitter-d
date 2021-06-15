@@ -343,8 +343,15 @@ struct Grammar
 				// segmentation.
 				size_t numExcluded;
 
+				// Avoid infinite recursion by only attempting to return (and re-optimize)
+				// a solution that is better than the status quo.
+				alias nodeScore = delegate size_t (ref Node node) => node.match!(
+					(ref SeqChoice sc) => sc.nodes.map!(choice => choice.map!nodeScore.sum).sum,
+					(ref _) => 1,
+				);
+
 				// Best solution found.
-				size_t bestScore = size_t.max;
+				size_t bestScore = nodeScore(node);
 				Node bestNode;
 
 				// Use classic recursive backtracking to iterate
@@ -464,6 +471,7 @@ struct Grammar
 								insertPos = 0;
 							newChoices = newChoices[0 .. insertPos] ~ [container] ~ newChoices[insertPos .. $];
 							bestNode = seqChoice(newChoices);
+							assert(nodeScore(bestNode) == score);
 						}
 					}
 				}
@@ -471,7 +479,7 @@ struct Grammar
 
 				assert(numExcluded == 0 && leftSetSize == 0 && rightSetSize == 0);
 
-				if (bestScore != size_t.max)
+				if (bestNode !is Node.init)
 				{
 					// Apply solution
 					node = bestNode;
