@@ -310,6 +310,9 @@ struct Grammar
 					|| choice.length == 0 // Edge case
 				).array;
 
+				if (choices.length.iota.filter!(i => choiceViable[i]).walkLength > 15)
+					return; // Too slow :(
+
 				// Precompute all minimally viable cut points for choices.
 				bool[][] cutPosViable = choices.map!(choice =>
 					(choice.length + 1).iota.map!(pos =>
@@ -602,6 +605,7 @@ struct Grammar
 				// Additional rules.
 				defName.among(
 					"ParameterAttributes",
+					"AsmInstruction",
 				);
 
 			if (shouldDeRecurse)

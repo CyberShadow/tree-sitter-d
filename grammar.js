@@ -7514,47 +7514,50 @@ module.exports = grammar({
 
     // https://dlang.org/spec/iasm.html#AsmInstruction
     asm_instruction: $ =>
-      choice(
-        seq(
-          $.identifier,
-          ":",
-          $.asm_instruction,
-        ),
-        seq(
-          "align",
-          $._integer_expression,
-        ),
-        "even",
-        "naked",
-        seq(
-          choice(
-            "db",
-            "ds",
-            "di",
-            "dl",
+      seq(
+        repeat(
+          seq(
+            $.identifier,
+            ":",
           ),
-          choice(
+        ),
+        choice(
+          seq(
+            "align",
+            $._integer_expression,
+          ),
+          "even",
+          "naked",
+          seq(
+            choice(
+              "db",
+              "ds",
+              "di",
+              "dl",
+            ),
+            choice(
+              $.operands,
+              $._string_literal,
+            ),
+          ),
+          seq(
+            choice(
+              "df",
+              "dd",
+              "de",
+              $.opcode,
+            ),
             $.operands,
+          ),
+          seq(
+            choice(
+              "dw",
+              "dq",
+            ),
             $._string_literal,
           ),
+          $.opcode,
         ),
-        seq(
-          choice(
-            "df",
-            "dd",
-            "de",
-            $.opcode,
-          ),
-          $.operands,
-        ),
-        seq(
-          choice(
-            "dw",
-            "dq",
-          ),
-          $._string_literal,
-        ),
-        $.opcode,
       ),
 
     // https://dlang.org/spec/iasm.html#Opcode
