@@ -4608,7 +4608,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#ShiftExpression
     _maybe_shift_expression: $ =>
       choice(
-        $.add_expression,
+        $._maybe_add_expression,
         $.shift_expression,
       ),
 
@@ -4628,27 +4628,27 @@ module.exports = grammar({
             ),
           ),
         ),
-        $.add_expression,
+        $._maybe_add_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#AddExpression
-    add_expression: $ =>
+    _maybe_add_expression: $ =>
       choice(
-        seq(
-          optional(
-            seq(
-              $.add_expression,
-              choice(
-                "+",
-                "-",
-              ),
-            ),
-          ),
-          $._maybe_mul_expression,
-        ),
+        $._maybe_mul_expression,
         $.cat_expression,
+        $.add_expression,
+      ),
+
+    add_expression: $ =>
+      seq(
+        $._maybe_add_expression,
+        choice(
+          "+",
+          "-",
+        ),
+        $._maybe_mul_expression,
       ),
 
     // ---
@@ -4656,7 +4656,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#CatExpression
     cat_expression: $ =>
       seq(
-        $.add_expression,
+        $._maybe_add_expression,
         "~",
         $._maybe_mul_expression,
       ),
@@ -4666,7 +4666,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#MulExpression
     _maybe_mul_expression: $ =>
       choice(
-        $.unary_expression,
+        $._maybe_unary_expression,
         $.mul_expression,
       ),
 
@@ -4678,12 +4678,21 @@ module.exports = grammar({
           "/",
           "%",
         ),
-        $.unary_expression,
+        $._maybe_unary_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#UnaryExpression
+    _maybe_unary_expression: $ =>
+      choice(
+        $.complement_expression,
+        $.delete_expression,
+        $.cast_expression,
+        $._maybe_pow_expression,
+        $.unary_expression,
+      ),
+
     unary_expression: $ =>
       choice(
         seq(
@@ -4696,9 +4705,8 @@ module.exports = grammar({
             "+",
             "!",
           ),
-          $.unary_expression,
+          $._maybe_unary_expression,
         ),
-        $.complement_expression,
         seq(
           "(",
           $.type,
@@ -4709,9 +4717,6 @@ module.exports = grammar({
             $.template_instance,
           ),
         ),
-        $.delete_expression,
-        $.cast_expression,
-        $._maybe_pow_expression,
       ),
 
     // ---
@@ -4720,7 +4725,7 @@ module.exports = grammar({
     complement_expression: $ =>
       seq(
         "~",
-        $.unary_expression,
+        $._maybe_unary_expression,
       ),
 
     // ---
@@ -4788,7 +4793,7 @@ module.exports = grammar({
     delete_expression: $ =>
       seq(
         "delete",
-        $.unary_expression,
+        $._maybe_unary_expression,
       ),
 
     // ---
@@ -4805,7 +4810,7 @@ module.exports = grammar({
           ),
         ),
         ")",
-        $.unary_expression,
+        $._maybe_unary_expression,
       ),
 
     // ---
@@ -4813,25 +4818,32 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#PowExpression
     _maybe_pow_expression: $ =>
       choice(
-        $.postfix_expression,
+        $._maybe_postfix_expression,
         $.pow_expression,
       ),
 
     pow_expression: $ =>
       seq(
-        $.postfix_expression,
+        $._maybe_postfix_expression,
         "^^",
-        $.unary_expression,
+        $._maybe_unary_expression,
       ),
 
     // ---
 
     // https://dlang.org/spec/expression.html#PostfixExpression
-    postfix_expression: $ =>
+    _maybe_postfix_expression: $ =>
       choice(
         $.primary_expression,
+        $.index_expression,
+        $.slice_expression,
+        $.postfix_expression,
+      ),
+
+    postfix_expression: $ =>
+      choice(
         seq(
-          $.postfix_expression,
+          $._maybe_postfix_expression,
           choice(
             seq(
               ".",
@@ -4843,28 +4855,24 @@ module.exports = grammar({
             ),
             "++",
             "--",
-            seq(
-              "(",
-              optional(
-                $.argument_list,
-              ),
-              ")",
-            ),
           ),
         ),
         seq(
-          optional(
-            $.type_ctors,
+          choice(
+            $._maybe_postfix_expression,
+            seq(
+              optional(
+                $.type_ctors,
+              ),
+              $._maybe_basic_type,
+            ),
           ),
-          $._maybe_basic_type,
           "(",
           optional(
             $.argument_list,
           ),
           ")",
         ),
-        $.index_expression,
-        $.slice_expression,
       ),
 
     // ---
@@ -4872,7 +4880,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#IndexExpression
     index_expression: $ =>
       seq(
-        $.postfix_expression,
+        $._maybe_postfix_expression,
         "[",
         $.argument_list,
         "]",
@@ -4883,7 +4891,7 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#SliceExpression
     slice_expression: $ =>
       seq(
-        $.postfix_expression,
+        $._maybe_postfix_expression,
         "[",
         optional(
           seq(
@@ -7961,7 +7969,7 @@ module.exports = grammar({
     // https://dlang.org/spec/iasm.html#AsmMulExp
     _maybe_asm_mul_exp: $ =>
       choice(
-        $.asm_br_exp,
+        $._maybe_asm_br_exp,
         $.asm_mul_exp,
       ),
 
@@ -7973,22 +7981,31 @@ module.exports = grammar({
           "/",
           "%",
         ),
-        $.asm_br_exp,
+        $._maybe_asm_br_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmBrExp
-    asm_br_exp: $ =>
+    _maybe_asm_br_exp: $ =>
       choice(
-        $.asm_una_exp,
-        seq(
-          $.asm_br_exp,
-          "[",
-          $._maybe_asm_exp,
-          "]",
-        ),
+        $._maybe_asm_una_exp,
+        $.asm_br_exp,
+      ),
+
+    asm_br_exp: $ =>
+      seq(
+        $._maybe_asm_br_exp,
+        "[",
+        $._maybe_asm_exp,
+        "]",
       ),
 
     // https://dlang.org/spec/iasm.html#AsmUnaExp
+    _maybe_asm_una_exp: $ =>
+      choice(
+        $.asm_primary_exp,
+        $.asm_una_exp,
+      ),
+
     asm_una_exp: $ =>
       choice(
         seq(
@@ -8006,9 +8023,8 @@ module.exports = grammar({
             "!",
             "~",
           ),
-          $.asm_una_exp,
+          $._maybe_asm_una_exp,
         ),
-        $.asm_primary_exp,
       ),
 
     // https://dlang.org/spec/iasm.html#AsmPrimaryExp

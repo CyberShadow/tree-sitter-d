@@ -768,6 +768,7 @@ struct Grammar
 							"IntegerLiteral",
 							"BlockStatement",
 							"Type",
+							"Opcode",
 						),
 						(ref _) => false,
 				)),
@@ -885,17 +886,6 @@ struct Grammar
 			def.node.match!(
 				(ref SeqChoice sc1)
 				{
-					alias isRecursive = delegate bool (ref Node node) => node.tryMatch!(
-						(ref RegExp       v) => false,
-						(ref LiteralChars v) => false,
-						(ref LiteralToken v) => false,
-						(ref Reference    v) => v.name == defName,
-						(ref SeqChoice    v) => v.nodes.joiner.any!isRecursive,
-						(ref Repeat1      v) => v.node[0].I!isRecursive,
-					);
-					if (isRecursive(def.node))
-						return;
-
 					auto choices = sc1.nodes;
 					choices = choices.map!flattenChoices.join;
 
