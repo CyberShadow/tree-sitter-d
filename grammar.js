@@ -3600,21 +3600,12 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#AltDeclaratorIdentifier
     alt_declarator_identifier: $ =>
       seq(
-        choice(
-          seq(
-            $.type_suffixes,
-            $.identifier,
-            optional(
-              $.alt_declarator_suffixes,
-            ),
-          ),
-          seq(
-            optional(
-              $.type_suffixes,
-            ),
-            $.identifier,
-            $.alt_declarator_suffixes,
-          ),
+        optional(
+          $.type_suffixes,
+        ),
+        $.identifier,
+        optional(
+          $.alt_declarator_suffixes,
         ),
         optional(
           seq(
@@ -3780,13 +3771,13 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#ArrayMemberInitializations
     array_member_initializations: $ =>
       seq(
-        $.array_member_initialization,
         repeat(
           seq(
-            ",",
             $.array_member_initialization,
+            ",",
           ),
         ),
+        $.array_member_initialization,
         optional(
           ",",
         ),
@@ -3817,13 +3808,13 @@ module.exports = grammar({
     // https://dlang.org/spec/declaration.html#StructMemberInitializers
     struct_member_initializers: $ =>
       seq(
-        $.struct_member_initializer,
         repeat(
           seq(
-            ",",
             $.struct_member_initializer,
+            ",",
           ),
         ),
+        $.struct_member_initializer,
         optional(
           ",",
         ),
@@ -4269,13 +4260,13 @@ module.exports = grammar({
     // https://dlang.org/spec/attribute.html#NamespaceList
     namespace_list: $ =>
       seq(
-        $._maybe_conditional_expression,
         repeat(
           seq(
-            ",",
             $._maybe_conditional_expression,
+            ",",
           ),
         ),
+        $._maybe_conditional_expression,
         optional(
           ",",
         ),
@@ -4779,13 +4770,13 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#ArgumentList
     argument_list: $ =>
       seq(
-        $._maybe_assign_expression,
         repeat(
           seq(
-            ",",
             $._maybe_assign_expression,
+            ",",
           ),
         ),
+        $._maybe_assign_expression,
         optional(
           ",",
         ),
@@ -5146,13 +5137,13 @@ module.exports = grammar({
     // https://dlang.org/spec/expression.html#AssertArguments
     assert_arguments: $ =>
       seq(
+        $._maybe_assign_expression,
         optional(
           seq(
-            $._maybe_assign_expression,
             ",",
+            $._maybe_assign_expression,
           ),
         ),
-        $._maybe_assign_expression,
         optional(
           ",",
         ),
@@ -5211,7 +5202,7 @@ module.exports = grammar({
               ":",
               "==",
             ),
-            $._maybe_type_specialization,
+            $.type_specialization,
             optional(
               seq(
                 ",",
@@ -5224,14 +5215,9 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/expression.html#TypeSpecialization
-    _maybe_type_specialization: $ =>
-      choice(
-        $.type,
-        $.type_specialization,
-      ),
-
     type_specialization: $ =>
       choice(
+        $.type,
         "struct",
         "union",
         "class",
@@ -6338,13 +6324,13 @@ module.exports = grammar({
     // https://dlang.org/spec/enum.html#EnumMembers
     enum_members: $ =>
       seq(
-        $.enum_member,
         repeat(
           seq(
-            ",",
             $.enum_member,
+            ",",
           ),
         ),
+        $.enum_member,
         optional(
           ",",
         ),
@@ -6411,13 +6397,13 @@ module.exports = grammar({
     // https://dlang.org/spec/enum.html#AnonymousEnumMembers
     anonymous_enum_members: $ =>
       seq(
-        $._maybe_anonymous_enum_member,
         repeat(
           seq(
-            ",",
             $._maybe_anonymous_enum_member,
+            ",",
           ),
         ),
+        $._maybe_anonymous_enum_member,
         optional(
           ",",
         ),
@@ -6688,22 +6674,18 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html#MissingFunctionBody
     missing_function_body: $ =>
       choice(
-        seq(
-          optional(
-            seq(
-              optional(
-                $.function_contracts,
-              ),
-              $._in_out_contract_expression,
-            ),
-          ),
-          ";",
-        ),
+        ";",
         seq(
           optional(
             $.function_contracts,
           ),
-          $._in_out_statement,
+          choice(
+            seq(
+              $._in_out_contract_expression,
+              ";",
+            ),
+            $._in_out_statement,
+          ),
         ),
       ),
 
@@ -6820,13 +6802,13 @@ module.exports = grammar({
     // https://dlang.org/spec/template.html#TemplateParameterList
     template_parameter_list: $ =>
       seq(
-        $._template_parameter,
         repeat(
           seq(
-            ",",
             $._template_parameter,
+            ",",
           ),
         ),
+        $._template_parameter,
         optional(
           ",",
         ),
@@ -6870,13 +6852,13 @@ module.exports = grammar({
     // https://dlang.org/spec/template.html#TemplateArgumentList
     template_argument_list: $ =>
       seq(
-        $._template_argument,
         repeat(
           seq(
-            ",",
             $._template_argument,
+            ",",
           ),
         ),
+        $._template_argument,
         optional(
           ",",
         ),
@@ -7115,15 +7097,15 @@ module.exports = grammar({
             choice(
               seq(
                 optional(
-                  $.constraint,
+                  $.base_interface_list,
                 ),
                 optional(
-                  $.base_interface_list,
+                  $.constraint,
                 ),
               ),
               seq(
-                $.base_interface_list,
                 $.constraint,
+                $.base_interface_list,
               ),
             ),
             $.aggregate_body,

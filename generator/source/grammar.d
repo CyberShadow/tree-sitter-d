@@ -296,6 +296,7 @@ struct Grammar
 			(ref SeqChoice sc)
 			{
 				auto choices = sc.nodes;
+				choices = choices.map!flattenChoices.join;
 
 				// Find all choices which have a chance of participating in segmentation.
 				bool[] choiceViable = choices.map!(choice =>
@@ -835,7 +836,7 @@ struct Grammar
 				{
 					assert(sc.nodes.length > 1);
 					Node[][] result;
-					foreach (choice; sc.nodes)
+					foreach (choice; sc.nodes.map!flattenChoices.joiner)
 						foreach (rightChoice; flattenChoices(nodes[i + 1 .. $]))
 							result ~= nodes[0 .. i] ~ choice ~ rightChoice;
 					return result;
@@ -900,6 +901,8 @@ struct Grammar
 							"Parameters",
 							"InOutStatement",
 							"IntegerLiteral",
+							"BlockStatement",
+							"Type",
 						),
 						(ref _) => false,
 				)),
