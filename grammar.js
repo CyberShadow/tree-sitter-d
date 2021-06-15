@@ -5619,13 +5619,8 @@ module.exports = grammar({
 
     // https://dlang.org/spec/statement.html#ForeachTypeAttributes
     foreach_type_attributes: $ =>
-      seq(
-        repeat1(
-          $._maybe_foreach_type_attribute,
-        ),
-        optional(
-          seq(),
-        ),
+      repeat1(
+        $._maybe_foreach_type_attribute,
       ),
 
     // https://dlang.org/spec/statement.html#ForeachTypeAttribute
