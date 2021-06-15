@@ -705,17 +705,6 @@ module.exports = grammar({
                   seq(
                     "\\",
                     choice(
-                      // OctalDigit
-                      choice(
-                        "0",
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                      ),
                       seq(
                         // OctalDigit
                         choice(
@@ -729,28 +718,32 @@ module.exports = grammar({
                           "7",
                         ),
                         optional(
-                          // OctalDigit
-                          choice(
-                            "0",
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
+                          seq(
+                            // OctalDigit
+                            choice(
+                              "0",
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                            ),
+                            optional(
+                              // OctalDigit
+                              choice(
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                              ),
+                            ),
                           ),
-                        ),
-                        // OctalDigit
-                        choice(
-                          "0",
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
                         ),
                       ),
                       // NamedCharacterEntity
@@ -1390,17 +1383,6 @@ module.exports = grammar({
               seq(
                 "\\",
                 choice(
-                  // OctalDigit
-                  choice(
-                    "0",
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                  ),
                   seq(
                     // OctalDigit
                     choice(
@@ -1414,28 +1396,32 @@ module.exports = grammar({
                       "7",
                     ),
                     optional(
-                      // OctalDigit
-                      choice(
-                        "0",
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
+                      seq(
+                        // OctalDigit
+                        choice(
+                          "0",
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                        ),
+                        optional(
+                          // OctalDigit
+                          choice(
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                          ),
+                        ),
                       ),
-                    ),
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
                     ),
                   ),
                   // NamedCharacterEntity
@@ -1915,127 +1901,24 @@ module.exports = grammar({
                       ),
                     ),
                   ),
-                  choice(
-                    seq(
-                      ".",
-                      optional(
-                        // DecimalDigits
-                        repeat1(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // DecimalExponent
-                    seq(
-                      // DecimalExponentStart
+                  ".",
+                  optional(
+                    // DecimalDigits
+                    repeat1(
+                      // DecimalDigit
                       choice(
-                        "e",
-                        "E",
-                        "e+",
-                        "E+",
-                        "e-",
-                        "E-",
-                      ),
-                      // DecimalDigitsNoSingleUS
-                      choice(
-                        seq(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          optional(
-                            // DecimalDigitsUS
-                            repeat1(
-                              // DecimalDigitUS
-                              choice(
-                                // DecimalDigit
-                                choice(
-                                  "0",
-                                  // NonZeroDigit
-                                  choice(
-                                    "1",
-                                    "2",
-                                    "3",
-                                    "4",
-                                    "5",
-                                    "6",
-                                    "7",
-                                    "8",
-                                    "9",
-                                  ),
-                                ),
-                                "_",
-                              ),
-                            ),
-                          ),
-                        ),
-                        seq(
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
+                        "0",
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
                         ),
                       ),
                     ),
@@ -2149,6 +2032,142 @@ module.exports = grammar({
                                   ),
                                 ),
                                 "_",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // LeadingDecimal
+                    choice(
+                      // DecimalInteger
+                      choice(
+                        "0",
+                        seq(
+                          // NonZeroDigit
+                          choice(
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ),
+                          optional(
+                            // DecimalDigitsUS
+                            repeat1(
+                              // DecimalDigitUS
+                              choice(
+                                // DecimalDigit
+                                choice(
+                                  "0",
+                                  // NonZeroDigit
+                                  choice(
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                  ),
+                                ),
+                                "_",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      seq(
+                        "0",
+                        // DecimalDigitsNoSingleUS
+                        choice(
+                          seq(
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                            optional(
+                              // DecimalDigitsUS
+                              repeat1(
+                                // DecimalDigitUS
+                                choice(
+                                  // DecimalDigit
+                                  choice(
+                                    "0",
+                                    // NonZeroDigit
+                                    choice(
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5",
+                                      "6",
+                                      "7",
+                                      "8",
+                                      "9",
+                                    ),
+                                  ),
+                                  "_",
+                                ),
+                              ),
+                            ),
+                          ),
+                          seq(
+                            // DecimalDigitsUS
+                            repeat1(
+                              // DecimalDigitUS
+                              choice(
+                                // DecimalDigit
+                                choice(
+                                  "0",
+                                  // NonZeroDigit
+                                  choice(
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                  ),
+                                ),
+                                "_",
+                              ),
+                            ),
+                            // DecimalDigit
+                            choice(
+                              "0",
+                              // NonZeroDigit
+                              choice(
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
                               ),
                             ),
                           ),
@@ -2819,28 +2838,23 @@ module.exports = grammar({
             optional(
               // Suffix
               choice(
-                // FloatSuffix
-                choice(
-                  "f",
-                  "F",
-                ),
-                // RealSuffix
-                "L",
                 seq(
-                  optional(
+                  choice(
+                    // FloatSuffix
                     choice(
-                      // FloatSuffix
-                      choice(
-                        "f",
-                        "F",
-                      ),
-                      // RealSuffix
-                      "L",
+                      "f",
+                      "F",
                     ),
+                    // RealSuffix
+                    "L",
                   ),
-                  // ImaginarySuffix
-                  "i",
+                  optional(
+                    // ImaginarySuffix
+                    "i",
+                  ),
                 ),
+                // ImaginarySuffix
+                "i",
               ),
             ),
           ),
@@ -3451,12 +3465,13 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#ImportBind
     import_bind: $ =>
-      choice(
+      seq(
         $.identifier,
-        seq(
-          $.identifier,
-          "=",
-          $.identifier,
+        optional(
+          seq(
+            "=",
+            $.identifier,
+          ),
         ),
       ),
 
@@ -4043,11 +4058,14 @@ module.exports = grammar({
           "[",
           optional(
             choice(
-              $._maybe_assign_expression,
               seq(
                 $._maybe_assign_expression,
-                "..",
-                $._maybe_assign_expression,
+                optional(
+                  seq(
+                    "..",
+                    $._maybe_assign_expression,
+                  ),
+                ),
               ),
               $.type,
             ),
@@ -4072,22 +4090,11 @@ module.exports = grammar({
 
     // https://dlang.org/spec/type.html#QualifiedIdentifier
     qualified_identifier: $ =>
-      choice(
-        seq(
-          $.identifier,
-          optional(
-            choice(
-              seq(
-                optional(
-                  seq(
-                    "[",
-                    $._maybe_assign_expression,
-                    "]",
-                  ),
-                ),
-                ".",
-                $.qualified_identifier,
-              ),
+      seq(
+        choice(
+          seq(
+            $.identifier,
+            optional(
               seq(
                 "[",
                 $._maybe_assign_expression,
@@ -4095,14 +4102,12 @@ module.exports = grammar({
               ),
             ),
           ),
-        ),
-        seq(
           $.template_instance,
-          optional(
-            seq(
-              ".",
-              $.qualified_identifier,
-            ),
+        ),
+        optional(
+          seq(
+            ".",
+            $.qualified_identifier,
           ),
         ),
       ),
@@ -4335,26 +4340,25 @@ module.exports = grammar({
         "@",
         choice(
           seq(
+            "(",
+            $.argument_list,
+            ")",
+          ),
+          seq(
             choice(
+              $.identifier,
+              $.template_instance,
+            ),
+            optional(
               seq(
-                "(",
-                $.argument_list,
-              ),
-              seq(
-                choice(
-                  $.identifier,
-                  $.template_instance,
-                ),
                 "(",
                 optional(
                   $.argument_list,
                 ),
+                ")",
               ),
             ),
-            ")",
           ),
-          $.identifier,
-          $.template_instance,
         ),
       ),
 
@@ -4628,11 +4632,9 @@ module.exports = grammar({
           seq(
             ">",
             ">",
-          ),
-          seq(
-            ">",
-            ">",
-            ">",
+            optional(
+              ">",
+            ),
           ),
         ),
         $.add_expression,
@@ -4908,21 +4910,15 @@ module.exports = grammar({
       seq(
         $._maybe_assign_expression,
         optional(
-          choice(
-            seq(
-              optional(
-                seq(
-                  "..",
-                  $._maybe_assign_expression,
-                ),
-              ),
-              ",",
-              $.slice,
-            ),
-            seq(
-              "..",
-              $._maybe_assign_expression,
-            ),
+          seq(
+            "..",
+            $._maybe_assign_expression,
+          ),
+        ),
+        optional(
+          seq(
+            ",",
+            $.slice,
           ),
         ),
       ),
@@ -4934,28 +4930,12 @@ module.exports = grammar({
       choice(
         seq(
           optional(
-            seq(
-              optional(
-                choice(
-                  $.fundamental_type,
-                  seq(
-                    $.type_ctor,
-                    "(",
-                    $.type,
-                    ")",
-                  ),
-                ),
-              ),
-              ".",
-            ),
-          ),
-          $.identifier,
-        ),
-        seq(
-          optional(
             ".",
           ),
-          $.template_instance,
+          choice(
+            $.identifier,
+            $.template_instance,
+          ),
         ),
         "this",
         "super",
@@ -4976,31 +4956,36 @@ module.exports = grammar({
         $._maybe_new_expression,
         seq(
           choice(
+            $.fundamental_type,
             seq(
-              choice(
-                $.fundamental_type,
-                seq(
-                  $.type_ctor,
-                  "(",
-                  $.type,
-                  ")",
-                ),
-              ),
+              $.type_ctor,
+              "(",
+              $.type,
+              ")",
+            ),
+          ),
+          choice(
+            seq(
+              ".",
+              $.identifier,
+            ),
+            seq(
               "(",
               optional(
                 $.argument_list,
               ),
-            ),
-            seq(
-              "(",
-              $.expression,
+              ")",
             ),
           ),
-          ")",
         ),
         $.typeof,
         $.typeid_expression,
         $.is_expression,
+        seq(
+          "(",
+          $.expression,
+          ")",
+        ),
         $.special_keyword,
         $.traits_expression,
       ),
@@ -5160,20 +5145,16 @@ module.exports = grammar({
 
     // https://dlang.org/spec/expression.html#AssertArguments
     assert_arguments: $ =>
-      choice(
-        seq(
-          $._maybe_assign_expression,
-          optional(
+      seq(
+        optional(
+          seq(
+            $._maybe_assign_expression,
             ",",
           ),
         ),
-        seq(
-          $._maybe_assign_expression,
+        $._maybe_assign_expression,
+        optional(
           ",",
-          $._maybe_assign_expression,
-          optional(
-            ",",
-          ),
         ),
       ),
 
@@ -5222,36 +5203,19 @@ module.exports = grammar({
         "(",
         $.type,
         optional(
-          choice(
-            seq(
-              choice(
-                ":",
-                "==",
-              ),
-              $._maybe_type_specialization,
-              optional(
-                seq(
-                  ",",
-                  $.template_parameter_list,
-                ),
-              ),
+          $.identifier,
+        ),
+        optional(
+          seq(
+            choice(
+              ":",
+              "==",
             ),
-            seq(
-              $.identifier,
-              optional(
-                seq(
-                  choice(
-                    ":",
-                    "==",
-                  ),
-                  $._maybe_type_specialization,
-                  optional(
-                    seq(
-                      ",",
-                      $.template_parameter_list,
-                    ),
-                  ),
-                ),
+            $._maybe_type_specialization,
+            optional(
+              seq(
+                ",",
+                $.template_parameter_list,
               ),
             ),
           ),
@@ -6050,20 +6014,20 @@ module.exports = grammar({
         "invariant",
         choice(
           seq(
-            optional(
+            "(",
+            choice(
               seq(
-                "(",
                 ")",
+                $.block_statement,
+              ),
+              seq(
+                $.assert_arguments,
+                ")",
+                ";",
               ),
             ),
-            $.block_statement,
           ),
-          seq(
-            "(",
-            $.assert_arguments,
-            ")",
-            ";",
-          ),
+          $.block_statement,
         ),
       ),
 
@@ -6973,15 +6937,10 @@ module.exports = grammar({
       seq(
         $.identifier,
         optional(
-          choice(
-            seq(
-              $.template_type_parameter_specialization,
-              optional(
-                $.template_type_parameter_default,
-              ),
-            ),
-            $.template_type_parameter_default,
-          ),
+          $.template_type_parameter_specialization,
+        ),
+        optional(
+          $.template_type_parameter_default,
         ),
       ),
 
@@ -7016,15 +6975,10 @@ module.exports = grammar({
         $._maybe_basic_type,
         $._declarator,
         optional(
-          choice(
-            seq(
-              $.template_value_parameter_specialization,
-              optional(
-                $.template_value_parameter_default,
-              ),
-            ),
-            $.template_value_parameter_default,
-          ),
+          $.template_value_parameter_specialization,
+        ),
+        optional(
+          $.template_value_parameter_default,
         ),
       ),
 
@@ -7276,17 +7230,12 @@ module.exports = grammar({
     // https://dlang.org/spec/template-mixin.html#MixinQualifiedIdentifier
     mixin_qualified_identifier: $ =>
       choice(
+        $.identifier,
         seq(
-          $.identifier,
-          optional(
-            seq(
-              ".",
-              $.mixin_qualified_identifier,
-            ),
+          choice(
+            $.identifier,
+            $.template_instance,
           ),
-        ),
-        seq(
-          $.template_instance,
           ".",
           $.mixin_qualified_identifier,
         ),
@@ -7300,24 +7249,14 @@ module.exports = grammar({
     conditional_declaration: $ =>
       seq(
         $._condition,
-        choice(
+        optional(
           seq(
             $._maybe_declaration_block,
-            optional(
-              seq(
-                "else",
-                choice(
-                  $._maybe_declaration_block,
-                  seq(
-                    ":",
-                    optional(
-                      $.decl_defs,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            "else",
           ),
+        ),
+        choice(
+          $._maybe_declaration_block,
           seq(
             ":",
             optional(
@@ -7329,16 +7268,14 @@ module.exports = grammar({
 
     // https://dlang.org/spec/version.html#ConditionalStatement
     conditional_statement: $ =>
-      choice(
-        seq(
-          $._condition,
-          $._no_scope_non_empty_statement,
-        ),
-        seq(
-          $._condition,
-          $._no_scope_non_empty_statement,
-          "else",
-          $._no_scope_non_empty_statement,
+      seq(
+        $._condition,
+        $._no_scope_non_empty_statement,
+        optional(
+          seq(
+            "else",
+            $._no_scope_non_empty_statement,
+          ),
         ),
       ),
 
@@ -7605,6 +7542,14 @@ module.exports = grammar({
             "ds",
             "di",
             "dl",
+          ),
+          choice(
+            $.operands,
+            $._string_literal,
+          ),
+        ),
+        seq(
+          choice(
             "df",
             "dd",
             "de",
@@ -7614,10 +7559,6 @@ module.exports = grammar({
         ),
         seq(
           choice(
-            "db",
-            "ds",
-            "di",
-            "dl",
             "dw",
             "dq",
           ),

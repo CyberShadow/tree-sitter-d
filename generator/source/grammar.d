@@ -285,6 +285,202 @@ struct Grammar
 			(ref _) {},
 		);
 
+		// Given a SeqChoice, try to segment all of its choices such that the set
+		// concatenation of the two sets containing each segment's halves is the exact set
+		// of the original choices.  This operation is more general than prefix/suffix
+		// extraction.
+		// ( a b | a c ) => a ( b | c )
+		// ( a b | b ) => ( | a ) b
+		// a x | a y | b x | b y => ( a | b ) ( x | y )
+		node.match!(
+			(ref SeqChoice sc)
+			{
+				auto choices = sc.nodes;
+
+				// Find all choices which have a chance of participating in segmentation.
+				bool[] choiceViable = choices.map!(choice =>
+					// A choice is minimally viable if any of its constituent nodes occur
+					// at least once somewhere else in the choice list.
+					choice.any!((ref Node node) =>
+						choices.map!(choice =>
+							choice.count(node)
+						).sum > 1
+					)
+					|| choice.length == 0 // Edge case
+				).array;
+
+				// Precompute all minimally viable cut points for choices.
+				bool[][] cutPosViable = choices.map!(choice =>
+					(choice.length + 1).iota.map!(pos =>
+						pos == 0 || pos == choice.length || // redundant / optimization
+						choices.count!(choice2 => choice2.startsWith(choice[0 .. pos])) > 1 ||
+						choices.count!(choice2 => choice2.endsWith  (choice[pos .. $])) > 1
+					).array
+				).array;
+
+				// How to cut the choice at the given index.
+				// -1 = doesn't participate in segmentation.
+				auto cutPos = new sizediff_t[choices.length];
+
+				// The two sets, represented by the index of some
+				// choice which is cut according to it.
+				auto leftSet  = new size_t[choices.length];
+				auto rightSet = new size_t[choices.length];
+				size_t leftSetSize, rightSetSize;
+
+				alias leftChoices = () => leftSetSize.iota.map!(setIndex =>
+					leftSet[setIndex].I!(choiceIndex =>
+						choices[choiceIndex][0 .. cutPos[choiceIndex]]
+					)
+				);
+				alias rightChoices = () => rightSetSize.iota.map!(setIndex =>
+					rightSet[setIndex].I!(choiceIndex =>
+						choices[choiceIndex][cutPos[choiceIndex] .. $]
+					)
+				);
+
+				// Number of choices which do not participate in
+				// segmentation.
+				size_t numExcluded;
+
+				// Best solution found.
+				size_t bestScore = size_t.max;
+				Node bestNode;
+
+				// Use classic recursive backtracking to iterate
+				// through all possible valid solutions
+				void search(size_t choiceIndex)
+				{
+					// If the cardinality of the set concatenation exceeds the
+					// size of the input set, then it certainly contains strings
+					// which are not part of the input set.
+					if (leftSetSize * rightSetSize > choices.length - numExcluded)
+						return;
+
+					// Disallowing either set to grow larger than |choices|/2 greatly
+					// reduces the execution time, but prevents this algorithm from
+					// performing basic prefix/suffix extraction. Currently we don't need
+					// the optimization.
+					version (none)
+						if (leftSetSize  > (choices.length - numExcluded) / 2 ||
+							rightSetSize > (choices.length - numExcluded) / 2)
+							return;
+
+					if (choiceIndex < choices.length)
+					{
+						auto choice = choices[choiceIndex];
+
+						// Try segmenting the choice at every viable point
+						if (choiceViable[choiceIndex])
+							foreach_reverse (pos; 0 .. choice.length + 1)
+							{
+								if (!cutPosViable[choiceIndex][pos])
+									continue;
+
+								cutPos[choiceIndex] = pos;
+
+								auto left = choice[0 .. pos];
+								auto right = choice[pos .. $];
+
+								bool inLeftSet = leftChoices().canFind(left);
+								bool inRightSet = rightChoices().canFind(right);
+								if (!inLeftSet)
+									leftSet[leftSetSize++] = choiceIndex;
+								if (!inRightSet)
+									rightSet[rightSetSize++] = choiceIndex;
+								search(choiceIndex + 1);
+								if (!inLeftSet)
+									leftSetSize--;
+								if (!inRightSet)
+									rightSetSize--;
+							}
+
+						// Also try excluding this choice from segmentation
+						cutPos[choiceIndex] = -1;
+						numExcluded++;
+						search(choiceIndex + 1);
+						numExcluded--;
+					}
+					else
+					{
+						// scope(failure)
+						// {
+						// 	import std.stdio;
+						// 	writeln("Inputs:");
+						// 	foreach (i, choice; choices)
+						// 		if (cutPos[i] == -1)
+						// 			writeln("- ", choice, " (EXCLUDED)");
+						// 		else
+						// 			writeln("- ", choice[0 .. cutPos[i]], " | ", choice[cutPos[i] .. $]);
+						// 	writeln("Left set:");
+						// 	foreach (choice; leftChoices())
+						// 		writeln("- ", choice);
+						// 	writeln("Right set:");
+						// 	foreach (choice; rightChoices())
+						// 		writeln("- ", choice);
+						// 	writefln("Total: %d  Excluded: %d  Segmented: %d", choices.length, numExcluded, choices.length - numExcluded);
+						// 	writeln();
+						// 	writeln();
+						// }
+
+						if (numExcluded == choices.length)
+							return; // Degenerate case - all choices are excluded
+						if (leftChoices().equal([[]]) || rightChoices().equal([[]]))
+							return; // Degenerate case - extracting empty prefix/suffix
+
+						// The set concatenation (pair-wise concatenation of Cartesian
+						// product) of the two sets must result in the original full set
+						// of choices.
+						if (leftSetSize * rightSetSize + numExcluded != choices.length)
+							return;
+
+						size_t score;
+						foreach (ci; 0 .. choices.length)
+							if (cutPos[ci] == -1)
+								score += choices[ci].length;
+						foreach (choice; leftChoices())
+							score += choice.length;
+						foreach (choice; rightChoices())
+							score += choice.length;
+
+						if (score < bestScore)
+						{
+							bestScore = score;
+
+							// Excluded choices
+							auto newChoices = choices.length.iota
+								.filter!(choiceIndex => cutPos[choiceIndex] == -1)
+								.map!(choiceIndex => choices[choiceIndex])
+								.array;
+							// Container for the two sets
+							auto container = seqChoice([[
+								seqChoice(leftChoices().array),
+								seqChoice(rightChoices().array),
+							]]);
+							// Insert the container choice at the first occurrence of a
+							// refactored choice
+							auto insertPos = cutPos.countUntil!(pos => pos >= 0);
+							if (insertPos < 0)
+								insertPos = 0;
+							newChoices = newChoices[0 .. insertPos] ~ [container] ~ newChoices[insertPos .. $];
+							bestNode = seqChoice(newChoices);
+						}
+					}
+				}
+				search(0);
+
+				assert(numExcluded == 0 && leftSetSize == 0 && rightSetSize == 0);
+
+				if (bestScore != size_t.max)
+				{
+					// Apply solution
+					node = bestNode;
+					optimizeNode(node);
+				}
+			},
+			(ref _) {}
+		);
+
 		// Lift the common part (prefix or suffix) out of SeqChoice choices, e.g, transform:
 		// x | x a | x b | ... => x ( | a | b | ... )
 		// We do this if at least two choices have a non-empty common prefix or suffix,
