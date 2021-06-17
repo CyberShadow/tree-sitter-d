@@ -60,6 +60,13 @@ struct Grammar
 		NodeValue value;
 		alias value this;
 
+		void toString(scope void delegate(const(char)[]) sink)
+		{
+			value.match!(
+				(ref v) => sink.formattedWrite!"%s"(v),
+			);
+		}
+
 		void toString(scope void delegate(const(char)[]) sink) const
 		{
 			value.match!(
@@ -237,42 +244,315 @@ struct Grammar
 			(ref              _) {},
 		);
 
-		// Lift the common part (prefix or suffix) out of SeqChoice, e.g, transform:
+		// Collapse redundantly-optional repetition into non-optional repetition.
+		// x ( | repeat1(x) ) => repeat1(x)
+		// ( | repeat1(x) ) x => repeat1(x)
+		node.match!(
+			(ref SeqChoice v)
+			{
+				foreach (ref choice; v.nodes)
+					foreach_reverse (i; 0 .. choice.length)
+						choice[i].match!(
+							(ref SeqChoice sc)
+							{
+								auto choices = sc.nodes;
+								if (!extractOptional(choices))
+									return;
+								if (choices.length != 1 || choices[0].length != 1)
+									return; // Not single-choice (bar optional) or single-length
+
+								choices[0][0].match!(
+									(ref Repeat1 r)
+									{
+										// The list of repeating nodes to try to collapse
+										auto span = r.node[0].match!(
+											(ref SeqChoice scSpan) => scSpan.nodes.length == 1 ? scSpan.nodes[0] : r.node,
+											(ref _) => r.node,
+										);
+
+										if (choice[0 .. i].endsWith(span))
+											choice = choice[0 .. i - span.length] ~ choices[0] ~ choice[i + 1 .. $];
+										else
+										if (choice[i + 1 .. $].startsWith(span))
+											choice = choice[0 .. i] ~ choices[0] ~ choice[i + 1 + span.length .. $];
+									},
+									(ref _) {}
+								);
+							},
+							(ref _) {},
+						);
+			},
+			(ref _) {},
+		);
+
+		// Given a SeqChoice, try to segment all of its choices such that the set
+		// concatenation of the two sets containing each segment's halves is the exact set
+		// of the original choices.  This operation is more general than prefix/suffix
+		// extraction.
+		// ( a b | a c ) => a ( b | c )
+		// ( a b | b ) => ( | a ) b
+		// a x | a y | b x | b y => ( a | b ) ( x | y )
+		node.match!(
+			(ref SeqChoice sc)
+			{
+				auto choices = sc.nodes;
+				choices = choices.map!flattenChoices.join;
+
+				// Find all choices which have a chance of participating in segmentation.
+				bool[] choiceViable = choices.map!(choice =>
+					// A choice is minimally viable if any of its constituent nodes occur
+					// at least once somewhere else in the choice list.
+					choice.any!((ref Node node) =>
+						choices.map!(choice =>
+							choice.count(node)
+						).sum > 1
+					)
+					|| choice.length == 0 // Edge case
+				).array;
+
+				if (choices.length.iota.filter!(i => choiceViable[i]).walkLength > 15)
+					return; // Too slow :(
+
+				// Precompute all minimally viable cut points for choices.
+				bool[][] cutPosViable = choices.map!(choice =>
+					(choice.length + 1).iota.map!(pos =>
+						pos == 0 || pos == choice.length || // redundant / optimization
+						choices.count!(choice2 => choice2.startsWith(choice[0 .. pos])) > 1 ||
+						choices.count!(choice2 => choice2.endsWith  (choice[pos .. $])) > 1
+					).array
+				).array;
+
+				// How to cut the choice at the given index.
+				// -1 = doesn't participate in segmentation.
+				auto cutPos = new sizediff_t[choices.length];
+
+				// The two sets, represented by the index of some
+				// choice which is cut according to it.
+				auto leftSet  = new size_t[choices.length];
+				auto rightSet = new size_t[choices.length];
+				size_t leftSetSize, rightSetSize;
+
+				alias leftChoices = () => leftSetSize.iota.map!(setIndex =>
+					leftSet[setIndex].I!(choiceIndex =>
+						choices[choiceIndex][0 .. cutPos[choiceIndex]]
+					)
+				);
+				alias rightChoices = () => rightSetSize.iota.map!(setIndex =>
+					rightSet[setIndex].I!(choiceIndex =>
+						choices[choiceIndex][cutPos[choiceIndex] .. $]
+					)
+				);
+
+				// Number of choices which do not participate in
+				// segmentation.
+				size_t numExcluded;
+
+				// Avoid infinite recursion by only attempting to return (and re-optimize)
+				// a solution that is better than the status quo.
+				alias nodeScore = delegate size_t (ref Node node) => node.match!(
+					(ref SeqChoice sc) => sc.nodes.map!(choice => choice.map!nodeScore.sum).sum,
+					(ref _) => 1,
+				);
+
+				// Best solution found.
+				size_t bestScore = nodeScore(node);
+				Node bestNode;
+
+				// Use classic recursive backtracking to iterate
+				// through all possible valid solutions
+				void search(size_t choiceIndex)
+				{
+					// If the cardinality of the set concatenation exceeds the
+					// size of the input set, then it certainly contains strings
+					// which are not part of the input set.
+					if (leftSetSize * rightSetSize > choices.length - numExcluded)
+						return;
+
+					// Disallowing either set to grow larger than |choices|/2 greatly
+					// reduces the execution time, but prevents this algorithm from
+					// performing basic prefix/suffix extraction. Currently we don't need
+					// the optimization.
+					version (none)
+						if (leftSetSize  > (choices.length - numExcluded) / 2 ||
+							rightSetSize > (choices.length - numExcluded) / 2)
+							return;
+
+					if (choiceIndex < choices.length)
+					{
+						auto choice = choices[choiceIndex];
+
+						// Try segmenting the choice at every viable point
+						if (choiceViable[choiceIndex])
+							foreach_reverse (pos; 0 .. choice.length + 1)
+							{
+								if (!cutPosViable[choiceIndex][pos])
+									continue;
+
+								cutPos[choiceIndex] = pos;
+
+								auto left = choice[0 .. pos];
+								auto right = choice[pos .. $];
+
+								bool inLeftSet = leftChoices().canFind(left);
+								bool inRightSet = rightChoices().canFind(right);
+								if (!inLeftSet)
+									leftSet[leftSetSize++] = choiceIndex;
+								if (!inRightSet)
+									rightSet[rightSetSize++] = choiceIndex;
+								search(choiceIndex + 1);
+								if (!inLeftSet)
+									leftSetSize--;
+								if (!inRightSet)
+									rightSetSize--;
+							}
+
+						// Also try excluding this choice from segmentation
+						cutPos[choiceIndex] = -1;
+						numExcluded++;
+						search(choiceIndex + 1);
+						numExcluded--;
+					}
+					else
+					{
+						// scope(failure)
+						// {
+						// 	import std.stdio;
+						// 	writeln("Inputs:");
+						// 	foreach (i, choice; choices)
+						// 		if (cutPos[i] == -1)
+						// 			writeln("- ", choice, " (EXCLUDED)");
+						// 		else
+						// 			writeln("- ", choice[0 .. cutPos[i]], " | ", choice[cutPos[i] .. $]);
+						// 	writeln("Left set:");
+						// 	foreach (choice; leftChoices())
+						// 		writeln("- ", choice);
+						// 	writeln("Right set:");
+						// 	foreach (choice; rightChoices())
+						// 		writeln("- ", choice);
+						// 	writefln("Total: %d  Excluded: %d  Segmented: %d", choices.length, numExcluded, choices.length - numExcluded);
+						// 	writeln();
+						// 	writeln();
+						// }
+
+						if (numExcluded == choices.length)
+							return; // Degenerate case - all choices are excluded
+						if (leftChoices().equal([[]]) || rightChoices().equal([[]]))
+							return; // Degenerate case - extracting empty prefix/suffix
+
+						// The set concatenation (pair-wise concatenation of Cartesian
+						// product) of the two sets must result in the original full set
+						// of choices.
+						if (leftSetSize * rightSetSize + numExcluded != choices.length)
+							return;
+
+						size_t score;
+						foreach (ci; 0 .. choices.length)
+							if (cutPos[ci] == -1)
+								score += choices[ci].length;
+						foreach (choice; leftChoices())
+							score += choice.length;
+						foreach (choice; rightChoices())
+							score += choice.length;
+
+						if (score < bestScore)
+						{
+							bestScore = score;
+
+							// Excluded choices
+							auto newChoices = choices.length.iota
+								.filter!(choiceIndex => cutPos[choiceIndex] == -1)
+								.map!(choiceIndex => choices[choiceIndex])
+								.array;
+							// Container for the two sets
+							auto container = seqChoice([[
+								seqChoice(leftChoices().array),
+								seqChoice(rightChoices().array),
+							]]);
+							// Insert the container choice at the first occurrence of a
+							// refactored choice
+							auto insertPos = cutPos.countUntil!(pos => pos >= 0);
+							if (insertPos < 0)
+								insertPos = 0;
+							newChoices = newChoices[0 .. insertPos] ~ [container] ~ newChoices[insertPos .. $];
+							bestNode = seqChoice(newChoices);
+							assert(nodeScore(bestNode) == score);
+						}
+					}
+				}
+				search(0);
+
+				assert(numExcluded == 0 && leftSetSize == 0 && rightSetSize == 0);
+
+				if (bestNode !is Node.init)
+				{
+					// Apply solution
+					node = bestNode;
+					optimizeNode(node);
+				}
+			},
+			(ref _) {}
+		);
+
+		// Lift the common part (prefix or suffix) out of SeqChoice choices, e.g, transform:
 		// x | x a | x b | ... => x ( | a | b | ... )
+		// We do this if at least two choices have a non-empty common prefix or suffix,
+		// for every such possible prefix / suffix.
 		node.match!(
 			(ref SeqChoice scNode)
 			{
 				auto choices = scNode.nodes;
-				auto optional = extractOptional(choices);
 
 				if (choices.length < 2)
 					return; // Must have at least two choices
 
-				auto prefix = choices          .fold!commonPrefix      ;
-				auto suffix = choices.map!retro.fold!commonPrefix.retro;
-				if (!prefix.length && !suffix.length)
-					return;
+				size_t bestCount;
 
-				// Avoid overlap
-				auto minLength = choices.map!(choiceSeq => choiceSeq.length).reduce!min;
-				while (prefix.length + suffix.length > minLength)
-					if (!suffix.empty)
-						suffix.popFront();
-					else
-					if (!prefix.empty)
-						prefix.popBack();
-					else
-						assert(false);
+				foreach (pass; [1, 2]) // Do a first pass to find the biggest group
+					foreach (i1; 0 .. choices.length)
+						foreach (i2; i1 + 1 .. choices.length)
+						{
+							auto choice1 = choices[i1];
+							auto choice2 = choices[i2];
+							auto prefix = commonPrefix(choice1      , choice2      )      ;
+							auto suffix = commonPrefix(choice1.retro, choice2.retro).retro;
+							if (prefix.length || suffix.length)
+							{
+								alias indexIsGrouped = i =>
+									choices[i].startsWith(prefix) &&
+									choices[i].endsWith(suffix) &&
+									choices[i].length >= prefix.length + suffix.length;
+								auto groupedIndices = choices.length.iota.filter!indexIsGrouped.array;
+								if (groupedIndices.length < 2)
+									continue;
 
-				node = seqChoice(optional ~ [
-					(prefix.length ? [seqChoice([prefix])] : []) ~
-					seqChoice(
-						choices.map!(choiceSeq => choiceSeq[prefix.length .. $ - suffix.length]).array,
-					) ~
-					(suffix.length ? [seqChoice([suffix])] : [])
-				]);
+								if (pass == 1)
+									bestCount = max(bestCount, groupedIndices.length);
+								else
+								if (groupedIndices.length == bestCount)
+								{
+									auto remainingIndices = choices.length.iota.filter!(not!indexIsGrouped);
+									// auto groupedChoices = groupedIndices.map!(i => choices[i]);
 
-				optimizeNode(node);
+									auto newChoices = remainingIndices.map!(i => choices[i]).array;
+									// Insert the new group at the first occurrence of the prefix/suffix
+									auto insertionPoint = groupedIndices.front;
+									newChoices =
+										newChoices[0 .. insertionPoint] ~
+										chain(
+											prefix,
+											seqChoice(
+												groupedIndices.map!(i => choices[i][prefix.length .. $ - suffix.length]).array
+											).only,
+											suffix,
+										).array.only.array ~
+										newChoices[insertionPoint .. $];
+
+									node = seqChoice(newChoices);
+									optimizeNode(node);
+									return;
+								}
+							}
+						}
 			},
 			(ref _) {},
 		);
@@ -284,6 +564,24 @@ struct Grammar
 	{
 		foreach (ref def; defs)
 			optimizeNode(def.node);
+	}
+
+	// Name-based heuristic to decide which nodes to perform
+	// de-recursion / body-extraction for.
+	private bool isPlural(string defName)
+	{
+		return
+			// Lists of things generally involve repetition.
+			defName.splitByCamelCase.canFind("List") ||
+
+			// If the definition name is the plural of the name of another definition,
+			// then this is almost certainly used for repetition.
+			["s", "es"].any!(pluralSuffix =>
+				defName.endsWith(pluralSuffix) &&
+				["", "Name"].any!(singularSuffix =>
+					defName[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
+				)
+			);
 	}
 
 	// Attempt to remove recursion as needed
@@ -302,130 +600,54 @@ struct Grammar
 				def.kind == Def.Kind.chars ||
 
 				// Lists of things generally involve repetition.
-				defName.splitByCamelCase.canFind("List") ||
+				isPlural(defName) ||
 
-				// If the definition name is the plural of the name of another definition,
-				// then this is almost certainly used for repetition.
-				["s", "es"].any!(pluralSuffix =>
-					defName.endsWith(pluralSuffix) &&
-					["", "Name"].any!(singularSuffix =>
-						defName[0 .. $ - pluralSuffix.length] ~ singularSuffix in defs
-					)
+				// Additional rules.
+				defName.among(
+					"ParameterAttributes",
+					"AsmInstruction",
 				);
 
 			if (shouldDeRecurse)
 			{
 				auto x = reference(defName);
 
-				// Transform x := y ( | x ) into x := ( y )+
+				// Transform x := a | b | c x into x := ( | ( c )+ ) ( a | b )
 				def.node.match!(
 					(ref SeqChoice sc1)
 					{
-						if (sc1.nodes.length != 1)
-							return; // Single choice
-						if (sc1.nodes[0].length < 2)
-							return;
+						auto choices = sc1.nodes;
+						choices = choices.map!flattenChoices.join;
 
-						auto y = sc1.nodes[0][0 .. $-1];
+						auto recursiveChoiceIndices = choices.length.iota.filter!(
+							i => choices[i].canFind(x),
+						).array;
+						if (recursiveChoiceIndices.length != 1)
+							return; // Single path to recursion
+						auto recursiveChoiceIndex = recursiveChoiceIndices.front;
+						auto recursiveChoice = choices[recursiveChoiceIndex];
+						if (recursiveChoice.countUntil(x) + 1 != recursiveChoice.length)
+							return; // More rules follow after recursion
 
-						sc1.nodes[0][$-1].match!(
-							(ref SeqChoice sc2)
-							{
-								auto choices = sc2.nodes;
-								if (!extractOptional(choices))
-									return;
-								if (choices != [[x]])
-									return;
-
-								def.node = repeat1(
-									seqChoice([y])
-								);
-								optimizeNode(def.node);
-							},
-							(_) {}
-						);
-					},
-					(_) {}
-				);
-
-				// Transform x := ( | x ) y into x := ( y )+
-				def.node.match!(
-					(ref SeqChoice sc1)
-					{
-						if (sc1.nodes.length != 1)
-							return; // Single choice
-						if (sc1.nodes[0].length < 2)
-							return;
-
-						auto y = sc1.nodes[0][1 .. $];
-
-						sc1.nodes[0][0].match!(
-							(ref SeqChoice sc2)
-							{
-								auto choices = sc2.nodes;
-								if (!extractOptional(choices))
-									return;
-								if (choices != [[x]])
-									return;
-
-								def.node = repeat1(
-									seqChoice([y])
-								);
-								optimizeNode(def.node);
-							},
-							(_) {}
-						);
-					},
-					(_) {}
-				);
-
-				// Transform x := y ( | z x ) into x := y ( | ( z y )+ )
-				def.node.match!(
-					(ref SeqChoice sc1)
-					{
-						if (sc1.nodes.length != 1)
-							return; // Single choice
-						if (sc1.nodes[0].length < 2)
-							return;
-
-						auto y = sc1.nodes[0][0 .. $-1];
-
-						sc1.nodes[0][$-1].match!(
-							(ref SeqChoice sc2)
-							{
-
-								auto choices = sc2.nodes;
-								if (!extractOptional(choices))
-									return;
-								if (choices.length != 1)
-									return;
-								if (choices[0][$-1] != x)
-									return;
-
-								auto z = choices[0][0 .. $-1];
-
-								def.node = seqChoice([
-									y ~
-									seqChoice([
-										[], // optional
-										[repeat1(
-											seqChoice([
-												z ~
-												y,
-											])
-										)],
-									]),
-								]);
-								optimizeNode(def.node);
-							},
-							(_) {}
-						);
+						def.node = seqChoice([[
+							// Recursive part
+							seqChoice([
+								[], // Optional (zero-or-more)
+								[repeat1(seqChoice([
+									recursiveChoice[0 .. $ - 1]
+								]))],
+							]),
+							// Non-recursive parts
+							seqChoice(
+								choices[0 .. recursiveChoiceIndex] ~ choices[recursiveChoiceIndex + 1 .. $],
+							),
+						]]);
+						optimizeNode(def.node);
 					},
 					(_) {}
 				);
 
 				// Transform x := ( | x z ) y into x := ( | y z ) y
-				// Same as above, but in the other direction.
 				def.node.match!(
 					(ref SeqChoice sc1)
 					{
@@ -468,66 +690,32 @@ struct Grammar
 					},
 					(_) {}
 				);
-
-				// Transform x := y ( | z ( | x ) ) into x := y ( | ( z y )+ ) ( | z )
-				def.node.match!(
-					(ref SeqChoice sc1)
-					{
-						if (sc1.nodes.length != 1)
-							return; // Single choice
-						if (sc1.nodes[0].length < 2)
-							return;
-
-						auto y = sc1.nodes[0][0 .. $-1];
-
-						sc1.nodes[0][$-1].match!(
-							(ref SeqChoice sc2)
-							{
-								auto choices = sc2.nodes;
-								if (!extractOptional(choices))
-									return;
-								if (choices.length != 1)
-									return;
-
-								auto z = choices[0][0 .. $-1];
-
-								sc2.nodes[1][$-1].match!(
-									(ref SeqChoice sc3)
-									{
-										auto choices = sc3.nodes;
-										if (!extractOptional(choices))
-											return;
-										if (choices != [[x]])
-											return;
-
-										def.node = seqChoice([
-											y ~
-											seqChoice([
-												[], // optional
-												[repeat1(
-													seqChoice([
-														z ~
-														y,
-													])
-												)],
-											]) ~
-											seqChoice([
-												[], // optional
-												z,
-											]),
-										]);
-										optimizeNode(def.node);
-									},
-									(_) {}
-								);
-							},
-							(_) {}
-						);
-					},
-					(_) {}
-				);
 			}
 		}
+	}
+
+	// Recursively expand all nested choices into a flat list of all possible combinations.
+	// This form is used for some transformations.
+	private static Node[][] flattenChoices(Node[] nodes)
+	{
+		foreach (i, ref node; nodes)
+		{
+			auto result = node.match!(
+				(ref SeqChoice sc)
+				{
+					assert(sc.nodes.length > 1);
+					Node[][] result;
+					foreach (choice; sc.nodes.map!flattenChoices.joiner)
+						foreach (rightChoice; flattenChoices(nodes[i + 1 .. $]))
+							result ~= nodes[0 .. i] ~ choice ~ rightChoice;
+					return result;
+				},
+				(ref _) => null,
+			);
+			if (result)
+				return result;
+		}
+		return [nodes];
 	}
 
 	// Refactor some definitions into a descending part and an
@@ -556,16 +744,49 @@ struct Grammar
 			// As far as I can see, there is no way to mechanically distinguish these cases
 			// from the majority of cases where body extraction is desirable.
 			if (defName.among(
+					"SourceFile",
 					"Import",
-					"ImportBind",
-					"Declarators",
-					"VarDeclaratorIdentifier",
-					"ArrayMemberInitialization",
-					"StructMemberInitializer",
 					"Slice", // needs to be de-recursed
 					"Symbol",
-					"MixinTemplateName",
+					"AssertArguments", // uses AssignExpression
 				))
+				continue;
+
+			// One way we can decide whether to perform body
+			// extraction is to check if one of the choices that the
+			// definition can resolve to is a reference to a very
+			// generic rule, such as Identifier.  In this case, it is
+			// generally valuable to preserve this node in the AST, as
+			// it provides information over the generic rule.
+			bool wrapsGeneric = def.node.match!(
+				(ref SeqChoice sc) => sc.nodes.map!flattenChoices.joiner.any!(choice =>
+					choice.length == 1 && choice[0].match!(
+						(ref Reference r) => r.name.among(
+							"Identifier",
+							"DeclDefs",
+							"NonVoidInitializer",
+							// "AssignExpression", // Also used for descending
+							"BasicType",
+							"Parameters",
+							"InOutStatement",
+							"IntegerLiteral",
+							"BlockStatement",
+							"Type",
+							"Opcode",
+						),
+						(ref _) => false,
+				)),
+				(ref _) => false,
+			);
+			if (wrapsGeneric)
+				continue;
+
+			// Another heuristic we can use is to check if the name
+			// suggests repetition.  An example is Packages: it is
+			// recursive, but unlike e.g. OrOrExpression (which is
+			// also recursive), we don't want to perform body
+			// extraction on it.
+			if (isPlural(defName))
 				continue;
 
 			auto x = reference(defName);
@@ -669,23 +890,15 @@ struct Grammar
 			def.node.match!(
 				(ref SeqChoice sc1)
 				{
-					alias isRecursive = delegate bool (ref Node node) => node.tryMatch!(
-						(ref RegExp       v) => false,
-						(ref LiteralChars v) => false,
-						(ref LiteralToken v) => false,
-						(ref Reference    v) => v.name == defName,
-						(ref SeqChoice    v) => v.nodes.joiner.any!isRecursive,
-						(ref Repeat1      v) => v.node[0].I!isRecursive,
-					);
-					if (isRecursive(def.node))
-						return;
+					auto choices = sc1.nodes;
+					choices = choices.map!flattenChoices.join;
 
 					alias isReference = (Node[] nodes) => nodes.length == 1 && nodes[0].match!(
 						(ref Reference    v) => true,
 						(_) => false,
 					);
-					auto references = sc1.nodes.filter!isReference.array;
-					auto remainder  = sc1.nodes.filter!(not!isReference).array;
+					auto references = choices.filter!isReference.array;
+					auto remainder  = choices.filter!(not!isReference).array;
 					if (!references || !remainder)
 						return;
 
