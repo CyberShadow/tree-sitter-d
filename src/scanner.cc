@@ -4,6 +4,8 @@ enum TokenType {
   NESTING_BLOCK_COMMENT,
 };
 
+extern "C" {
+
 void *tree_sitter_d_external_scanner_create() {
   return NULL;
 }
@@ -49,4 +51,6 @@ void tree_sitter_d_external_scanner_deserialize(void *payload, const char *buffe
 }
 
 void tree_sitter_d_external_scanner_destroy(void *payload) {
+}
+
 }

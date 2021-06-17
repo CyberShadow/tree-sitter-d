@@ -4,6 +4,6 @@
 # tree-sitter generate
 !/src/
 /src/*
-!/src/scanner.c
+!/src/scanner.cc
 /bindings/
 /Cargo.toml
