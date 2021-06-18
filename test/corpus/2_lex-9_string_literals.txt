@@ -141,3 +141,83 @@ x!"
         (declarators
           (var_declarator
             (identifier)))))))
+
+====================
+DelimitedString
+====================
+
+x!q"EOF
+Hello, world!
+Not the end: EOF"
+EOF: also not the end
+Also not the end:
+EOF
+The real end:
+EOF" y;
+
+x!q"( ( [ ) < { )" y;
+x!q"[ [ ( ] < { ]" y;
+x!q"{ { [ } < ) }" y;
+x!q"< < ( > [ { >" y;
+
+---
+
+(source_file
+  (module
+    (decl_defs
+
+      (var_declarations
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (template_single_argument
+                (delimited_string)))))
+        (declarators
+          (var_declarator
+            (identifier))))
+
+      (var_declarations
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (template_single_argument
+                (delimited_string)))))
+        (declarators
+          (var_declarator
+            (identifier))))
+
+      (var_declarations
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (template_single_argument
+                (delimited_string)))))
+        (declarators
+          (var_declarator
+            (identifier))))
+
+      (var_declarations
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (template_single_argument
+                (delimited_string)))))
+        (declarators
+          (var_declarator
+            (identifier))))
+
+      (var_declarations
+        (qualified_identifier
+          (template_instance
+            (identifier)
+            (template_arguments
+              (template_single_argument
+                (delimited_string)))))
+        (declarators
+          (var_declarator
+            (identifier)))))))
+

@@ -17,6 +17,7 @@ module.exports = grammar({
 
   externals: $ => [
     $.nesting_block_comment,
+    $.delimited_string,
   ],
 
   conflicts: $ => [
@@ -1122,6 +1123,7 @@ module.exports = grammar({
       ),
 
     // https://dlang.org/spec/lex.html#DelimitedString
+    /*
     delimited_string: $ =>
       token(
         // DelimitedString
@@ -1244,6 +1246,7 @@ module.exports = grammar({
           "\"",
         ),
       ),
+    */
 
     // ---
 
