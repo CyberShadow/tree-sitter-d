@@ -335,14 +335,8 @@ module.exports = grammar({
           // BlockComment
           seq(
             "/*",
-            optional(
-              // Characters
-              repeat1(
-                // Character
-                /[^*]|[*][^/]/,
-              ),
-            ),
-            "*/",
+	    /[^*]*[*]+(?:[^/*][^*]*[*]+)*/,
+            "/",
           ),
       ),
 

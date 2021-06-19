@@ -32,6 +32,26 @@ BlockComment
   (block_comment))
 
 ====================
+BlockComment 2
+====================
+
+int i;
+
+/***************************************************/
+
+---
+
+(source_file
+  (module
+    (decl_defs
+      (var_declarations
+        (fundamental_type)
+        (declarators
+          (var_declarator
+            (identifier))))))
+  (block_comment))
+
+====================
 NestingBlockComment
 ====================
 
