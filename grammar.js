@@ -219,6 +219,10 @@ module.exports = grammar({
     [$.primary_expression, $.template_value_parameter_default],
     [$.asm_primary_exp],
 
+    [$._maybe_at_attribute, $._function_attribute],
+    [$.user_defined_attribute],
+    [$.user_defined_attribute, $.template_instance],
+
     // <-- insert here
   ],
 
@@ -6823,6 +6827,7 @@ module.exports = grammar({
       choice(
         $.function_attribute_kwd,
         $.property,
+        $._maybe_at_attribute,
       ),
 
     // https://dlang.org/spec/function.html#MemberFunctionAttributes
