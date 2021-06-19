@@ -3298,9 +3298,12 @@ module.exports = grammar({
 
     // https://dlang.org/spec/module.html#Module
     module: $ =>
-      seq(
-        optional(
+      choice(
+        seq(
           $.module_declaration,
+          optional(
+            $.decl_defs,
+          ),
         ),
         $.decl_defs,
       ),
