@@ -9,6 +9,7 @@ SO_SUFFIX=.so
 GRAMMAR=src/grammar.json
 SO=$(HOME)/.tree-sitter/bin/d$(SO_SUFFIX)
 WASM=tree-sitter-d.wasm
+TEST_TS_FILES=$(shell find test/corpus -type f)
 TEST_TS_OK=test/tmp/tree-sitter-test.ok
 TEST_PARSE_SUCCESS_OK=test/tmp/parse-success.ok
 TEST_PARSE_SUCCESS_XFAIL_OK=$(addsuffix .ok,$(subst test/parse-success-xfail/,test/tmp/parse-success-xfail/,$(shell find test/parse-success-xfail -type f)))
@@ -54,7 +55,7 @@ $(WASM) : $(GRAMMAR)
 	$(TREE_SITTER) build-wasm $(DOCKER_FLAG)
 
 # tree-sitter test suite
-$(TEST_TS_OK) : $(SO)
+$(TEST_TS_OK) : $(TEST_TS_FILES) $(SO)
 	$(TREE_SITTER) test
 	@touch $@
 
