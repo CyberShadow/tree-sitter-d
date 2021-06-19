@@ -7,3 +7,6 @@
 !/src/scanner.cc
 /bindings/
 /Cargo.toml
+
+# tree-sitter build-wasm
+/tree-sitter-d.wasm
