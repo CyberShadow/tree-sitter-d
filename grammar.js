@@ -6616,6 +6616,7 @@ module.exports = grammar({
       choice(
         $.function_attribute_kwd,
         $.property,
+        $._maybe_at_attribute,
       ),
 
     // https://dlang.org/spec/function.html#MemberFunctionAttributes
