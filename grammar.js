@@ -6953,20 +6953,15 @@ module.exports = grammar({
           seq(
             $._maybe_basic_type,
             $._declarator,
-            optional(
-              choice(
-                "...",
-                seq(
-                  "=",
-                  $._maybe_assign_expression,
-                ),
-              ),
-            ),
           ),
-          seq(
-            $.type,
-            optional(
-              "...",
+          $.type,
+        ),
+        optional(
+          choice(
+            "...",
+            seq(
+              "=",
+              $._maybe_assign_expression,
             ),
           ),
         ),
