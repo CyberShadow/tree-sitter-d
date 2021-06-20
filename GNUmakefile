@@ -28,7 +28,7 @@ test-parse-success-xfail : $(TEST_PARSE_SUCCESS_XFAIL_OK)
 
 # Implementation
 
-.PHONY : all grammar compile wasm test test-ts test-parse-success test-parse-success-xfail
+.PHONY : all grammar compile wasm test test-ts test-parse-success test-parse-success-xfail web-ui
 
 # The default is to use the tree-sitter version which would be
 # installed by npm (according to package.json / package-lock.json).
@@ -53,6 +53,10 @@ $(SO) : $(GRAMMAR)
 # Run with DOCKER_FLAG= to use the host Emscripten version.
 $(WASM) : $(GRAMMAR)
 	$(TREE_SITTER) build-wasm $(DOCKER_FLAG)
+
+# Launch web-ui
+web-ui : $(WASM)
+	$(TREE_SITTER) web-ui
 
 # tree-sitter test suite
 $(TEST_TS_OK) : $(TEST_TS_FILES) $(SO)
