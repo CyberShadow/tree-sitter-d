@@ -4638,9 +4638,11 @@ module.exports = grammar({
           seq(
             "C++",
             ",",
-            choice(
-              $.qualified_identifier,
-              $.namespace_list,
+            optional(
+              choice(
+                $.qualified_identifier,
+                $.namespace_list,
+              ),
             ),
           ),
         ),
