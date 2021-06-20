@@ -237,6 +237,8 @@ module.exports = grammar({
     [$.case_statement],
     [$.case_range_statement],
 
+    [$.storage_class, $.deprecated_attribute],
+
     // <-- insert here
   ],
 
@@ -6990,12 +6992,8 @@ module.exports = grammar({
         "in",
         "lazy",
         "out",
-        seq(
-          optional(
-            "return",
-          ),
-          "ref",
-        ),
+        "ref",
+        "return",
         "scope",
       ),
 
