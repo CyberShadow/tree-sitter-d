@@ -223,6 +223,12 @@ module.exports = grammar({
     [$.user_defined_attribute],
     [$.user_defined_attribute, $.template_instance],
 
+    [$.import_declaration, $.storage_class],
+    [$.import_declaration, $.storage_class, $.attribute],
+    [$._decl_def, $._maybe_declaration_statement],
+    [$.var_declarations],
+    [$.func_declaration],
+
     // <-- insert here
   ],
 
@@ -5525,7 +5531,7 @@ module.exports = grammar({
       choice(
         $.labeled_statement,
         $.expression_statement,
-        $.declaration_statement,
+        $._maybe_declaration_statement,
         $.if_statement,
         $.while_statement,
         $.do_statement,
@@ -5610,8 +5616,17 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/statement.html#DeclarationStatement
+    _maybe_declaration_statement: $ =>
+      choice(
+        $._declaration,
+        $.declaration_statement,
+      ),
+
     declaration_statement: $ =>
-      $._declaration,
+      seq(
+        $.storage_classes,
+        $._declaration,
+      ),
 
     // ---
 
