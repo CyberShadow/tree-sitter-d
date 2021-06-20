@@ -1297,7 +1297,7 @@ module.exports = grammar({
           // SingleQuotedCharacter
           choice(
             // Character
-            /[\s\S]/,
+            /[^'\\]/,
             // EscapeSequence
             choice(
               "\\'",
