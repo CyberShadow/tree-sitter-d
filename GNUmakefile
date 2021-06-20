@@ -28,7 +28,7 @@ test-parse-success-xfail : $(TEST_PARSE_SUCCESS_XFAIL_OK)
 
 # Implementation
 
-.PHONY : all grammar wasm test
+.PHONY : all grammar compile wasm test test-ts test-parse-success test-parse-success-xfail
 
 # The default is to use the tree-sitter version which would be
 # installed by npm (according to package.json / package-lock.json).
