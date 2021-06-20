@@ -3722,6 +3722,7 @@ module.exports = grammar({
 
     storage_class: $ =>
       choice(
+        "deprecated",
         "enum",
         "static",
         "extern",
