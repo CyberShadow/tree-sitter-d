@@ -3926,6 +3926,7 @@ module.exports = grammar({
       choice(
         $.linkage_attribute,
         $.align_attribute,
+        $._maybe_at_attribute,
         $.property,
         $.storage_class,
       ),
