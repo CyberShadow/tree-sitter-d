@@ -229,6 +229,10 @@ module.exports = grammar({
     [$.var_declarations],
     [$.func_declaration],
 
+    [$.float_literal, $.primary_expression],
+    [$.float_literal, $.template_single_argument],
+    [$.token_no_braces, $.float_literal],
+
     // <-- insert here
   ],
 
@@ -1973,6 +1977,24 @@ module.exports = grammar({
 
     // https://dlang.org/spec/lex.html#FloatLiteral
     float_literal: $ =>
+      // Allow tree-sitter to disambiguate UFCS calls by defining two
+      // versions of this token, with or without a trailing period.
+      choice(
+        $._float_literal_no_trailing_period,
+        seq(
+          choice(
+            $._float_literal_trailing_period,
+            // Hack around tree-sitter not being able to deal with ambiguous lexing rules
+            alias(
+              $.integer_literal,
+              '_actually_a_float_literal_without_its_trailing_period',
+            ),
+          ),
+          ".",
+        )
+      ),
+
+    _float_literal_no_trailing_period: $ =>
       token(
         // FloatLiteral
         choice(
@@ -2119,7 +2141,7 @@ module.exports = grammar({
                     ),
                   ),
                   ".",
-                  optional(
+                  // optional(
                     // DecimalDigits
                     repeat1(
                       // DecimalDigit
@@ -2139,7 +2161,7 @@ module.exports = grammar({
                         ),
                       ),
                     ),
-                  ),
+                  // ),
                 ),
                 seq(
                   choice(
@@ -3353,6 +3375,160 @@ module.exports = grammar({
                 ),
                 // ImaginarySuffix
                 "i",
+              ),
+            ),
+          ),
+        ),
+      ),
+
+    _float_literal_trailing_period: $ =>
+      token(
+        // FloatLiteral
+        choice(
+          seq(
+            // Float
+            choice(
+              // DecimalFloat
+              choice(
+                seq(
+                  // LeadingDecimal
+                  choice(
+                    // DecimalInteger
+                    choice(
+                      "0",
+                      seq(
+                        // NonZeroDigit
+                        choice(
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                        optional(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    seq(
+                      "0",
+                      // DecimalDigitsNoSingleUS
+                      choice(
+                        seq(
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                          optional(
+                            // DecimalDigitsUS
+                            repeat1(
+                              // DecimalDigitUS
+                              choice(
+                                // DecimalDigit
+                                choice(
+                                  "0",
+                                  // NonZeroDigit
+                                  choice(
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                  ),
+                                ),
+                                "_",
+                              ),
+                            ),
+                          ),
+                        ),
+                        seq(
+                          // DecimalDigitsUS
+                          repeat1(
+                            // DecimalDigitUS
+                            choice(
+                              // DecimalDigit
+                              choice(
+                                "0",
+                                // NonZeroDigit
+                                choice(
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                ),
+                              ),
+                              "_",
+                            ),
+                          ),
+                          // DecimalDigit
+                          choice(
+                            "0",
+                            // NonZeroDigit
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // ".",
+                ),
               ),
             ),
           ),

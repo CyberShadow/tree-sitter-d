@@ -1,0 +1,48 @@
+====================
+FloatLiteral + UFCS
+====================
+
+float a = 1.0;
+float a = 1.foo;
+float a = 1. .foo;
+
+---
+
+(source_file
+  (module
+    (decl_defs
+
+      (var_declarations
+        (fundamental_type)
+        (declarators
+          (declarator_initializer
+            (var_declarator
+              (identifier))
+            (exp_initializer
+              (primary_expression
+                (float_literal))))))
+
+      (var_declarations
+        (fundamental_type)
+        (declarators
+          (declarator_initializer
+            (var_declarator
+              (identifier))
+            (exp_initializer
+              (postfix_expression
+                (primary_expression
+                  (integer_literal))
+                (identifier))))))
+
+      (var_declarations
+        (fundamental_type)
+        (declarators
+          (declarator_initializer
+            (var_declarator
+              (identifier))
+            (exp_initializer
+              (postfix_expression
+                (primary_expression
+                  (float_literal))
+                (identifier))))))
+    )))
