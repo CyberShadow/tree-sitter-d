@@ -6593,12 +6593,8 @@ module.exports = grammar({
         "in",
         "lazy",
         "out",
-        seq(
-          optional(
-            "return",
-          ),
-          "ref",
-        ),
+        "ref",
+        "return",
         "scope",
       ),
 
