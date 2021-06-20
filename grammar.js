@@ -6658,6 +6658,7 @@ module.exports = grammar({
         "immutable",
         "inout",
         "return",
+        "scope",
         "shared",
       ),
 
