@@ -233,6 +233,10 @@ module.exports = grammar({
     [$.float_literal, $.template_single_argument],
     [$.token_no_braces, $.float_literal],
 
+    [$.default_statement],
+    [$.case_statement],
+    [$.case_range_statement],
+
     // <-- insert here
   ],
 
@@ -6052,7 +6056,9 @@ module.exports = grammar({
         "case",
         $.argument_list,
         ":",
-        $.scope_statement_list,
+        optional(
+          $.scope_statement_list,
+        ),
       ),
 
     // https://dlang.org/spec/statement.html#CaseRangeStatement
@@ -6065,7 +6071,9 @@ module.exports = grammar({
         "case",
         $.last_exp,
         ":",
-        $.scope_statement_list,
+        optional(
+          $.scope_statement_list,
+        ),
       ),
 
     // https://dlang.org/spec/statement.html#FirstExp
@@ -6081,7 +6089,9 @@ module.exports = grammar({
       seq(
         "default",
         ":",
-        $.scope_statement_list,
+        optional(
+          $.scope_statement_list,
+        ),
       ),
 
     // https://dlang.org/spec/statement.html#ScopeStatementList
