@@ -16,7 +16,7 @@ TEST_PARSE_SUCCESS_XFAIL_OK=$(addsuffix .ok,$(subst test/parse-success-xfail/,te
 
 # Entry points
 
-all : grammar
+all : compile
 grammar : $(GRAMMAR)
 compile : $(SO)
 wasm : $(WASM)
