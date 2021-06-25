@@ -90,6 +90,11 @@ void program()
 
 			if (node.call.macroName == "GRAMMAR" || node.call.macroName == "GRAMMAR_LEX")
 			{
+				enforce(node.call.contents.length &&
+					node.call.contents[$-1].type == Node.type.text &&
+					node.call.contents[$-1].isText("\n"),
+					"Unexpected text at the end of GRAMMAR node"
+				);
 				auto macros = (globalMacros ~ ddoc.macros).fold!merge((DDoc[string]).init);
 				auto kind = node.call.macroName == "GRAMMAR" ? Grammar.Def.Kind.tokens : Grammar.Def.Kind.chars;
 				auto newDefs = grammar.parse(node.call.contents, macros, kind);
