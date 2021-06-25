@@ -95,15 +95,20 @@ struct Grammar
 
 		string publicName; /// If set, use this name instead of the `defs` key.
 		string[] tail; /// Also write these (synthetic) rules after this one
+
+		HashSet!string definedIn; /// Used to check if GLINK2 links are correct.
 	}
 
 	/// All definitions in the grammar, indexed by their official names.
 	Def[string] defs;
 
+	HashSet!(string[2]) links; /// Used to check if GLINK2 links are correct.
+
 	/// Pre-process and prepare for writing
 	void analyze(string[] roots)
 	{
 		checkReferences();
+		checkLinks();
 		normalize();
 		optimize();
 		deRecurse();
@@ -134,6 +139,17 @@ struct Grammar
 		}
 		foreach (name, ref def; defs)
 			scan(def.node);
+	}
+
+	/// Ensure that GLINK2 destinations link to pages
+	/// which actually contain the linked definitions.
+	private void checkLinks()
+	{
+		foreach (pair; links)
+			enforce(pair[1] in defs[pair[0]].definedIn,
+				"Broken link to %s: links to page %s but it is defined in page(s) %-(%s, %)".format(
+					pair[0], pair[1], defs[pair[0]].definedIn.byKey,
+			));
 	}
 
 	// Convert rules to an intermediate normalized form, which makes other manipulations easier.

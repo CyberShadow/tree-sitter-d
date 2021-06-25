@@ -97,7 +97,7 @@ void program()
 				);
 				auto macros = (globalMacros ~ ddoc.macros).fold!merge((DDoc[string]).init);
 				auto kind = node.call.macroName == "GRAMMAR" ? Grammar.Def.Kind.tokens : Grammar.Def.Kind.chars;
-				auto newDefs = grammar.parse(node.call.contents, macros, kind);
+				auto newDefs = grammar.parse(node.call.contents, file, macros, kind);
 				order[file] ~= newDefs;
 			}
 			else
