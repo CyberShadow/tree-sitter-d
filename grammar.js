@@ -239,6 +239,8 @@ module.exports = grammar({
 
     [$.storage_class, $.deprecated_attribute],
 
+    [$._cmp_expression, $.shift_expression],
+
     // <-- insert here
   ],
 
@@ -1141,14 +1143,10 @@ module.exports = grammar({
     delimited_string: $ =>
       token(
         // DelimitedString
-        seq(
-          "q\"",
-          // Delimiter
-          choice(
-            "(",
-            "{",
-            "[",
-            "<",
+        choice(
+          seq(
+            "q\"",
+            // Delimiter
             // Identifier
             seq(
               // IdentifierStart
@@ -1185,41 +1183,35 @@ module.exports = grammar({
                 ),
               ),
             ),
-          ),
-          optional(
-            // WysiwygCharacters
-            repeat1(
-              // WysiwygCharacter
-              choice(
-                // Character
-                /[\s\S]/,
-                // EndOfLine
+            optional(
+              // WysiwygCharacters
+              repeat1(
+                // WysiwygCharacter
                 choice(
-                  seq(
-                    "\r",
-                    optional(
-                      "\n",
-                    ),
-                  ),
-                  "\n",
-                  "\u2028",
-                  "\u2029",
-                  // EndOfFile
+                  // Character
+                  /[\s\S]/,
+                  // EndOfLine
                   choice(
-                    // /$/m,
-                    "\0",
-                    "\x1A",
+                    seq(
+                      "\r",
+                      optional(
+                        "\n",
+                      ),
+                    ),
+                    "\n",
+                    "\u2028",
+                    "\u2029",
+                    // EndOfFile
+                    choice(
+                      // /$/m,
+                      "\0",
+                      "\x1A",
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          // MatchingDelimiter
-          choice(
-            ")",
-            "}",
-            "]",
-            ">",
+            // MatchingDelimiter
             // Identifier
             seq(
               // IdentifierStart
@@ -1256,8 +1248,184 @@ module.exports = grammar({
                 ),
               ),
             ),
+            "\"",
           ),
-          "\"",
+          seq(
+            "q\"(",
+            optional(
+              // ParenDelimitedCharacters
+              choice(
+                seq(
+                  // WysiwygCharacter
+                  choice(
+                    // Character
+                    /[\s\S]/,
+                    // EndOfLine
+                    choice(
+                      seq(
+                        "\r",
+                        optional(
+                          "\n",
+                        ),
+                      ),
+                      "\n",
+                      "\u2028",
+                      "\u2029",
+                      // EndOfFile
+                      choice(
+                        /$/m,
+                        "\0",
+                        "\x1A",
+                      ),
+                    ),
+                  ),
+                  optional(
+                    / * recursion * /,
+                  ),
+                ),
+                seq(
+                  "(",
+                  optional(
+                    / * recursion * /,
+                  ),
+                  ")",
+                ),
+              ),
+            ),
+            ")\"",
+          ),
+          seq(
+            "q\"[",
+            optional(
+              // BracketDelimitedCharacters
+              choice(
+                seq(
+                  // WysiwygCharacter
+                  choice(
+                    // Character
+                    /[\s\S]/,
+                    // EndOfLine
+                    choice(
+                      seq(
+                        "\r",
+                        optional(
+                          "\n",
+                        ),
+                      ),
+                      "\n",
+                      "\u2028",
+                      "\u2029",
+                      // EndOfFile
+                      choice(
+                        /$/m,
+                        "\0",
+                        "\x1A",
+                      ),
+                    ),
+                  ),
+                  optional(
+                    / * recursion * /,
+                  ),
+                ),
+                seq(
+                  "[",
+                  optional(
+                    / * recursion * /,
+                  ),
+                  "]",
+                ),
+              ),
+            ),
+            "]\"",
+          ),
+          seq(
+            "q\"{",
+            optional(
+              // BraceDelimitedCharacters
+              choice(
+                seq(
+                  // WysiwygCharacter
+                  choice(
+                    // Character
+                    /[\s\S]/,
+                    // EndOfLine
+                    choice(
+                      seq(
+                        "\r",
+                        optional(
+                          "\n",
+                        ),
+                      ),
+                      "\n",
+                      "\u2028",
+                      "\u2029",
+                      // EndOfFile
+                      choice(
+                        /$/m,
+                        "\0",
+                        "\x1A",
+                      ),
+                    ),
+                  ),
+                  optional(
+                    / * recursion * /,
+                  ),
+                ),
+                seq(
+                  "{",
+                  optional(
+                    / * recursion * /,
+                  ),
+                  "}",
+                ),
+              ),
+            ),
+            "}\"",
+          ),
+          seq(
+            "q\"<",
+            optional(
+              // AngleDelimitedCharacters
+              choice(
+                seq(
+                  // WysiwygCharacter
+                  choice(
+                    // Character
+                    /[\s\S]/,
+                    // EndOfLine
+                    choice(
+                      seq(
+                        "\r",
+                        optional(
+                          "\n",
+                        ),
+                      ),
+                      "\n",
+                      "\u2028",
+                      "\u2029",
+                      // EndOfFile
+                      choice(
+                        /$/m,
+                        "\0",
+                        "\x1A",
+                      ),
+                    ),
+                  ),
+                  optional(
+                    / * recursion * /,
+                  ),
+                ),
+                seq(
+                  "<",
+                  optional(
+                    / * recursion * /,
+                  ),
+                  ">",
+                ),
+              ),
+            ),
+            ">\"",
+          ),
         ),
       ),
     */
@@ -3665,7 +3833,10 @@ module.exports = grammar({
       seq(
         "#",
         "line",
-        $.integer_literal,
+        choice(
+          $.integer_literal,
+          "__LINE__",
+        ),
         optional(
           $.filespec,
         ),
@@ -4984,12 +5155,8 @@ module.exports = grammar({
       seq(
         $._maybe_shift_expression,
         choice(
-          seq(
-            "<",
-            optional(
-              "=",
-            ),
-          ),
+          "<",
+          "<=",
           ">",
           ">=",
         ),
@@ -5022,17 +5189,9 @@ module.exports = grammar({
       seq(
         $._maybe_shift_expression,
         choice(
-          seq(
-            "<",
-            "<",
-          ),
-          seq(
-            ">",
-            ">",
-            optional(
-              ">",
-            ),
-          ),
+          "<<",
+          ">>",
+          ">>>",
         ),
         $._maybe_add_expression,
       ),
@@ -8335,12 +8494,8 @@ module.exports = grammar({
       seq(
         $._maybe_asm_rel_exp,
         choice(
-          seq(
-            "<",
-            optional(
-              "=",
-            ),
-          ),
+          "<",
+          "<=",
           ">",
           ">=",
         ),
@@ -8358,10 +8513,7 @@ module.exports = grammar({
       seq(
         $._maybe_asm_shift_exp,
         choice(
-          seq(
-            "<",
-            "<",
-          ),
+          "<<",
           ">>",
           ">>>",
         ),

@@ -3,6 +3,7 @@ module parser;
 import std.algorithm.comparison;
 import std.algorithm.iteration;
 import std.algorithm.searching;
+import std.array;
 import std.conv : to;
 import std.exception;
 import std.string;
@@ -10,7 +11,7 @@ import std.string;
 import ddoc;
 import grammar;
 
-string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Grammar.Def.Kind kind)
+string[] parse(ref Grammar grammar, const DDoc ddoc, string fileName, DDoc[string] macros, Grammar.Def.Kind kind)
 {
 	alias RegExp = Grammar.RegExp;
 	alias LiteralChars = Grammar.LiteralChars;
@@ -45,11 +46,12 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 	struct ParseContext
 	{
 		string currentName;
+		string file;
 		DDoc[string] macros;
 		Def.Kind kind;
 	}
 
-	static Node[] parseDefinition(const DDoc line, ref const ParseContext context)
+	/*static*/ Node[] parseDefinition(const DDoc line, ref const ParseContext context)
 	{
 		scope(failure) { import std.stdio : stderr; stderr.writeln("Error with line: ", line); }
 		Node[] seqNodes;
@@ -359,6 +361,10 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 						"w",
 						"d",
 						`q"`,
+						`q"(`, `)"`,
+						`q"[`, `]"`,
+						`q"{`, `}"`,
+						`q"<`, `>"`,
 						`(`, `[`, `<`, `{`,
 						`)`, `]`, `>`, `}`,
 						"L", "u", "U",
@@ -505,15 +511,20 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 				auto text = node.getSingleTextChild();
 				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
 				seqNodes ~= reference(text);
+				auto file = node.call.macroName == "GLINK_LEX" ? "lex" : context.file;
+				grammar.links.add([file, text].staticArray);
 			}
 			else
 			if (node.isCallTo("GLINK2"))
 			{
 				auto arguments = node.call.splitArguments();
 				enforce(arguments.length == 2);
+				auto file = arguments[0].toString();
+				enforce(file != context.file, "GLINK2 to the current file should be GLINK");
 				auto text = arguments[1].toString();
 				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
 				seqNodes ~= reference(text);
+				grammar.links.add([file, text].staticArray);
 			}
 			else
 			if (node.isCallTo("LINK2") || node.isCallTo("RELATIVE_LINK2"))
@@ -565,6 +576,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 	/// Parse and accumulate definitions from DDoc AST
 	{
 		ParseContext context;
+		context.file = fileName;
 		context.macros = macros;
 		context.kind = kind;
 
@@ -579,8 +591,16 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, DDoc[string] macros, Gramma
 			auto newDef = Def(choice(currentDefs), kind);
 			grammar.defs.update(context.currentName,
 				{ newDefs ~= context.currentName; return newDef; },
-				(ref Def def) { enforce(def == newDef, "Definition mismatch for " ~ context.currentName); }
+				(ref Def def)
+				{
+					enforce(Def(def.node, def.kind) == newDef,
+						"Definition mismatch for " ~ context.currentName);
+				}
 			);
+
+			auto pDef = &grammar.defs[context.currentName];
+			pDef.definedIn.add(fileName);
+
 			context.currentName = null;
 			currentDefs = null;
 		}

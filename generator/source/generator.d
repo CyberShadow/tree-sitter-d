@@ -9,6 +9,7 @@ import std.stdio;
 import std.string;
 
 import ae.utils.aa;
+import ae.utils.array;
 import ae.utils.funopt;
 import ae.utils.main;
 
@@ -84,12 +85,19 @@ void program()
 		{
 			if (node.type != Node.Type.call)
 				return;
+			scope(failure) stderr.writefln("Error on line %d:",
+				1 + source[0 .. source.sliceIndex(node.call.macroName)].representation.count('\n'));
 
 			if (node.call.macroName == "GRAMMAR" || node.call.macroName == "GRAMMAR_LEX")
 			{
+				enforce(node.call.contents.length &&
+					node.call.contents[$-1].type == Node.type.text &&
+					node.call.contents[$-1].isText("\n"),
+					"Unexpected text at the end of GRAMMAR node"
+				);
 				auto macros = (globalMacros ~ ddoc.macros).fold!merge((DDoc[string]).init);
 				auto kind = node.call.macroName == "GRAMMAR" ? Grammar.Def.Kind.tokens : Grammar.Def.Kind.chars;
-				auto newDefs = grammar.parse(node.call.contents, macros, kind);
+				auto newDefs = grammar.parse(node.call.contents, file, macros, kind);
 				order[file] ~= newDefs;
 			}
 			else
