@@ -511,6 +511,8 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, string fileName, DDoc[strin
 				auto text = node.getSingleTextChild();
 				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
 				seqNodes ~= reference(text);
+				auto file = node.call.macroName == "GLINK_LEX" ? "lex" : context.file;
+				grammar.links.add([text, file].staticArray);
 			}
 			else
 			if (node.isCallTo("GLINK2"))
