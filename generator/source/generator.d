@@ -9,6 +9,7 @@ import std.stdio;
 import std.string;
 
 import ae.utils.aa;
+import ae.utils.array;
 import ae.utils.funopt;
 import ae.utils.main;
 
@@ -84,6 +85,8 @@ void program()
 		{
 			if (node.type != Node.Type.call)
 				return;
+			scope(failure) stderr.writefln("Error on line %d:",
+				1 + source[0 .. source.sliceIndex(node.call.macroName)].representation.count('\n'));
 
 			if (node.call.macroName == "GRAMMAR" || node.call.macroName == "GRAMMAR_LEX")
 			{
