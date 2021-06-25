@@ -786,6 +786,7 @@ struct Grammar
 							"Parameters",
 							"InOutStatement",
 							"IntegerLiteral",
+							"Declaration",
 							"BlockStatement",
 							"Type",
 							"Opcode",

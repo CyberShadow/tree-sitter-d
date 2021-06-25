@@ -225,7 +225,6 @@ module.exports = grammar({
 
     [$.import_declaration, $.storage_class],
     [$.import_declaration, $.storage_class, $.attribute],
-    [$._decl_def, $._maybe_declaration_statement],
     [$.var_declarations],
     [$.func_declaration],
 
@@ -5875,7 +5874,7 @@ module.exports = grammar({
       choice(
         $.labeled_statement,
         $.expression_statement,
-        $._maybe_declaration_statement,
+        $.declaration_statement,
         $.if_statement,
         $.while_statement,
         $.do_statement,
@@ -5960,15 +5959,11 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/statement.html#DeclarationStatement
-    _maybe_declaration_statement: $ =>
-      choice(
-        $._declaration,
-        $.declaration_statement,
-      ),
-
     declaration_statement: $ =>
       seq(
-        $.storage_classes,
+        optional(
+          $.storage_classes,
+        ),
         $._declaration,
       ),
 
