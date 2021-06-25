@@ -145,10 +145,10 @@ struct Grammar
 	/// which actually contain the linked definitions.
 	private void checkLinks()
 	{
-		foreach (pair; links)
-			enforce(pair[1] in defs[pair[0]].definedIn,
+		foreach (pair; links.keys.sort)
+			enforce(pair[0] in defs[pair[1]].definedIn,
 				"Broken link to %s: links to page %s but it is defined in page(s) %-(%s, %)".format(
-					pair[0], pair[1], defs[pair[0]].definedIn.byKey,
+					pair[1], pair[0], defs[pair[1]].definedIn.byKey,
 			));
 	}
 

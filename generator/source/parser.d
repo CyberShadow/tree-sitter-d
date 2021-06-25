@@ -512,7 +512,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, string fileName, DDoc[strin
 				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
 				seqNodes ~= reference(text);
 				auto file = node.call.macroName == "GLINK_LEX" ? "lex" : context.file;
-				grammar.links.add([text, file].staticArray);
+				grammar.links.add([file, text].staticArray);
 			}
 			else
 			if (node.isCallTo("GLINK2"))
@@ -524,7 +524,7 @@ string[] parse(ref Grammar grammar, const DDoc ddoc, string fileName, DDoc[strin
 				auto text = arguments[1].toString();
 				enforce(text != context.currentName, "GLINK to %(%s%) should be GSELF".format([text]));
 				seqNodes ~= reference(text);
-				grammar.links.add([text, file].staticArray);
+				grammar.links.add([file, text].staticArray);
 			}
 			else
 			if (node.isCallTo("LINK2") || node.isCallTo("RELATIVE_LINK2"))
