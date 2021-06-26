@@ -35,9 +35,10 @@ struct Grammar
 	struct Choice { Node[] nodes; } /// Choice of multiple possible nodes.
 	struct Seq { Node[] nodes; } /// Consecutive sequence of nodes.
 	// https://issues.dlang.org/show_bug.cgi?id=22010
-	struct Repeat { Node[/*1*/] node; } /// Zero-or-more occurrences of the given node.
-	struct Repeat1 { Node[/*1*/] node; } /// One-or-more occurrences of the given node.
-	struct Optional { Node[/*1*/] node; } /// Zero-or-one occurrences of the given node.
+	private mixin template OneNode() { Node[/*1*/] nodes; ref Node node() { assert(nodes.length == 1); return nodes[0]; } }
+	struct Repeat { mixin OneNode; } /// Zero-or-more occurrences of the given node.
+	struct Repeat1 { mixin OneNode; } /// One-or-more occurrences of the given node.
+	struct Optional { mixin OneNode; } /// Zero-or-one occurrences of the given node.
 	struct SeqChoice { Node[][] nodes; } /// Internal node, superset of Choice, Seq and Optional. `nodes` is a list of choices of sequences.
 
 	// https://issues.dlang.org/show_bug.cgi?id=22003
@@ -131,9 +132,9 @@ struct Grammar
 				(ref Reference    v) { enforce(v.name in defs, "Unknown reference: " ~ v.name); },
 				(ref Choice       v) { v.nodes       .each!scan(); },
 				(ref Seq          v) { v.nodes       .each!scan(); },
-				(ref Repeat       v) { v.node        .each!scan(); },
-				(ref Repeat1      v) { v.node        .each!scan(); },
-				(ref Optional     v) { v.node        .each!scan(); },
+				(ref Repeat       v) { v.nodes       .each!scan(); },
+				(ref Repeat1      v) { v.nodes       .each!scan(); },
+				(ref Optional     v) { v.nodes       .each!scan(); },
 				(ref SeqChoice    v) { v.nodes.joiner.each!scan(); },
 			);
 		}
@@ -172,9 +173,9 @@ struct Grammar
 				(ref Reference    v) {},
 				(ref Choice       v) { v.nodes.each!normalizeNode(); },
 				(ref Seq          v) { v.nodes.each!normalizeNode(); },
-				(ref Repeat       v) { v.node .each!normalizeNode(); },
-				(ref Repeat1      v) { v.node .each!normalizeNode(); },
-				(ref Optional     v) { v.node .each!normalizeNode(); },
+				(ref Repeat       v) { v.nodes.each!normalizeNode(); },
+				(ref Repeat1      v) { v.nodes.each!normalizeNode(); },
+				(ref Optional     v) { v.nodes.each!normalizeNode(); },
 				(ref SeqChoice    v) { assert(false); },
 			);
 
@@ -194,9 +195,9 @@ struct Grammar
 					(ref              _) => enforce(null),
 				)).join),
 				(ref Seq          v) => seqChoice([v.nodes]),
-				(ref Repeat       v) => seqChoice([[], [repeat1(v.node[0])]]),
+				(ref Repeat       v) => seqChoice([[], [repeat1(v.node)]]),
 				(ref Repeat1      v) => node,
-				(ref Optional     v) => seqChoice([[], v.node]),
+				(ref Optional     v) => seqChoice([[], v.nodes]),
 				(ref SeqChoice    v) { enforce(false); return node; },
 			);
 		}
@@ -232,7 +233,7 @@ struct Grammar
 			(ref LiteralToken v) {},
 			(ref Reference    v) {},
 			(ref SeqChoice    v) { v.nodes.joiner.each!optimizeNode(); },
-			(ref Repeat1      v) { v.node        .each!optimizeNode(); },
+			(ref Repeat1      v) { v.nodes       .each!optimizeNode(); },
 			(ref              _) { assert(false); },
 		);
 
@@ -281,9 +282,9 @@ struct Grammar
 									(ref Repeat1 r)
 									{
 										// The list of repeating nodes to try to collapse
-										auto span = r.node[0].match!(
-											(ref SeqChoice scSpan) => scSpan.nodes.length == 1 ? scSpan.nodes[0] : r.node,
-											(ref _) => r.node,
+										auto span = r.node.match!(
+											(ref SeqChoice scSpan) => scSpan.nodes.length == 1 ? scSpan.nodes[0] : r.nodes,
+											(ref _) => r.nodes,
 										);
 
 										if (choice[0 .. i].endsWith(span))
@@ -985,7 +986,7 @@ struct Grammar
 								(ref LiteralChars v) => State.hasChars,
 								(ref LiteralToken v) => State.hasToken,
 								(ref Reference    v) { enforce(defs[v.name].kind == Def.Kind.chars, "%s of kind %s references %s of kind %s".format(defName, def.kind, v.name, defs[v.name].kind)); return checkDef(v.name); },
-								(ref Repeat1      v) => v.node[0].I!scanNode().I!(x => concat(x, x)),
+								(ref Repeat1      v) => v.node.I!scanNode().I!(x => concat(x, x)),
 								(ref SeqChoice    v) => v.nodes.map!(choiceSeq => choiceSeq.map!scanNode().fold!concat(State.init)).fold!((a, b) => State(a | b)),
 								(ref              _) => enforce(State.init),
 							);
@@ -1006,7 +1007,7 @@ struct Grammar
 							(ref LiteralChars v) { throw new Exception("Definition %s with kind %s has literal chars: %(%s%)".format(defName, def.kind, [v.chars])); },
 							(ref LiteralToken v) {},
 							(ref Reference    v) {},
-							(ref Repeat1      v) { v.node        .each!scanNode(); },
+							(ref Repeat1      v) { v.nodes       .each!scanNode(); },
 							(ref SeqChoice    v) { v.nodes.joiner.each!scanNode(); },
 							(ref              _) { assert(false); },
 						);
@@ -1037,7 +1038,7 @@ struct Grammar
 					(ref LiteralChars v) {},
 					(ref LiteralToken v) {},
 					(ref Reference    v) { scanDef(v.name); },
-					(ref Repeat1      v) { v.node        .each!scanNode(); },
+					(ref Repeat1      v) { v.nodes       .each!scanNode(); },
 					(ref SeqChoice    v) { v.nodes.joiner.each!scanNode(); },
 					(ref              _) { assert(false); },
 				);
@@ -1076,7 +1077,7 @@ struct Grammar
 					(ref LiteralChars v) => enforce(0),
 					(ref LiteralToken v) => 2,
 					(ref Reference    v) => 1,
-					(ref Repeat1      v) => v.node[0].I!scanNode() * 2,
+					(ref Repeat1      v) => v.nodes.each!scanNode() * 2,
 					(ref SeqChoice    v) => v.nodes.map!(choiceSeq => choiceSeq.map!scanNode().sum()).reduce!max,
 					(ref              _) => enforce(0),
 				);
@@ -1100,7 +1101,7 @@ struct Grammar
 				(ref Choice       v) { assert(false); },
 				(ref Seq          v) { assert(false); },
 				(ref Repeat       v) { assert(false); },
-				(ref Repeat1      v) { v.node        .each!compileNode(); },
+				(ref Repeat1      v) { v.nodes       .each!compileNode(); },
 				(ref Optional     v) { assert(false); },
 				(ref SeqChoice    v) { v.nodes.joiner.each!compileNode(); },
 			);
@@ -1123,7 +1124,7 @@ struct Grammar
 					{
 						// optional(repeat1(...)) -> repeat(...)
 						node = node.match!(
-							(ref Repeat1 v) => repeat(v.node[0]),
+							(ref Repeat1 v) => repeat(v.node),
 							(ref         _) => optional(node),
 						);
 					}

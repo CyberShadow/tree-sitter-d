@@ -159,9 +159,9 @@ private:
 					(ref Grammar.Reference    v) { if (def.kind == Grammar.Def.Kind.chars) writeDef(v.name); else single("$." ~ convertRuleName(v.name)); },
 					(ref Grammar.Choice       v) => list("choice"  , v.nodes, &writeNode),
 					(ref Grammar.Seq          v) => list("seq"     , v.nodes, &writeNode),
-					(ref Grammar.Repeat       v) => list("repeat"  , v.node , &writeNode),
-					(ref Grammar.Repeat1      v) => list("repeat1" , v.node , &writeNode),
-					(ref Grammar.Optional     v) => list("optional", v.node , &writeNode),
+					(ref Grammar.Repeat       v) => list("repeat"  , v.nodes, &writeNode),
+					(ref Grammar.Repeat1      v) => list("repeat1" , v.nodes, &writeNode),
+					(ref Grammar.Optional     v) => list("optional", v.nodes, &writeNode),
 					(ref Grammar.SeqChoice    v) { assert(false); },
 				);
 			}
