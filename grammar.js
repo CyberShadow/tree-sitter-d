@@ -247,6 +247,8 @@ module.exports = grammar({
     [$._no_scope_non_empty_statement, $.specified_function_body],
     [$.missing_function_body, $._function_contract],
 
+    [$.primary_expression, $.parameter],
+
     // <-- insert here
   ],
 
@@ -5265,29 +5267,17 @@ module.exports = grammar({
       ),
 
     unary_expression: $ =>
-      choice(
-        seq(
-          choice(
-            "&",
-            "++",
-            "--",
-            "*",
-            "-",
-            "+",
-            "!",
-          ),
-          $._maybe_unary_expression,
+      seq(
+        choice(
+          "&",
+          "++",
+          "--",
+          "*",
+          "-",
+          "+",
+          "!",
         ),
-        seq(
-          "(",
-          $.type,
-          ")",
-          ".",
-          choice(
-            $.identifier,
-            $.template_instance,
-          ),
-        ),
+        $._maybe_unary_expression,
       ),
 
     // ---
@@ -5500,7 +5490,16 @@ module.exports = grammar({
       choice(
         seq(
           optional(
-            ".",
+            seq(
+              optional(
+                seq(
+                  "(",
+                  $.type,
+                  ")",
+                ),
+              ),
+              ".",
+            ),
           ),
           choice(
             $.identifier,
