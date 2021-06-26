@@ -240,6 +240,13 @@ module.exports = grammar({
 
     [$._cmp_expression, $.shift_expression],
 
+    [$.scope_block_statement, $.specified_function_body],
+    [$.specified_function_body],
+    [$._scope_statement, $.specified_function_body],
+    [$._no_scope_statement, $.specified_function_body],
+    [$._no_scope_non_empty_statement, $.specified_function_body],
+    [$.missing_function_body, $._function_contract],
+
     // <-- insert here
   ],
 
@@ -7219,7 +7226,7 @@ module.exports = grammar({
 
     // https://dlang.org/spec/function.html#FunctionLiteralBody
     function_literal_body: $ =>
-      $.block_statement,
+      $.specified_function_body,
 
     // https://dlang.org/spec/function.html#SpecifiedFunctionBody
     specified_function_body: $ =>
