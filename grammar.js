@@ -6687,7 +6687,12 @@ module.exports = grammar({
           ),
         ),
         choice(
-          $.parameter,
+          seq(
+            $.parameter,
+            optional(
+              ",",
+            ),
+          ),
           seq(
             optional(
               $.variadic_arguments_attributes,
