@@ -6819,7 +6819,7 @@ module.exports = grammar({
 
     // https://dlang.org/spec/function.html#FunctionLiteralBody
     function_literal_body: $ =>
-      $.block_statement,
+      $.specified_function_body,
 
     // https://dlang.org/spec/function.html#SpecifiedFunctionBody
     specified_function_body: $ =>
