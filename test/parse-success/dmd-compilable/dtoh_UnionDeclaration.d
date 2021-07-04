@@ -17,7 +17,7 @@ TEST_OUTPUT:
 #else
 /// Represents a D [] array
 template<typename T>
-struct _d_dynamicArray
+struct _d_dynamicArray final
 {
     size_t length;
     T *ptr;
@@ -39,9 +39,6 @@ struct _d_dynamicArray
 };
 #endif
 
-union U1;
-union U2;
-
 union U1
 {
     int32_t a;
@@ -54,7 +51,7 @@ union U2
     char* ptr;
 };
 
-struct S
+struct S final
 {
     int32_t i;
     U1 u1;

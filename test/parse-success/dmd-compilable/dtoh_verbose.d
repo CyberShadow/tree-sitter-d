@@ -19,7 +19,7 @@ TEST_OUTPUT:
 #else
 /// Represents a D [] array
 template<typename T>
-struct _d_dynamicArray
+struct _d_dynamicArray final
 {
     size_t length;
     T *ptr;
@@ -46,23 +46,23 @@ extern void importFunc();
 // Ignored function dtoh_verbose.foo because of linkage
 // Ignored variable dtoh_verbose.i because of linkage
 // Ignored function dtoh_verbose.bar because of linkage
-// Ignored non-cpp struct S because of linkage
-// Ignored non-cpp class C
+// Ignored struct dtoh_verbose.S because of linkage
+// Ignored class dtoh_verbose.C because of linkage
 // Ignored function dtoh_verbose.bar because it is extern
 // Ignored variable dtoh_verbose.i1 because of linkage
 // Ignored template dtoh_verbose.templ(T)(T t) because of linkage
-// Ignored function dtoh_verbose.templ!int.templ
+// Ignored alias dtoh_verbose.inst because of linkage
 // Ignored enum dtoh_verbose.arrayOpaque because of its base type
 // Ignored renamed import `myFunc = importFunc` because `using` only supports types
-struct A
+struct A final
 {
-    // Ignored local __anonymous
+    // Ignored renamed import `myFunc = importFunc` because `using` only supports types
     A()
     {
     }
 };
 
-struct Hidden
+struct Hidden final
 {
     // Ignored function dtoh_verbose.Hidden.hidden because it is private
     Hidden()
@@ -70,6 +70,7 @@ struct Hidden
     }
 };
 
+// Ignored alias dtoh_verbose.D because of linkage
 class Visitor
 {
 public:
@@ -79,6 +80,25 @@ public:
 };
 
 extern void unused();
+
+// Ignored variable dtoh_verbose.and because its name is a special operator in C++
+template <typename T>
+struct FullImportTmpl final
+{
+    // Ignored `dtoh_imports` because it's inside of a template declaration
+    FullImportTmpl()
+    {
+    }
+};
+
+template <typename T>
+struct SelectiveImportsTmpl final
+{
+    // Ignored `__anonymous` because it's inside of a template declaration
+    SelectiveImportsTmpl()
+    {
+    }
+};
 ---
 */
 
@@ -102,13 +122,14 @@ void templ(T)(T t) {}
 
 alias inst = templ!int;
 
+extern(C++)
 enum arrayOpaque : int[4];
 
 public import dtoh_imports : myFunc = importFunc;
 
 extern(C++) struct A
 {
-    import core.stdc.errno : cErrorC = errno;
+    public import dtoh_imports : myFunc = importFunc;
 }
 
 extern(C++) struct Hidden
@@ -134,3 +155,18 @@ extern(C++) class Visitor
 }
 
 extern(C++) void unused() {}
+
+extern(C++) __gshared bool and;
+
+extern(C++) struct FullImportTmpl(T)
+{
+    public import dtoh_imports;
+
+}
+
+extern(C++) struct SelectiveImportsTmpl(T)
+{
+    public import dtoh_imports :
+        importFunc,
+        aliasName = ImportsC;
+}

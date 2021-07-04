@@ -1,4 +1,4 @@
-/*
+/+
 REQUIRED_ARGS: -HC=silent -c -o- -Icompilable/extra-files
 PERMUTE_ARGS:
 EXTRA_FILES: extra-files/dtoh_imports.d extra-files/dtoh_imports2.d
@@ -19,7 +19,7 @@ TEST_OUTPUT:
 #else
 /// Represents a D [] array
 template<typename T>
-struct _d_dynamicArray
+struct _d_dynamicArray final
 {
     size_t length;
     T *ptr;
@@ -41,10 +41,7 @@ struct _d_dynamicArray
 };
 #endif
 
-struct S;
-struct S2;
 class C;
-class C2;
 
 extern void importFunc();
 
@@ -53,6 +50,11 @@ class ImportsC
 };
 
 typedef int32_t MyStdcInt;
+
+enum
+{
+    IgnoreErrors = 0,
+};
 
 typedef int32_t T;
 
@@ -79,7 +81,7 @@ typedef C2* aliasC2;
 typedef size_t(*F)(size_t x);
 
 template <typename T, typename U>
-struct TS
+struct TS final
 {
     TS()
     {
@@ -93,8 +95,36 @@ typedef TSD<int32_t, int16_t > TSI;
 using aliasName = ImportsC;
 
 using MyStdc = MyStdcInt;
+
+struct FullImport final
+{
+    using ImportsC = ::ImportsC;
+    using MyStdcInt = ::MyStdcInt;
+    FullImport()
+    {
+    }
+};
+
+struct SelectiveImports final
+{
+    using aliasName = ::ImportsC;
+    SelectiveImports()
+    {
+    }
+};
+
+struct PrivateImport final
+{
+    PrivateImport()
+    {
+    }
+};
+
+typedef /* noreturn */ char Impossible[0];
 ---
-*/
++/
+
+extern (C++):
 
 alias T = int;
 
@@ -142,3 +172,26 @@ public import dtoh_imports :
     importFunc,
     aliasName = ImportsC,
     MyStdc = MyStdcInt;
+
+struct FullImport
+{
+    public import dtoh_imports;
+
+}
+
+struct SelectiveImports
+{
+    public import dtoh_imports :
+        importFunc,
+        aliasName = ImportsC;
+
+    public static import dtoh_imports;
+}
+
+struct PrivateImport
+{
+    import dtoh_imports;
+
+}
+
+alias Impossible = noreturn;

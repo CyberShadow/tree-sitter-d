@@ -19,7 +19,7 @@ TEST_OUTPUT:
 #else
 /// Represents a D [] array
 template<typename T>
-struct _d_dynamicArray
+struct _d_dynamicArray final
 {
     size_t length;
     T *ptr;
@@ -41,13 +41,11 @@ struct _d_dynamicArray
 };
 #endif
 
-struct MyString;
-
 class ImportsC
 {
 };
 
-struct Null
+struct Null final
 {
     void* field;
     _d_dynamicArray< const char > null_;
@@ -69,7 +67,7 @@ extern void* typeof_null;
 
 extern void* inferred_null;
 
-struct MyString
+struct MyString final
 {
     _d_dynamicArray< const char > str;
     MyString() :
@@ -81,7 +79,7 @@ struct MyString
         {}
 };
 
-struct Wrapper
+struct Wrapper final
 {
     MyString s1;
     MyString s2;
