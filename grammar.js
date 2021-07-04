@@ -3673,6 +3673,7 @@ module.exports = grammar({
         $._maybe_func_declaration,
         $._maybe_var_declarations,
         $.alias_declaration,
+        $.alias_assign,
         $._aggregate_declaration,
         $._maybe_enum_declaration,
         $.import_declaration,
@@ -4099,6 +4100,16 @@ module.exports = grammar({
           ),
           $._maybe_function_literal,
         ),
+      ),
+
+    // ---
+
+    // https://dlang.org/spec/declaration.html#AliasAssign
+    alias_assign: $ =>
+      seq(
+        $.identifier,
+        "=",
+        $.type,
       ),
 
     // ---
@@ -7615,6 +7626,7 @@ module.exports = grammar({
         "isOut",
         "isLazy",
         "isReturnOnStack",
+        "isCopyable",
         "isZeroInit",
         "isModule",
         "isPackage",
