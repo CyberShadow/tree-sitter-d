@@ -7301,6 +7301,14 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html#ShortenedFunctionBody
     shortened_function_body: $ =>
       seq(
+        optional(
+          seq(
+            optional(
+              $.function_contracts,
+            ),
+            $._in_out_contract_expression,
+          ),
+        ),
         "=>",
         $._maybe_assign_expression,
         ";",
