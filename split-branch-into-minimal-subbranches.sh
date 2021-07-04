@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eEuo pipefail
+shopt -s lastpipe
 
 branch=grammar2x
 base=master
@@ -16,25 +17,28 @@ git show-ref --heads |
 		git update-ref -d "$ref"
 	done
 
-num_branches=0
+branches=()
 
-git log --reverse --pretty=format:%H "$base".."$branch" |
-	while IFS= read -r hash
+git log --reverse --pretty=format:$'%H\t%at\t%f' "$base".."$branch" |
+	while IFS=$'\t' read -r hash date slug
 	do
-		git checkout -q -B "$branch-$num_branches" "$base"
-		if git cherry-pick "$hash"
+		subbranch=$branch-$slug
+		git checkout -q -B "$subbranch" "$base"
+		if GIT_COMMITTER_DATE=$date git -c commit.gpgsign=false cherry-pick "$hash"
 		then
-			num_branches=$((num_branches + 1))
+			branches+=("$subbranch")
 			continue
 		else
 			git cherry-pick --abort
+			git checkout -q "$base"
+			git update-ref -d refs/heads/"$subbranch"
 		fi
 
 		added=false
-		for (( i=0; i<num_branches; i++ ))
+		for subbranch in "${branches[@]}"
 		do
-			git checkout -q "$branch-$i"
-			if git cherry-pick "$hash"
+			git checkout -q "$subbranch"
+			if GIT_COMMITTER_DATE=$date git -c commit.gpgsign=false cherry-pick "$hash"
 			then
 				added=true
 				break
