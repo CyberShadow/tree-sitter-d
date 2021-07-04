@@ -53,3 +53,15 @@ git log --reverse --pretty=format:$'%H\t%at\t%f' "$base".."$branch" |
 			exit 1
 		fi
 	done
+
+git push --force-with-lease my "${branches[@]}"
+
+printf '%s\n' "${branches[@]}" |
+	grep -vxFf <(
+		curl 'https://api.github.com/repos/dlang/dlang.org/pulls?state=all&per_page=100' |
+		jq -r '.[] | select(.user.login == "CyberShadow") | .head.ref'
+	) |
+	while read -r subbranch
+	do
+		xdg-open "https://github.com/CyberShadow/d-programming-language.org/pull/new/$subbranch"
+	done
