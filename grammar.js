@@ -258,6 +258,10 @@ module.exports = grammar({
     [$.type, $.postfix_expression],
     [$._maybe_basic_type, $.basic_type, $.primary_expression],
 
+    [$.primary_expression, $.opcode],
+    [$.primary_expression, $.template_instance, $.opcode],
+    [$.primary_expression, $.asm_instruction],
+
     // <-- insert here
   ],
 
@@ -5917,7 +5921,7 @@ module.exports = grammar({
         $.try_statement,
         $.scope_guard_statement,
         $.throw_statement,
-        $.asm_statement,
+        $._maybe_asm_statement,
         $.mixin_statement,
         $.foreach_range_statement,
         $.pragma_statement,
@@ -6476,6 +6480,12 @@ module.exports = grammar({
     // ---
 
     // https://dlang.org/spec/statement.html#AsmStatement
+    _maybe_asm_statement: $ =>
+      choice(
+        $.gcc_asm_statement,
+        $.asm_statement,
+      ),
+
     asm_statement: $ =>
       seq(
         "asm",
@@ -8627,6 +8637,138 @@ module.exports = grammar({
           $.fundamental_type,
         ),
         "ptr",
+      ),
+
+    // ---
+
+    // https://dlang.org/spec/iasm.html#GccAsmStatement
+    gcc_asm_statement: $ =>
+      seq(
+        "asm",
+        optional(
+          $.function_attributes,
+        ),
+        "{",
+        $.gcc_asm_instruction_list,
+        "}",
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccAsmInstructionList
+    gcc_asm_instruction_list: $ =>
+      repeat1(
+        seq(
+          $._gcc_asm_instruction,
+          ";",
+        ),
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccAsmInstruction
+    _gcc_asm_instruction: $ =>
+      choice(
+        $.gcc_basic_asm_instruction,
+        $.gcc_ext_asm_instruction,
+        $.gcc_goto_asm_instruction,
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccBasicAsmInstruction
+    gcc_basic_asm_instruction: $ =>
+      $._maybe_assign_expression,
+
+    // https://dlang.org/spec/iasm.html#GccExtAsmInstruction
+    gcc_ext_asm_instruction: $ =>
+      seq(
+        $._maybe_assign_expression,
+        ":",
+        optional(
+          $.gcc_asm_operands,
+        ),
+        optional(
+          seq(
+            ":",
+            optional(
+              $.gcc_asm_operands,
+            ),
+            optional(
+              seq(
+                ":",
+                optional(
+                  $._maybe_gcc_asm_clobbers,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccGotoAsmInstruction
+    gcc_goto_asm_instruction: $ =>
+      seq(
+        $._maybe_assign_expression,
+        ":",
+        ":",
+        optional(
+          $.gcc_asm_operands,
+        ),
+        ":",
+        optional(
+          $._maybe_gcc_asm_clobbers,
+        ),
+        ":",
+        optional(
+          $.gcc_asm_goto_labels,
+        ),
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccAsmOperands
+    gcc_asm_operands: $ =>
+      seq(
+        optional(
+          $.gcc_symbolic_name,
+        ),
+        $._string_literal,
+        "(",
+        $._maybe_assign_expression,
+        ")",
+        optional(
+          seq(
+            ",",
+            $.gcc_asm_operands,
+          ),
+        ),
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccSymbolicName
+    gcc_symbolic_name: $ =>
+      seq(
+        "[",
+        $.identifier,
+        "]",
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccAsmClobbers
+    _maybe_gcc_asm_clobbers: $ =>
+      choice(
+        $._string_literal,
+        $.gcc_asm_clobbers,
+      ),
+
+    gcc_asm_clobbers: $ =>
+      seq(
+        $._string_literal,
+        ",",
+        $._maybe_gcc_asm_clobbers,
+      ),
+
+    // https://dlang.org/spec/iasm.html#GccAsmGotoLabels
+    gcc_asm_goto_labels: $ =>
+      seq(
+        $.identifier,
+        optional(
+          seq(
+            ",",
+            $.gcc_asm_goto_labels,
+          ),
+        ),
       ),
   }
 });

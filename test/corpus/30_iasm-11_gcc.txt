@@ -1,0 +1,54 @@
+====================
+GccExtAsmInstruction
+====================
+
+void cpuid()
+{
+    uint u;
+    asm { "cpuid" : "=eax" (u) : "eax" (0x8000_0000) : "ebx", "ecx", "edx"; }
+}
+
+---
+
+(source_file
+ (module
+  (decl_defs
+   (func_declaration
+    (fundamental_type)
+    (func_declarator
+     (identifier)
+     (func_declarator_suffix
+      (parameters)))
+
+    (specified_function_body
+     (block_statement
+      (statement_list
+       (declaration_statement
+        (var_declarations
+         (fundamental_type)
+         (declarators
+          (var_declarator
+           (identifier)))))
+
+       (gcc_asm_statement
+        (gcc_asm_instruction_list
+         (gcc_ext_asm_instruction
+          (primary_expression
+           (string_literals
+            (double_quoted_string)))
+
+          (gcc_asm_operands
+           (double_quoted_string)
+           (primary_expression
+            (identifier)))
+
+          (gcc_asm_operands
+           (double_quoted_string)
+           (primary_expression
+            (integer_literal)))
+
+          (gcc_asm_clobbers
+           (double_quoted_string)
+           (gcc_asm_clobbers
+            (double_quoted_string)
+            (double_quoted_string)))))))))))))
