@@ -108,6 +108,11 @@ void program()
 			scan(node);
 	}
 
+	grammar.defs["AsmStatement"].node = choice([
+		grammar.defs["AsmStatement"].node,
+		reference("GccAsmStatement"),
+	]);
+
 	grammar.analyze(["SourceFile"] ~ extras);
 
 	foreach (defName; ["WhiteSpace", "EndOfLine"])
