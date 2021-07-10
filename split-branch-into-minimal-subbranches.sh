@@ -19,7 +19,7 @@ git show-ref --heads |
 
 branches=()
 
-git log --reverse --pretty=format:$'%H\t%at\t%f' "$base".."$branch" |
+git log --reverse --pretty=tformat:$'%H\t%at\t%f' "$base".."$branch" |
 	while IFS=$'\t' read -r hash date slug
 	do
 		subbranch=$branch-$slug
