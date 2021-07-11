@@ -7,7 +7,8 @@ SO_SUFFIX=.so
 # Constants
 
 GRAMMAR=src/grammar.json
-SO=$(HOME)/.tree-sitter/bin/d$(SO_SUFFIX)
+XDG_CACHE_HOME=$(HOME)/.cache
+SO=$(XDG_CACHE_HOME)/tree-sitter/lib/d$(SO_SUFFIX)
 WASM=tree-sitter-d.wasm
 TEST_TS_FILES=$(shell find test/corpus -type f)
 TEST_TS_OK=test/tmp/tree-sitter-test.ok
