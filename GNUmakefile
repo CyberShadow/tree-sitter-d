@@ -6,7 +6,7 @@ SO_SUFFIX=.so
 
 # Constants
 
-GRAMMAR=src/grammar.json
+PARSER=src/parser.c
 XDG_CACHE_HOME=$(HOME)/.cache
 SO=$(XDG_CACHE_HOME)/tree-sitter/lib/d$(SO_SUFFIX)
 WASM=tree-sitter-d.wasm
@@ -18,7 +18,7 @@ TEST_PARSE_SUCCESS_XFAIL_OK=$(addsuffix .ok,$(subst test/parse-success-xfail/,te
 # Entry points
 
 all : compile
-grammar : $(GRAMMAR)
+parser : $(PARSER)
 compile : $(SO)
 wasm : $(WASM)
 
@@ -29,7 +29,7 @@ test-parse-success-xfail : $(TEST_PARSE_SUCCESS_XFAIL_OK)
 
 # Implementation
 
-.PHONY : all grammar compile wasm test test-ts test-parse-success test-parse-success-xfail web-ui
+.PHONY : all parser compile wasm test test-ts test-parse-success test-parse-success-xfail web-ui
 
 # The default is to use the tree-sitter version which would be
 # installed by npm (according to package.json / package-lock.json).
@@ -37,22 +37,22 @@ test-parse-success-xfail : $(TEST_PARSE_SUCCESS_XFAIL_OK)
 node_modules/.bin/tree-sitter :
 	npm install
 
-# Build the grammar (.json, .c etc. files)
-$(GRAMMAR) : grammar.js src/scanner.cc $(TREE_SITTER)
+# Build the grammar (grammar.json, parser.c etc.)
+$(PARSER) : grammar.js src/scanner.cc $(TREE_SITTER)
 	$(TREE_SITTER) generate
 
-# Build a shared object binary from the grammar
+# Build a shared object binary from the parser
 # This file mainly exists to avoid race conditions / duplicate work
 # when running the test targets in parallel.
-$(SO) : $(GRAMMAR)
+$(SO) : $(PARSER)
 	@# No explicit "compile" command, so just parse an empty file
 	$(TREE_SITTER) parse -q /dev/null
 
-# Build a WASM binary from the grammar
+# Build a WASM binary from the parser
 # The default is to use Docker, which will ensure that the correct version is used
 # (https://github.com/tree-sitter/tree-sitter/pull/1180).
 # Run with DOCKER_FLAG= to use the host Emscripten version.
-$(WASM) : $(GRAMMAR)
+$(WASM) : $(PARSER)
 	$(TREE_SITTER) build-wasm $(DOCKER_FLAG)
 
 # Launch web-ui
