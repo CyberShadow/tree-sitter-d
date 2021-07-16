@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eEuo pipefail
 
+# Script to generate the initial list in
+# https://github.com/CyberShadow/tree-sitter-d/issues/3
+
 cd ~/work/tree-sitter-d
 
 find ../tree-sitter-d-ci-repos -type f -\( -name '*.d' -o -name '*.di' -\) |

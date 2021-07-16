@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eEuo pipefail
 
+# Script to update the list in
+# https://github.com/CyberShadow/tree-sitter-d/issues/3
+
 function read_errors()
 {
 	local lines_var=$1
