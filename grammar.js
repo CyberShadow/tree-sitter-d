@@ -8182,7 +8182,12 @@ module.exports = grammar({
 
     // https://dlang.org/spec/iasm.html#Opcode
     opcode: $ =>
-      $.identifier,
+      choice(
+        $.identifier,
+        "int",
+        "in",
+        "out",
+      ),
 
     // https://dlang.org/spec/iasm.html#Operands
     operands: $ =>
