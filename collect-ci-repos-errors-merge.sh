@@ -33,7 +33,7 @@ read_errors new_lines new_order < ci-repos-errors-2.txt
 
 for full_path in "${old_order[@]}"
 do
-	if [[ -v new_lines[$full_path] ]]
+	if [[ -v 'new_lines[$full_path]' ]]
 	then
 		line=${new_lines[$full_path]}
 	else
@@ -41,6 +41,14 @@ do
 		line=${line/- \[ \] /- [X] }
 	fi
 	printf '%s\n' "$line"
+done
+
+for full_path in "${new_order[@]}"
+do
+	if [[ ! -v 'old_lines[$full_path]' ]]
+	then
+		printf 'REGRESSION! %s\n' "${new_lines[$full_path]}" 1>&2
+	fi
 done
 
 # while read -r line
