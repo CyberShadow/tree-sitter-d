@@ -1,3 +1,7 @@
+# auto-conflict.sh
+/output.txt
+
+# collect-ci-repos-errors-merge.sh
 /ci-repos-errors-gh.txt
 /ci-repos-errors-cur.txt
 /ci-repos-errors-out.txt
