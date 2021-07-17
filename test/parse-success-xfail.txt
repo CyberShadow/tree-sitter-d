@@ -2,8 +2,6 @@
 test/parse-success/dmd/runnable/complex.d
 test/parse-success/dmd/runnable/helloUTF16BE.d
 test/parse-success/dmd/runnable/helloUTF16.d
-test/parse-success/dmd/runnable/iasm64.d
-test/parse-success/dmd/runnable/iasm.d
 test/parse-success/dmd/runnable/opover2.d
 test/parse-success/dmd/runnable/sdtor.d
 test/parse-success/dmd/runnable/template10.d
