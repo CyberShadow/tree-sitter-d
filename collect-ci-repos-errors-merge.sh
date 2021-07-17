@@ -28,8 +28,8 @@ function read_errors()
 	done
 }
 
-read_errors old_lines old_order < ci-repos-errors.txt
-read_errors new_lines new_order < ci-repos-errors-2.txt
+read_errors old_lines old_order < ci-repos-errors-gh.txt
+read_errors new_lines new_order < ci-repos-errors-cur.txt
 
 for full_path in "${old_order[@]}"
 do
