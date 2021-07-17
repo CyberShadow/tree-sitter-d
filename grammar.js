@@ -8157,6 +8157,11 @@ module.exports = grammar({
           $._maybe_asm_exp,
         ),
         seq(
+          "[",
+          $._maybe_asm_exp,
+          "]",
+        ),
+        seq(
           choice(
             "+",
             "-",
