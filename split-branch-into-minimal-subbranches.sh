@@ -7,6 +7,8 @@ base=master
 
 cd ~/work/tree-sitter-d-generator/generator/dlang.org
 
+old_branch=$(git rev-parse --abbrev-ref HEAD)
+
 git checkout -q "$base" # Ensure we are not on a branch which we are about to delete
 
 git show-ref --heads |
@@ -65,3 +67,8 @@ printf '%s\n' "${branches[@]}" |
 	do
 		xdg-open "https://github.com/CyberShadow/d-programming-language.org/pull/new/$subbranch"
 	done
+
+if [[ -n "$old_branch" ]]
+then
+	git checkout -q "$old_branch"
+fi
