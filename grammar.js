@@ -8152,6 +8152,10 @@ module.exports = grammar({
         ),
         choice(
           seq(
+            $.identifier,
+            ":",
+          ),
+          seq(
             "align",
             $._integer_expression,
           ),

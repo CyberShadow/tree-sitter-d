@@ -8,7 +8,6 @@ test/parse-success/dmd/runnable/opover2.d
 test/parse-success/dmd/runnable/sdtor.d
 test/parse-success/dmd/runnable/template10.d
 test/parse-success/dmd/runnable/test15.d
-test/parse-success/dmd/runnable/test22.d
 test/parse-success/dmd/runnable/testcontracts.d
 test/parse-success/dmd/runnable/testUTF32.d
 test/parse-success/dmd/runnable/testv.d
