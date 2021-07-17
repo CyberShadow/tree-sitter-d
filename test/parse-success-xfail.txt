@@ -1,0 +1,18 @@
+# TODO
+test/parse-success/dmd/runnable/complex.d
+test/parse-success/dmd/runnable/helloUTF16BE.d
+test/parse-success/dmd/runnable/helloUTF16.d
+test/parse-success/dmd/runnable/iasm64.d
+test/parse-success/dmd/runnable/iasm.d
+test/parse-success/dmd/runnable/opover2.d
+test/parse-success/dmd/runnable/sdtor.d
+test/parse-success/dmd/runnable/template10.d
+test/parse-success/dmd/runnable/test15.d
+test/parse-success/dmd/runnable/test22.d
+test/parse-success/dmd/runnable/testabi.d
+test/parse-success/dmd/runnable/testcontracts.d
+test/parse-success/dmd/runnable/testUTF32.d
+test/parse-success/dmd/runnable/testv.d
+test/parse-success/dmd/runnable/testxmm.d
+test/parse-success/dmd/runnable/traits.d
+test/parse-success/dmd/runnable/uda.d
