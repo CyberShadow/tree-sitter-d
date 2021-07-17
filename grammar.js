@@ -7737,16 +7737,10 @@ module.exports = grammar({
               "ds",
               "di",
               "dl",
-            ),
-            choice(
-              $.operands,
-              $._string_literal,
-            ),
-          ),
-          seq(
-            choice(
               "df",
+              "dw",
               "dd",
+              "dq",
               "de",
               $.opcode,
             ),
@@ -7754,6 +7748,10 @@ module.exports = grammar({
           ),
           seq(
             choice(
+              "db",
+              "ds",
+              "di",
+              "dl",
               "dw",
               "dq",
             ),
