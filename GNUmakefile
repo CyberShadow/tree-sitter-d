@@ -22,10 +22,9 @@ parser : $(PARSER)
 compile : $(SO)
 wasm : $(WASM)
 
-test : test-ts test-parse-success test-parse-success-xfail
+test : test-ts test-parse-success
 test-ts : $(TEST_TS_OK)
 test-parse-success : $(TEST_PARSE_SUCCESS_OK)
-test-parse-success-xfail : $(TEST_PARSE_SUCCESS_XFAIL_OK)
 
 # Implementation
 
@@ -65,8 +64,14 @@ $(TEST_TS_OK) : $(TEST_TS_FILES) $(SO)
 	@touch $@
 
 # parse-success
-$(TEST_PARSE_SUCCESS_OK) : $(SO)
-	find test/parse-success -type f | $(TREE_SITTER) parse -q --paths /dev/stdin
+PARSE_SUCCESS_RESULTS=test/tmp/parse-success-results.txt
+PARSE_SUCCESS_XFAIL=test/parse-success-xfail.txt
+$(PARSE_SUCCESS_RESULTS) : $(SO)
+	rm -f $@
+	find -L test/parse-success -type f -name '*.d' -o -name '*.di' | sort | $(TREE_SITTER) parse -q --paths /dev/stdin | awk '{print $$1}' > $@
+
+$(TEST_PARSE_SUCCESS_OK) : $(PARSE_SUCCESS_RESULTS) $(PARSE_SUCCESS_XFAIL)
+	diff -u $+
 	@touch $@
 
 # parse-success-xfail

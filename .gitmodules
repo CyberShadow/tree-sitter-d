@@ -1,3 +1,6 @@
 [submodule "dlang.org"]
 	path = generator/dlang.org
 	url = https://github.com/CyberShadow/d-programming-language.org
+[submodule "test/repos/dmd"]
+	path = test/repos/dmd
+	url = https://github.com/dlang/dmd.git
