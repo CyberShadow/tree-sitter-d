@@ -264,6 +264,8 @@ module.exports = grammar({
 
     [$.asm_instruction_list, $.gcc_asm_instruction_list],
 
+    [$.qualified_identifier, $.primary_expression, $.opcode],
+
     // <-- insert here
   ],
 
@@ -8579,6 +8581,11 @@ module.exports = grammar({
             "seg",
           ),
           $._maybe_asm_exp,
+        ),
+        seq(
+          "[",
+          $._maybe_asm_exp,
+          "]",
         ),
         seq(
           choice(
