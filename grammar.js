@@ -6084,7 +6084,9 @@ module.exports = grammar({
     asm_instruction_list: $ =>
       repeat1(
         seq(
-          $.asm_instruction,
+          optional(
+            $.asm_instruction,
+          ),
           ";",
         ),
       ),
@@ -8243,7 +8245,9 @@ module.exports = grammar({
     gcc_asm_instruction_list: $ =>
       repeat1(
         seq(
-          $._gcc_asm_instruction,
+          optional(
+            $._gcc_asm_instruction,
+          ),
           ";",
         ),
       ),
