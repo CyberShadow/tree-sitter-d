@@ -64,11 +64,17 @@ $(TEST_TS_OK) : $(TEST_TS_FILES) $(SO)
 	@touch $@
 
 # parse-success
+
 PARSE_SUCCESS_RESULTS=test/tmp/parse-success-results.txt
-PARSE_SUCCESS_XFAIL=test/parse-success-xfail.txt
+PARSE_SUCCESS_XFAIL_IN=test/parse-success-xfail.txt
+PARSE_SUCCESS_XFAIL=test/tmp/parse-success-xfail.txt
+
 $(PARSE_SUCCESS_RESULTS) : $(SO)
 	rm -f $@
 	find -L test/parse-success -type f -name '*.d' -o -name '*.di' | sort | $(TREE_SITTER) parse -q --paths /dev/stdin | awk '{print $$1}' > $@
+
+$(PARSE_SUCCESS_XFAIL) : $(PARSE_SUCCESS_XFAIL_IN)
+	grep '^[^#]' $< | sort > $@
 
 $(TEST_PARSE_SUCCESS_OK) : $(PARSE_SUCCESS_RESULTS) $(PARSE_SUCCESS_XFAIL)
 	diff -u $+
