@@ -269,6 +269,9 @@ struct Grammar
 			{
 				foreach (ref choice; v.nodes)
 					foreach_reverse (i; 0 .. choice.length)
+					{
+						if (i >= choice.length)
+							continue; // Already optimized; cursor is outside new range
 						choice[i].match!(
 							(ref SeqChoice sc)
 							{
@@ -298,6 +301,7 @@ struct Grammar
 							},
 							(ref _) {},
 						);
+					}
 			},
 			(ref _) {},
 		);
