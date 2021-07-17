@@ -2,7 +2,12 @@
 set -eEuo pipefail
 shopt -s lastpipe
 
-branch=grammar2x
+# branch=grammar2x
+# base=master
+# since=$base
+
+branch=grammar2
+since=403bdbc4
 base=master
 
 cd ~/work/tree-sitter-d-generator/generator/dlang.org
@@ -21,7 +26,7 @@ git show-ref --heads |
 
 branches=()
 
-git log --reverse --pretty=tformat:$'%H\t%at\t%f' "$base".."$branch" |
+git log --reverse --pretty=tformat:$'%H\t%at\t%f' "$since".."$branch" |
 	while IFS=$'\t' read -r hash date slug
 	do
 		subbranch=$branch-$slug
