@@ -262,6 +262,8 @@ module.exports = grammar({
     [$.primary_expression, $.template_instance, $.opcode],
     [$.primary_expression, $.asm_instruction],
 
+    [$.asm_instruction_list, $.gcc_asm_instruction_list],
+
     // <-- insert here
   ],
 
@@ -6506,7 +6508,9 @@ module.exports = grammar({
     asm_instruction_list: $ =>
       repeat1(
         seq(
-          $.asm_instruction,
+          optional(
+            $.asm_instruction,
+          ),
           ";",
         ),
       ),
@@ -8665,7 +8669,9 @@ module.exports = grammar({
     gcc_asm_instruction_list: $ =>
       repeat1(
         seq(
-          $._gcc_asm_instruction,
+          optional(
+            $._gcc_asm_instruction,
+          ),
           ";",
         ),
       ),
