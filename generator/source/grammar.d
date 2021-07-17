@@ -668,7 +668,53 @@ struct Grammar
 					(_) {}
 				);
 
-				// Transform x := ( | x z ) y into x := ( | y z ) y
+				// Transform x := y ( | z x ) into x := y ( | ( z y )+ )
+				def.node.match!(
+					(ref SeqChoice sc1)
+					{
+						if (sc1.nodes.length != 1)
+							return; // Single choice
+						if (sc1.nodes[0].length < 2)
+							return;
+
+						auto y = sc1.nodes[0][0 .. $-1];
+
+						sc1.nodes[0][$-1].match!(
+							(ref SeqChoice sc2)
+							{
+
+								auto choices = sc2.nodes;
+								if (!extractOptional(choices))
+									return;
+								if (choices.length != 1)
+									return;
+								if (choices[0][$-1] != x)
+									return;
+
+								auto z = choices[0][0 .. $-1];
+
+								def.node = seqChoice([
+									y ~
+									seqChoice([
+										[], // optional
+										[repeat1(
+											seqChoice([
+												z ~
+												y,
+											])
+										)],
+									]),
+								]);
+								optimizeNode(def.node);
+							},
+							(_) {}
+						);
+					},
+					(_) {}
+				);
+
+				// Transform x := ( | x z ) y into x := ( | ( y z )+ ) y
+				// Same as above, but in the other direction.
 				def.node.match!(
 					(ref SeqChoice sc1)
 					{
