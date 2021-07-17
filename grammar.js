@@ -5201,6 +5201,9 @@ module.exports = grammar({
           ),
         ),
         $.key_value_pair,
+        optional(
+          ",",
+        ),
       ),
 
     // https://dlang.org/spec/expression.html#KeyValuePair
