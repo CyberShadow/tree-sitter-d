@@ -6,6 +6,5 @@ test/parse-success/dmd/runnable/sdtor.d
 test/parse-success/dmd/runnable/test15.d
 test/parse-success/dmd/runnable/testcontracts.d
 test/parse-success/dmd/runnable/testUTF32.d
-test/parse-success/dmd/runnable/testv.d
 test/parse-success/dmd/runnable/traits.d
 test/parse-success/dmd/runnable/uda.d
