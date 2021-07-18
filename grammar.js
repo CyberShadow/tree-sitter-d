@@ -8038,8 +8038,12 @@ module.exports = grammar({
         "__traits",
         "(",
         $.traits_keyword,
-        ",",
-        $.traits_arguments,
+        optional(
+          seq(
+            ",",
+            $.traits_arguments,
+          ),
+        ),
         ")",
       ),
 
