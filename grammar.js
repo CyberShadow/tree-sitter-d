@@ -6738,13 +6738,13 @@ module.exports = grammar({
           $.type,
         ),
         optional(
-          choice(
-            "...",
-            seq(
-              "=",
-              $._maybe_assign_expression,
-            ),
+          seq(
+            "=",
+            $._maybe_assign_expression,
           ),
+        ),
+        optional(
+          "...",
         ),
       ),
 
