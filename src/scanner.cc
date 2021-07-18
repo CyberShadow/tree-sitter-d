@@ -47,7 +47,6 @@ bool tree_sitter_d_external_scanner_scan(void *payload, TSLexer *lexer,
         return false; // EOF
       }
     }
-    lexer->advance(lexer, false);
     lexer->result_symbol = NESTING_BLOCK_COMMENT;
     return true;
   }

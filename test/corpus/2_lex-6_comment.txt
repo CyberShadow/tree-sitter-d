@@ -66,6 +66,8 @@ NestingBlockComment
 /+ /+/ +/ +/
 /+ /+ +/+ +/
 
+int/+ +/a;
+
 ---
 
 (source_file
@@ -75,4 +77,13 @@ NestingBlockComment
   (nesting_block_comment)
   (nesting_block_comment)
   (nesting_block_comment)
-  (nesting_block_comment))
+  (nesting_block_comment)
+
+  (module
+	 (decl_defs
+    (var_declarations
+     (fundamental_type)
+     (nesting_block_comment)
+     (declarators
+      (var_declarator
+       (identifier)))))))
