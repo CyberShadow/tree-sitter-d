@@ -3,6 +3,7 @@ import std.algorithm.iteration;
 import std.algorithm.searching;
 import std.algorithm.sorting;
 import std.array;
+import std.conv : to;
 import std.exception;
 import std.format;
 import std.functional;
@@ -344,6 +345,33 @@ struct Grammar
 							(ref _) {},
 						);
 					}
+			},
+			(ref _) {},
+		);
+
+		// Collapse a SeqChoice consisting of only single-character choices into a single
+		// regular expression.  This not only makes the grammar output terser, but also reduces
+		// the total complexity of rules, allowing us to perform more optimizations.
+		node.match!(
+			(ref SeqChoice sc)
+			{
+				auto choices = sc.nodes;
+				auto optionalChoice = extractOptional(choices);
+				if (choices.length < 2)
+					return;
+				auto exprs = choices.map!(choice =>
+					choice.length == 1
+					? choice[0].match!(
+						(ref LiteralChars v) => v.chars.length == 1 ? v.chars.only.format!"%(%s%)"[1 .. $-1] : null,
+						(ref RegExp       v) => v.regexp.startsWith("/[") && v.regexp.endsWith("]/") ? v.regexp[2 .. $-2] : null,
+						(ref              _) => null,
+					)
+					: null
+				).array;
+				if (exprs.canFind(null))
+					return;
+				enforce(!exprs.canFind("[") && !exprs.canFind("]"));
+				sc.nodes = optionalChoice ~ [regexp("/[" ~ exprs.join ~ "]/")];
 			},
 			(ref _) {},
 		);
