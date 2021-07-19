@@ -46,6 +46,7 @@ module.exports = grammar({
         seq(
           "#!",
           repeat(
+            // Character
             /[\s\S]/,
           ),
           choice(
@@ -100,6 +101,7 @@ module.exports = grammar({
           seq(
             "/*",
             repeat(
+              // Character
               /[\s\S]/,
             ),
             "*/",
@@ -107,6 +109,7 @@ module.exports = grammar({
           seq(
             "//",
             repeat(
+              // Character
               /[\s\S]/,
             ),
             choice(
@@ -128,12 +131,14 @@ module.exports = grammar({
             "/+",
             repeat(
               choice(
+                // Character
                 /[\s\S]/,
                 // NestingBlockComment
                 seq(
                   "/+",
                   repeat(
                     choice(
+                      // Character
                       /[\s\S]/,
                       $.nesting_block_comment, // recursion
                     ),
@@ -250,6 +255,7 @@ module.exports = grammar({
           "r\"",
           repeat(
             choice(
+              // Character
               /[\s\S]/,
               seq(
                 "\r",
@@ -280,6 +286,7 @@ module.exports = grammar({
           "`",
           repeat(
             choice(
+              // Character
               /[\s\S]/,
               seq(
                 "\r",
@@ -310,6 +317,7 @@ module.exports = grammar({
           "\"",
           repeat(
             choice(
+              // Character
               /[\s\S]/,
               "\\'",
               "\\\"",
@@ -435,6 +443,7 @@ module.exports = grammar({
             ),
             repeat(
               choice(
+                // Character
                 /[\s\S]/,
                 seq(
                   "\r",
@@ -462,6 +471,7 @@ module.exports = grammar({
               choice(
                 seq(
                   choice(
+                    // Character
                     /[\s\S]/,
                     seq(
                       "\r",
@@ -481,6 +491,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -516,6 +527,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -555,6 +567,7 @@ module.exports = grammar({
               choice(
                 seq(
                   choice(
+                    // Character
                     /[\s\S]/,
                     seq(
                       "\r",
@@ -574,6 +587,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -609,6 +623,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -648,6 +663,7 @@ module.exports = grammar({
               choice(
                 seq(
                   choice(
+                    // Character
                     /[\s\S]/,
                     seq(
                       "\r",
@@ -667,6 +683,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -702,6 +719,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -741,6 +759,7 @@ module.exports = grammar({
               choice(
                 seq(
                   choice(
+                    // Character
                     /[\s\S]/,
                     seq(
                       "\r",
@@ -760,6 +779,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -795,6 +815,7 @@ module.exports = grammar({
                     choice(
                       seq(
                         choice(
+                          // Character
                           /[\s\S]/,
                           seq(
                             "\r",
@@ -874,6 +895,7 @@ module.exports = grammar({
         seq(
           "'",
           choice(
+            // Character
             /[\s\S]/,
             "\\'",
             "\\\"",
@@ -1184,6 +1206,7 @@ module.exports = grammar({
               /[fFL]/,
             ),
             optional(
+              // ImaginarySuffix
               "i",
             ),
           ),
@@ -1236,6 +1259,7 @@ module.exports = grammar({
                 optional(
                   /[fFL]/,
                 ),
+                // ImaginarySuffix
                 "i",
               ),
             ),
@@ -1386,6 +1410,7 @@ module.exports = grammar({
         seq(
           "\"",
           repeat(
+            // Character
             /[\s\S]/,
           ),
           "\"",

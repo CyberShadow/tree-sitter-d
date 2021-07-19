@@ -151,6 +151,8 @@ private:
 
 			void writeNode(ref Grammar.Node node)
 			{
+				if (node.comment)
+					line("// " ~ node.comment);
 				node.match!(
 					(ref Grammar.RegExp       v) => single(v.regexp),
 					(ref Grammar.LiteralChars v) => single(format!"%(%s%)"([v.chars])),

@@ -62,6 +62,8 @@ struct Grammar
 		NodeValue value;
 		alias value this;
 
+		string comment;
+
 		void toString(scope void delegate(const(char)[]) sink)
 		{
 			value.match!(
@@ -676,6 +678,7 @@ struct Grammar
 			inDef.add(defName);
 			scope(success) inDef.remove(defName);
 			targetNode = defs[defName].node.dup;
+			targetNode.comment = defName;
 			scanNode(targetNode);
 		}
 
@@ -687,6 +690,7 @@ struct Grammar
 
 		foreach (defName, node; inlined)
 		{
+			node.comment = null;
 			optimizeNode(node);
 			defs[defName].node = node;
 		}
