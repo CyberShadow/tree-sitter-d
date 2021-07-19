@@ -45,22 +45,14 @@ module.exports = grammar({
         // Shebang
         seq(
           "#!",
-          optional(
-            // Characters
-            repeat1(
-              // Character
-              /[\s\S]/,
-            ),
+          repeat(
+            /[\s\S]/,
           ),
-          // EndOfShebang
           choice(
             "\n",
-            // EndOfFile
-            choice(
-              /$/m,
-              "\0",
-              "\x1A",
-            ),
+            /$/m,
+            "\0",
+            "\x1A",
           ),
         ),
       ),
@@ -81,12 +73,9 @@ module.exports = grammar({
           "\n",
           "\u2028",
           "\u2029",
-          // EndOfFile
-          choice(
-            /$/m,
-            "\0",
-            "\x1A",
-          ),
+          /$/m,
+          "\0",
+          "\x1A",
         ),
       ),
 
@@ -97,7 +86,6 @@ module.exports = grammar({
       token(
         // WhiteSpace
         repeat1(
-          // Space
           choice(
             " ",
             "\t",
@@ -114,29 +102,18 @@ module.exports = grammar({
       token(
         // Comment
         choice(
-          // BlockComment
           seq(
             "/*",
-            optional(
-              // Characters
-              repeat1(
-                // Character
-                /[\s\S]/,
-              ),
+            repeat(
+              /[\s\S]/,
             ),
             "*/",
           ),
-          // LineComment
           seq(
             "//",
-            optional(
-              // Characters
-              repeat1(
-                // Character
-                /[\s\S]/,
-              ),
+            repeat(
+              /[\s\S]/,
             ),
-            // EndOfLine
             choice(
               seq(
                 "\r",
@@ -147,25 +124,26 @@ module.exports = grammar({
               "\n",
               "\u2028",
               "\u2029",
-              // EndOfFile
-              choice(
-                /$/m,
-                "\0",
-                "\x1A",
-              ),
+              /$/m,
+              "\0",
+              "\x1A",
             ),
           ),
-          // NestingBlockComment
           seq(
             "/+",
-            optional(
-              // NestingBlockCommentCharacters
-              repeat1(
-                // NestingBlockCommentCharacter
-                choice(
-                  // Character
-                  /[\s\S]/,
-                  /* recursion */,
+            repeat(
+              choice(
+                /[\s\S]/,
+                // NestingBlockComment
+                seq(
+                  "/+",
+                  repeat(
+                    choice(
+                      /[\s\S]/,
+                      /* recursion */,
+                    ),
+                  ),
+                  "+/",
                 ),
               ),
             ),
@@ -247,37 +225,26 @@ module.exports = grammar({
       token(
         // Identifier
         seq(
-          // IdentifierStart
           choice(
             "_",
             /[A-Za-z]/,
             /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
           ),
-          optional(
-            // IdentifierChars
-            repeat1(
-              // IdentifierChar
-              choice(
-                // IdentifierStart
-                choice(
-                  "_",
-                  /[A-Za-z]/,
-                  /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                ),
-                "0",
-                // NonZeroDigit
-                choice(
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                  "8",
-                  "9",
-                ),
-              ),
+          repeat(
+            choice(
+              "_",
+              /[A-Za-z]/,
+              /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
             ),
           ),
         ),
@@ -304,37 +271,25 @@ module.exports = grammar({
         // WysiwygString
         seq(
           "r\"",
-          optional(
-            // WysiwygCharacters
-            repeat1(
-              // WysiwygCharacter
-              choice(
-                // Character
-                /[\s\S]/,
-                // EndOfLine
-                choice(
-                  seq(
-                    "\r",
-                    optional(
-                      "\n",
-                    ),
-                  ),
+          repeat(
+            choice(
+              /[\s\S]/,
+              seq(
+                "\r",
+                optional(
                   "\n",
-                  "\u2028",
-                  "\u2029",
-                  // EndOfFile
-                  choice(
-                    /$/m,
-                    "\0",
-                    "\x1A",
-                  ),
                 ),
               ),
+              "\n",
+              "\u2028",
+              "\u2029",
+              /$/m,
+              "\0",
+              "\x1A",
             ),
           ),
           "\"",
           optional(
-            // StringPostfix
             choice(
               "c",
               "w",
@@ -350,37 +305,25 @@ module.exports = grammar({
         // AlternateWysiwygString
         seq(
           "`",
-          optional(
-            // WysiwygCharacters
-            repeat1(
-              // WysiwygCharacter
-              choice(
-                // Character
-                /[\s\S]/,
-                // EndOfLine
-                choice(
-                  seq(
-                    "\r",
-                    optional(
-                      "\n",
-                    ),
-                  ),
+          repeat(
+            choice(
+              /[\s\S]/,
+              seq(
+                "\r",
+                optional(
                   "\n",
-                  "\u2028",
-                  "\u2029",
-                  // EndOfFile
-                  choice(
-                    /$/m,
-                    "\0",
-                    "\x1A",
-                  ),
                 ),
               ),
+              "\n",
+              "\u2028",
+              "\u2029",
+              /$/m,
+              "\0",
+              "\x1A",
             ),
           ),
           "`",
           optional(
-            // StringPostfix
             choice(
               "c",
               "w",
@@ -396,250 +339,31 @@ module.exports = grammar({
         // DoubleQuotedString
         seq(
           "\"",
-          optional(
-            // DoubleQuotedCharacters
-            repeat1(
-              // DoubleQuotedCharacter
-              choice(
-                // Character
-                /[\s\S]/,
-                // EscapeSequence
+          repeat(
+            choice(
+              /[\s\S]/,
+              "\\'",
+              "\\\"",
+              "\\?",
+              "\\\\",
+              "\\0",
+              "\\a",
+              "\\b",
+              "\\f",
+              "\\n",
+              "\\r",
+              "\\t",
+              "\\v",
+              seq(
                 choice(
-                  "\\'",
-                  "\\\"",
-                  "\\?",
-                  "\\\\",
-                  "\\0",
-                  "\\a",
-                  "\\b",
-                  "\\f",
-                  "\\n",
-                  "\\r",
-                  "\\t",
-                  "\\v",
+                  "\\x",
                   seq(
                     choice(
-                      "\\x",
+                      "\\u",
                       seq(
+                        "\\U",
                         choice(
-                          "\\u",
-                          seq(
-                            "\\U",
-                            // HexDigit
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
-                            ),
-                            // HexDigit
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
-                            ),
-                            // HexDigit
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
-                            ),
-                            // HexDigit
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
-                            ),
-                          ),
-                        ),
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
+                          "0",
                           "1",
                           "2",
                           "3",
@@ -649,31 +373,21 @@ module.exports = grammar({
                           "7",
                           "8",
                           "9",
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
                         ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
                         choice(
+                          "0",
                           "1",
                           "2",
                           "3",
@@ -683,30 +397,184 @@ module.exports = grammar({
                           "7",
                           "8",
                           "9",
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                        choice(
+                          "0",
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
+                        ),
+                        choice(
+                          "0",
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
                         ),
                       ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
+                    ),
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
                     ),
                   ),
+                ),
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+                choice(
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                  "a",
+                  "b",
+                  "c",
+                  "d",
+                  "e",
+                  "f",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                ),
+              ),
+              seq(
+                "\\",
+                choice(
                   seq(
-                    "\\",
                     choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                    ),
+                    optional(
                       seq(
-                        // OctalDigit
                         choice(
                           "0",
                           "1",
@@ -718,102 +586,64 @@ module.exports = grammar({
                           "7",
                         ),
                         optional(
-                          seq(
-                            // OctalDigit
-                            choice(
-                              "0",
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                            ),
-                            optional(
-                              // OctalDigit
-                              choice(
-                                "0",
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // NamedCharacterEntity
-                      seq(
-                        "&",
-                        // Identifier
-                        seq(
-                          // IdentifierStart
                           choice(
-                            "_",
-                            /[A-Za-z]/,
-                            /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                          ),
-                          optional(
-                            // IdentifierChars
-                            repeat1(
-                              // IdentifierChar
-                              choice(
-                                // IdentifierStart
-                                choice(
-                                  "_",
-                                  /[A-Za-z]/,
-                                  /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                                ),
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                            ),
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
                           ),
                         ),
-                        ";",
                       ),
                     ),
                   ),
-                ),
-                // EndOfLine
-                choice(
                   seq(
-                    "\r",
-                    optional(
-                      "\n",
+                    "&",
+                    choice(
+                      "_",
+                      /[A-Za-z]/,
+                      /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
                     ),
-                  ),
-                  "\n",
-                  "\u2028",
-                  "\u2029",
-                  // EndOfFile
-                  choice(
-                    /$/m,
-                    "\0",
-                    "\x1A",
+                    repeat(
+                      choice(
+                        "_",
+                        /[A-Za-z]/,
+                        /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                      ),
+                    ),
+                    ";",
                   ),
                 ),
               ),
+              seq(
+                "\r",
+                optional(
+                  "\n",
+                ),
+              ),
+              "\n",
+              "\u2028",
+              "\u2029",
+              /$/m,
+              "\0",
+              "\x1A",
             ),
           ),
           "\"",
           optional(
-            // StringPostfix
             choice(
               "c",
               "w",
@@ -829,79 +659,54 @@ module.exports = grammar({
         // HexString
         seq(
           "x\"",
-          optional(
-            // HexStringChars
-            repeat1(
-              // HexStringChar
-              choice(
-                // HexDigit
+          repeat(
+            choice(
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "a",
+              "b",
+              "c",
+              "d",
+              "e",
+              "f",
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              repeat1(
                 choice(
-                  // DecimalDigit
-                  choice(
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
-                    "a",
-                    "b",
-                    "c",
-                    "d",
-                    "e",
-                    "f",
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                  ),
-                ),
-                // WhiteSpace
-                repeat1(
-                  // Space
-                  choice(
-                    " ",
-                    "\t",
-                    "\v",
-                    "\f",
-                  ),
-                ),
-                // EndOfLine
-                choice(
-                  seq(
-                    "\r",
-                    optional(
-                      "\n",
-                    ),
-                  ),
-                  "\n",
-                  "\u2028",
-                  "\u2029",
-                  // EndOfFile
-                  choice(
-                    /$/m,
-                    "\0",
-                    "\x1A",
-                  ),
+                  " ",
+                  "\t",
+                  "\v",
+                  "\f",
                 ),
               ),
+              seq(
+                "\r",
+                optional(
+                  "\n",
+                ),
+              ),
+              "\n",
+              "\u2028",
+              "\u2029",
+              /$/m,
+              "\0",
+              "\x1A",
             ),
           ),
           "\"",
           optional(
-            // StringPostfix
             choice(
               "c",
               "w",
@@ -918,52 +723,76 @@ module.exports = grammar({
         choice(
           seq(
             "q\"",
-            // Delimiter
-            // Identifier
-            seq(
-              // IdentifierStart
+            choice(
+              "_",
+              /[A-Za-z]/,
+              /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+            ),
+            repeat(
               choice(
                 "_",
                 /[A-Za-z]/,
                 /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-              ),
-              optional(
-                // IdentifierChars
-                repeat1(
-                  // IdentifierChar
-                  choice(
-                    // IdentifierStart
-                    choice(
-                      "_",
-                      /[A-Za-z]/,
-                      /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                    ),
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                ),
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
               ),
             ),
+            repeat(
+              choice(
+                /[\s\S]/,
+                seq(
+                  "\r",
+                  optional(
+                    "\n",
+                  ),
+                ),
+                "\n",
+                "\u2028",
+                "\u2029",
+                /$/m,
+                "\0",
+                "\x1A",
+              ),
+            ),
+            choice(
+              "_",
+              /[A-Za-z]/,
+              /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+            ),
+            repeat(
+              choice(
+                "_",
+                /[A-Za-z]/,
+                /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+            ),
+            "\"",
+          ),
+          seq(
+            "q\"(",
             optional(
-              // WysiwygCharacters
-              repeat1(
-                // WysiwygCharacter
-                choice(
-                  // Character
-                  /[\s\S]/,
-                  // EndOfLine
+              choice(
+                seq(
                   choice(
+                    /[\s\S]/,
                     seq(
                       "\r",
                       optional(
@@ -973,92 +802,76 @@ module.exports = grammar({
                     "\n",
                     "\u2028",
                     "\u2029",
-                    // EndOfFile
-                    choice(
-                      /$/m,
-                      "\0",
-                      "\x1A",
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // MatchingDelimiter
-            // Identifier
-            seq(
-              // IdentifierStart
-              choice(
-                "_",
-                /[A-Za-z]/,
-                /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-              ),
-              optional(
-                // IdentifierChars
-                repeat1(
-                  // IdentifierChar
-                  choice(
-                    // IdentifierStart
-                    choice(
-                      "_",
-                      /[A-Za-z]/,
-                      /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                    ),
-                    "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            "\"",
-          ),
-          seq(
-            "q\"(",
-            optional(
-              // ParenDelimitedCharacters
-              choice(
-                seq(
-                  // WysiwygCharacter
-                  choice(
-                    // Character
-                    /[\s\S]/,
-                    // EndOfLine
-                    choice(
-                      seq(
-                        "\r",
-                        optional(
-                          "\n",
-                        ),
-                      ),
-                      "\n",
-                      "\u2028",
-                      "\u2029",
-                      // EndOfFile
-                      choice(
-                        /$/m,
-                        "\0",
-                        "\x1A",
-                      ),
-                    ),
+                    /$/m,
+                    "\0",
+                    "\x1A",
                   ),
                   optional(
-                    /* recursion */,
+                    // ParenDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "(",
+                        optional(
+                          /* recursion */,
+                        ),
+                        ")",
+                      ),
+                    ),
                   ),
                 ),
                 seq(
                   "(",
                   optional(
-                    /* recursion */,
+                    // ParenDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "(",
+                        optional(
+                          /* recursion */,
+                        ),
+                        ")",
+                      ),
+                    ),
                   ),
                   ")",
                 ),
@@ -1069,40 +882,89 @@ module.exports = grammar({
           seq(
             "q\"[",
             optional(
-              // BracketDelimitedCharacters
               choice(
                 seq(
-                  // WysiwygCharacter
                   choice(
-                    // Character
                     /[\s\S]/,
-                    // EndOfLine
-                    choice(
-                      seq(
-                        "\r",
-                        optional(
-                          "\n",
-                        ),
-                      ),
-                      "\n",
-                      "\u2028",
-                      "\u2029",
-                      // EndOfFile
-                      choice(
-                        /$/m,
-                        "\0",
-                        "\x1A",
+                    seq(
+                      "\r",
+                      optional(
+                        "\n",
                       ),
                     ),
+                    "\n",
+                    "\u2028",
+                    "\u2029",
+                    /$/m,
+                    "\0",
+                    "\x1A",
                   ),
                   optional(
-                    /* recursion */,
+                    // BracketDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "[",
+                        optional(
+                          /* recursion */,
+                        ),
+                        "]",
+                      ),
+                    ),
                   ),
                 ),
                 seq(
                   "[",
                   optional(
-                    /* recursion */,
+                    // BracketDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "[",
+                        optional(
+                          /* recursion */,
+                        ),
+                        "]",
+                      ),
+                    ),
                   ),
                   "]",
                 ),
@@ -1113,40 +975,89 @@ module.exports = grammar({
           seq(
             "q\"{",
             optional(
-              // BraceDelimitedCharacters
               choice(
                 seq(
-                  // WysiwygCharacter
                   choice(
-                    // Character
                     /[\s\S]/,
-                    // EndOfLine
-                    choice(
-                      seq(
-                        "\r",
-                        optional(
-                          "\n",
-                        ),
-                      ),
-                      "\n",
-                      "\u2028",
-                      "\u2029",
-                      // EndOfFile
-                      choice(
-                        /$/m,
-                        "\0",
-                        "\x1A",
+                    seq(
+                      "\r",
+                      optional(
+                        "\n",
                       ),
                     ),
+                    "\n",
+                    "\u2028",
+                    "\u2029",
+                    /$/m,
+                    "\0",
+                    "\x1A",
                   ),
                   optional(
-                    /* recursion */,
+                    // BraceDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "{",
+                        optional(
+                          /* recursion */,
+                        ),
+                        "}",
+                      ),
+                    ),
                   ),
                 ),
                 seq(
                   "{",
                   optional(
-                    /* recursion */,
+                    // BraceDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "{",
+                        optional(
+                          /* recursion */,
+                        ),
+                        "}",
+                      ),
+                    ),
                   ),
                   "}",
                 ),
@@ -1157,40 +1068,89 @@ module.exports = grammar({
           seq(
             "q\"<",
             optional(
-              // AngleDelimitedCharacters
               choice(
                 seq(
-                  // WysiwygCharacter
                   choice(
-                    // Character
                     /[\s\S]/,
-                    // EndOfLine
-                    choice(
-                      seq(
-                        "\r",
-                        optional(
-                          "\n",
-                        ),
-                      ),
-                      "\n",
-                      "\u2028",
-                      "\u2029",
-                      // EndOfFile
-                      choice(
-                        /$/m,
-                        "\0",
-                        "\x1A",
+                    seq(
+                      "\r",
+                      optional(
+                        "\n",
                       ),
                     ),
+                    "\n",
+                    "\u2028",
+                    "\u2029",
+                    /$/m,
+                    "\0",
+                    "\x1A",
                   ),
                   optional(
-                    /* recursion */,
+                    // AngleDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "<",
+                        optional(
+                          /* recursion */,
+                        ),
+                        ">",
+                      ),
+                    ),
                   ),
                 ),
                 seq(
                   "<",
                   optional(
-                    /* recursion */,
+                    // AngleDelimitedCharacters
+                    choice(
+                      seq(
+                        choice(
+                          /[\s\S]/,
+                          seq(
+                            "\r",
+                            optional(
+                              "\n",
+                            ),
+                          ),
+                          "\n",
+                          "\u2028",
+                          "\u2029",
+                          /$/m,
+                          "\0",
+                          "\x1A",
+                        ),
+                        optional(
+                          /* recursion */,
+                        ),
+                      ),
+                      seq(
+                        "<",
+                        optional(
+                          /* recursion */,
+                        ),
+                        ">",
+                      ),
+                    ),
                   ),
                   ">",
                 ),
@@ -1243,190 +1203,39 @@ module.exports = grammar({
         // CharacterLiteral
         seq(
           "'",
-          // SingleQuotedCharacter
           choice(
-            // Character
             /[\s\S]/,
-            // EscapeSequence
-            choice(
-              "\\'",
-              "\\\"",
-              "\\?",
-              "\\\\",
-              "\\0",
-              "\\a",
-              "\\b",
-              "\\f",
-              "\\n",
-              "\\r",
-              "\\t",
-              "\\v",
-              seq(
-                choice(
-                  "\\x",
-                  seq(
-                    choice(
-                      "\\u",
-                      seq(
-                        "\\U",
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                      ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
+            "\\'",
+            "\\\"",
+            "\\?",
+            "\\\\",
+            "\\0",
+            "\\a",
+            "\\b",
+            "\\f",
+            "\\n",
+            "\\r",
+            "\\t",
+            "\\v",
+            seq(
+              choice(
+                "\\x",
+                seq(
+                  choice(
+                    "\\u",
+                    seq(
+                      "\\U",
                       choice(
                         "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
                         "a",
                         "b",
                         "c",
@@ -1440,27 +1249,65 @@ module.exports = grammar({
                         "E",
                         "F",
                       ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
                       choice(
                         "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
                       ),
-                      // HexLetter
                       choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                      ),
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
                         "a",
                         "b",
                         "c",
@@ -1476,27 +1323,17 @@ module.exports = grammar({
                       ),
                     ),
                   ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
                   choice(
                     "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
                     "a",
                     "b",
                     "c",
@@ -1510,27 +1347,17 @@ module.exports = grammar({
                     "E",
                     "F",
                   ),
-                ),
-                // HexDigit
-                choice(
-                  // DecimalDigit
                   choice(
                     "0",
-                    // NonZeroDigit
-                    choice(
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                      "8",
-                      "9",
-                    ),
-                  ),
-                  // HexLetter
-                  choice(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
                     "a",
                     "b",
                     "c",
@@ -1546,24 +1373,82 @@ module.exports = grammar({
                   ),
                 ),
               ),
-              seq(
-                "\\",
-                choice(
-                  seq(
-                    // OctalDigit
-                    choice(
-                      "0",
-                      "1",
-                      "2",
-                      "3",
-                      "4",
-                      "5",
-                      "6",
-                      "7",
-                    ),
-                    optional(
-                      seq(
-                        // OctalDigit
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+              choice(
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+              ),
+            ),
+            seq(
+              "\\",
+              choice(
+                seq(
+                  choice(
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                  ),
+                  optional(
+                    seq(
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                      ),
+                      optional(
                         choice(
                           "0",
                           "1",
@@ -1574,63 +1459,35 @@ module.exports = grammar({
                           "6",
                           "7",
                         ),
-                        optional(
-                          // OctalDigit
-                          choice(
-                            "0",
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                          ),
-                        ),
                       ),
                     ),
                   ),
-                  // NamedCharacterEntity
-                  seq(
-                    "&",
-                    // Identifier
-                    seq(
-                      // IdentifierStart
-                      choice(
-                        "_",
-                        /[A-Za-z]/,
-                        /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                      ),
-                      optional(
-                        // IdentifierChars
-                        repeat1(
-                          // IdentifierChar
-                          choice(
-                            // IdentifierStart
-                            choice(
-                              "_",
-                              /[A-Za-z]/,
-                              /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
-                            ),
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    ";",
+                ),
+                seq(
+                  "&",
+                  choice(
+                    "_",
+                    /[A-Za-z]/,
+                    /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
                   ),
+                  repeat(
+                    choice(
+                      "_",
+                      /[A-Za-z]/,
+                      /[\u00aa\u00b5\u00b7\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f5\u01fa-\u0217\u0250-\u02a8\u02b0-\u02b8\u02bb\u02bd-\u02c1\u02d0-\u02d1\u02e0-\u02e4\u037a\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03ce\u03d0-\u03d6\u03da\u03dc\u03de\u03e0\u03e2-\u03f3\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u0481\u0490-\u04c4\u04c7-\u04c8\u04cb-\u04cc\u04d0-\u04eb\u04ee-\u04f5\u04f8-\u04f9\u0531-\u0556\u0559\u0561-\u0587\u05b0-\u05b9\u05bb-\u05bd\u05bf\u05c1-\u05c2\u05d0-\u05ea\u05f0-\u05f2\u0621-\u063a\u0640-\u0652\u0660-\u0669\u0670-\u06b7\u06ba-\u06be\u06c0-\u06ce\u06d0-\u06dc\u06e5-\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0901-\u0903\u0905-\u0939\u093d-\u094d\u0950-\u0952\u0958-\u0963\u0966-\u096f\u0981-\u0983\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09be-\u09c4\u09c7-\u09c8\u09cb-\u09cd\u09dc-\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a02\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a3e-\u0a42\u0a47-\u0a48\u0a4b-\u0a4d\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a74\u0a81-\u0a83\u0a85-\u0a8b\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b36-\u0b39\u0b3d-\u0b43\u0b47-\u0b48\u0b4b-\u0b4d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b82-\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb5\u0bb7-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0be7-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c60-\u0c61\u0c66-\u0c6f\u0c82-\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d02-\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3e-\u0d43\u0d46-\u0d48\u0d4a-\u0d4d\u0d60-\u0d61\u0d66-\u0d6f\u0e01-\u0e3a\u0e40-\u0e5b\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eae\u0eb0-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f18-\u0f19\u0f20-\u0f33\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f69\u0f71-\u0f84\u0f86-\u0f8b\u0f90-\u0f95\u0f97\u0f99-\u0fad\u0fb1-\u0fb7\u0fb9\u10a0-\u10c5\u10d0-\u10f6\u1e00-\u1e9b\u1ea0-\u1ef9\u1f00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u207f\u2102\u2107\u210a-\u2113\u2115\u2118-\u211d\u2124\u2126\u2128\u212a-\u2131\u2133-\u2138\u2160-\u2182\u3005-\u3007\u3021-\u3029\u3041-\u3093\u309b-\u309c\u30a1-\u30f6\u30fb-\u30fc\u3105-\u312c\u4e00-\u9fa5\uac00-\ud7a3]/,
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                  ";",
                 ),
               ),
             ),
@@ -1646,14 +1503,23 @@ module.exports = grammar({
       token(
         // IntegerLiteral
         seq(
-          // Integer
           choice(
-            // DecimalInteger
-            choice(
-              "0",
-              seq(
-                // NonZeroDigit
+            "0",
+            seq(
+              choice(
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+              ),
+              repeat(
                 choice(
+                  "0",
                   "1",
                   "2",
                   "3",
@@ -1663,108 +1529,77 @@ module.exports = grammar({
                   "7",
                   "8",
                   "9",
-                ),
-                optional(
-                  // DecimalDigitsUS
-                  repeat1(
-                    // DecimalDigitUS
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      "_",
-                    ),
-                  ),
+                  "_",
                 ),
               ),
             ),
-            // BinaryInteger
             seq(
-              // BinPrefix
               choice(
                 "0b",
                 "0B",
               ),
-              // BinaryDigitsNoSingleUS
-              seq(
-                optional(
-                  // BinaryDigitsUS
-                  repeat1(
-                    // BinaryDigitUS
-                    choice(
-                      // BinaryDigit
-                      choice(
-                        "0",
-                        "1",
-                      ),
-                      "_",
-                    ),
-                  ),
-                ),
-                // BinaryDigit
+              repeat(
                 choice(
                   "0",
                   "1",
+                  "_",
                 ),
-                optional(
-                  // BinaryDigitsUS
-                  repeat1(
-                    // BinaryDigitUS
-                    choice(
-                      // BinaryDigit
-                      choice(
-                        "0",
-                        "1",
-                      ),
-                      "_",
-                    ),
-                  ),
+              ),
+              choice(
+                "0",
+                "1",
+              ),
+              repeat(
+                choice(
+                  "0",
+                  "1",
+                  "_",
                 ),
               ),
             ),
-            // HexadecimalInteger
             seq(
-              // HexPrefix
               choice(
                 "0x",
                 "0X",
               ),
-              // HexDigitsNoSingleUS
               choice(
                 seq(
-                  // HexDigit
                   choice(
-                    // DecimalDigit
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                  ),
+                  repeat(
                     choice(
                       "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // HexLetter
-                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
                       "a",
                       "b",
                       "c",
@@ -1777,114 +1612,23 @@ module.exports = grammar({
                       "D",
                       "E",
                       "F",
-                    ),
-                  ),
-                  optional(
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
-                            "a",
-                            "b",
-                            "c",
-                            "d",
-                            "e",
-                            "f",
-                            "A",
-                            "B",
-                            "C",
-                            "D",
-                            "E",
-                            "F",
-                          ),
-                        ),
-                        "_",
-                      ),
+                      "_",
                     ),
                   ),
                 ),
                 seq(
-                  // HexDigitsUS
                   repeat1(
-                    // HexDigitUS
-                    choice(
-                      // HexDigit
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                      "_",
-                    ),
-                  ),
-                  // HexDigit
-                  choice(
-                    // DecimalDigit
                     choice(
                       "0",
-                      // NonZeroDigit
-                      choice(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                      ),
-                    ),
-                    // HexLetter
-                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
                       "a",
                       "b",
                       "c",
@@ -1897,14 +1641,38 @@ module.exports = grammar({
                       "D",
                       "E",
                       "F",
+                      "_",
                     ),
+                  ),
+                  choice(
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
                   ),
                 ),
               ),
             ),
           ),
           optional(
-            // IntegerSuffix
             choice(
               "L",
               "u",
@@ -1926,440 +1694,16 @@ module.exports = grammar({
         // FloatLiteral
         choice(
           seq(
-            // Float
             choice(
-              // DecimalFloat
-              choice(
-                seq(
-                  // LeadingDecimal
-                  choice(
-                    // DecimalInteger
-                    choice(
-                      "0",
-                      seq(
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                        optional(
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    seq(
-                      "0",
-                      // DecimalDigitsNoSingleUS
-                      choice(
-                        seq(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          optional(
-                            // DecimalDigitsUS
-                            repeat1(
-                              // DecimalDigitUS
-                              choice(
-                                // DecimalDigit
-                                choice(
-                                  "0",
-                                  // NonZeroDigit
-                                  choice(
-                                    "1",
-                                    "2",
-                                    "3",
-                                    "4",
-                                    "5",
-                                    "6",
-                                    "7",
-                                    "8",
-                                    "9",
-                                  ),
-                                ),
-                                "_",
-                              ),
-                            ),
-                          ),
-                        ),
-                        seq(
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  ".",
-                  optional(
-                    // DecimalDigits
-                    repeat1(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                seq(
-                  choice(
-                    seq(
-                      // DecimalDigits
-                      repeat1(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                      ),
-                      ".",
-                      // DecimalDigitsNoStartingUS
-                      seq(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        optional(
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    seq(
-                      ".",
-                      // DecimalInteger
-                      choice(
-                        "0",
-                        seq(
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                          optional(
-                            // DecimalDigitsUS
-                            repeat1(
-                              // DecimalDigitUS
-                              choice(
-                                // DecimalDigit
-                                choice(
-                                  "0",
-                                  // NonZeroDigit
-                                  choice(
-                                    "1",
-                                    "2",
-                                    "3",
-                                    "4",
-                                    "5",
-                                    "6",
-                                    "7",
-                                    "8",
-                                    "9",
-                                  ),
-                                ),
-                                "_",
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // LeadingDecimal
-                    choice(
-                      // DecimalInteger
-                      choice(
-                        "0",
-                        seq(
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                          optional(
-                            // DecimalDigitsUS
-                            repeat1(
-                              // DecimalDigitUS
-                              choice(
-                                // DecimalDigit
-                                choice(
-                                  "0",
-                                  // NonZeroDigit
-                                  choice(
-                                    "1",
-                                    "2",
-                                    "3",
-                                    "4",
-                                    "5",
-                                    "6",
-                                    "7",
-                                    "8",
-                                    "9",
-                                  ),
-                                ),
-                                "_",
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      seq(
-                        "0",
-                        // DecimalDigitsNoSingleUS
-                        choice(
-                          seq(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            optional(
-                              // DecimalDigitsUS
-                              repeat1(
-                                // DecimalDigitUS
-                                choice(
-                                  // DecimalDigit
-                                  choice(
-                                    "0",
-                                    // NonZeroDigit
-                                    choice(
-                                      "1",
-                                      "2",
-                                      "3",
-                                      "4",
-                                      "5",
-                                      "6",
-                                      "7",
-                                      "8",
-                                      "9",
-                                    ),
-                                  ),
-                                  "_",
-                                ),
-                              ),
-                            ),
-                          ),
-                          seq(
-                            // DecimalDigitsUS
-                            repeat1(
-                              // DecimalDigitUS
-                              choice(
-                                // DecimalDigit
-                                choice(
-                                  "0",
-                                  // NonZeroDigit
-                                  choice(
-                                    "1",
-                                    "2",
-                                    "3",
-                                    "4",
-                                    "5",
-                                    "6",
-                                    "7",
-                                    "8",
-                                    "9",
-                                  ),
-                                ),
-                                "_",
-                              ),
-                            ),
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // DecimalExponent
+              seq(
+                choice(
                   seq(
-                    // DecimalExponentStart
-                    choice(
-                      "e",
-                      "E",
-                      "e+",
-                      "E+",
-                      "e-",
-                      "E-",
-                    ),
-                    // DecimalDigitsNoSingleUS
-                    choice(
-                      seq(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
+                    "0",
+                    optional(
+                      choice(
+                        seq(
                           choice(
+                            "0",
                             "1",
                             "2",
                             "3",
@@ -2370,62 +1714,40 @@ module.exports = grammar({
                             "8",
                             "9",
                           ),
-                        ),
-                        optional(
-                          // DecimalDigitsUS
-                          repeat1(
-                            // DecimalDigitUS
+                          repeat(
                             choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
+                              "0",
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
                               "_",
                             ),
                           ),
                         ),
-                      ),
-                      seq(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
+                        seq(
+                          repeat1(
                             choice(
                               "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                              "_",
                             ),
-                            "_",
                           ),
-                        ),
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
                           choice(
+                            "0",
                             "1",
                             "2",
                             "3",
@@ -2440,15 +1762,21 @@ module.exports = grammar({
                       ),
                     ),
                   ),
-                ),
-                seq(
-                  ".",
-                  // DecimalInteger
-                  choice(
-                    "0",
-                    seq(
-                      // NonZeroDigit
+                  seq(
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    repeat(
                       choice(
+                        "0",
                         "1",
                         "2",
                         "3",
@@ -2458,56 +1786,37 @@ module.exports = grammar({
                         "7",
                         "8",
                         "9",
-                      ),
-                      optional(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
+                        "_",
                       ),
                     ),
                   ),
                 ),
-              ),
-              // HexFloat
-              seq(
-                // HexPrefix
-                choice(
-                  "0x",
-                  "0X",
+                ".",
+                repeat(
+                  choice(
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                  ),
                 ),
+              ),
+              seq(
                 choice(
                   seq(
-                    optional(
-                      // HexDigitsNoSingleUS
-                      choice(
-                        seq(
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
+                    choice(
+                      seq(
+                        choice(
+                          seq(
+                            repeat1(
                               choice(
+                                "0",
                                 "1",
                                 "2",
                                 "3",
@@ -2519,34 +1828,194 @@ module.exports = grammar({
                                 "9",
                               ),
                             ),
-                            // HexLetter
+                            ".",
                             choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
+                              "0",
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
                             ),
                           ),
-                          optional(
-                            // HexDigitsUS
-                            repeat1(
-                              // HexDigitUS
+                          "1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                        ),
+                        repeat(
+                          choice(
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                            "_",
+                          ),
+                        ),
+                      ),
+                      seq(
+                        ".",
+                        choice(
+                          "0",
+                          seq(
+                            choice(
+                              "1",
+                              "2",
+                              "3",
+                              "4",
+                              "5",
+                              "6",
+                              "7",
+                              "8",
+                              "9",
+                            ),
+                            repeat(
                               choice(
-                                // HexDigit
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                                "_",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      seq(
+                        "0",
+                        optional(
+                          choice(
+                            seq(
+                              choice(
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                              repeat(
                                 choice(
-                                  // DecimalDigit
+                                  "0",
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                  "_",
+                                ),
+                              ),
+                            ),
+                            seq(
+                              repeat1(
+                                choice(
+                                  "0",
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "4",
+                                  "5",
+                                  "6",
+                                  "7",
+                                  "8",
+                                  "9",
+                                  "_",
+                                ),
+                              ),
+                              choice(
+                                "0",
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5",
+                                "6",
+                                "7",
+                                "8",
+                                "9",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    choice(
+                      "e",
+                      "E",
+                      "e+",
+                      "E+",
+                      "e-",
+                      "E-",
+                    ),
+                  ),
+                  seq(
+                    choice(
+                      "0x",
+                      "0X",
+                    ),
+                    choice(
+                      seq(
+                        optional(
+                          seq(
+                            optional(
+                              choice(
+                                seq(
                                   choice(
                                     "0",
-                                    // NonZeroDigit
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                    "a",
+                                    "b",
+                                    "c",
+                                    "d",
+                                    "e",
+                                    "f",
+                                    "A",
+                                    "B",
+                                    "C",
+                                    "D",
+                                    "E",
+                                    "F",
+                                  ),
+                                  repeat(
                                     choice(
+                                      "0",
                                       "1",
                                       "2",
                                       "3",
@@ -2556,10 +2025,61 @@ module.exports = grammar({
                                       "7",
                                       "8",
                                       "9",
+                                      "a",
+                                      "b",
+                                      "c",
+                                      "d",
+                                      "e",
+                                      "f",
+                                      "A",
+                                      "B",
+                                      "C",
+                                      "D",
+                                      "E",
+                                      "F",
+                                      "_",
                                     ),
                                   ),
-                                  // HexLetter
+                                ),
+                                seq(
+                                  repeat1(
+                                    choice(
+                                      "0",
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5",
+                                      "6",
+                                      "7",
+                                      "8",
+                                      "9",
+                                      "a",
+                                      "b",
+                                      "c",
+                                      "d",
+                                      "e",
+                                      "f",
+                                      "A",
+                                      "B",
+                                      "C",
+                                      "D",
+                                      "E",
+                                      "F",
+                                      "_",
+                                    ),
+                                  ),
                                   choice(
+                                    "0",
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
                                     "a",
                                     "b",
                                     "c",
@@ -2574,351 +2094,13 @@ module.exports = grammar({
                                     "F",
                                   ),
                                 ),
-                                "_",
                               ),
                             ),
+                            ".",
                           ),
                         ),
-                        seq(
-                          // HexDigitsUS
-                          repeat1(
-                            // HexDigitUS
-                            choice(
-                              // HexDigit
-                              choice(
-                                // DecimalDigit
-                                choice(
-                                  "0",
-                                  // NonZeroDigit
-                                  choice(
-                                    "1",
-                                    "2",
-                                    "3",
-                                    "4",
-                                    "5",
-                                    "6",
-                                    "7",
-                                    "8",
-                                    "9",
-                                  ),
-                                ),
-                                // HexLetter
-                                choice(
-                                  "a",
-                                  "b",
-                                  "c",
-                                  "d",
-                                  "e",
-                                  "f",
-                                  "A",
-                                  "B",
-                                  "C",
-                                  "D",
-                                  "E",
-                                  "F",
-                                ),
-                              ),
-                              "_",
-                            ),
-                          ),
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    ".",
-                    // HexDigitsNoStartingUS
-                    seq(
-                      // HexDigit
-                      choice(
-                        // DecimalDigit
                         choice(
                           "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                      optional(
-                        // HexDigitsUS
-                        repeat1(
-                          // HexDigitUS
-                          choice(
-                            // HexDigit
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // HexDigitsNoSingleUS
-                  choice(
-                    seq(
-                      // HexDigit
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                      optional(
-                        // HexDigitsUS
-                        repeat1(
-                          // HexDigitUS
-                          choice(
-                            // HexDigit
-                            choice(
-                              // DecimalDigit
-                              choice(
-                                "0",
-                                // NonZeroDigit
-                                choice(
-                                  "1",
-                                  "2",
-                                  "3",
-                                  "4",
-                                  "5",
-                                  "6",
-                                  "7",
-                                  "8",
-                                  "9",
-                                ),
-                              ),
-                              // HexLetter
-                              choice(
-                                "a",
-                                "b",
-                                "c",
-                                "d",
-                                "e",
-                                "f",
-                                "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E",
-                                "F",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                    ),
-                    seq(
-                      // HexDigitsUS
-                      repeat1(
-                        // HexDigitUS
-                        choice(
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                      // HexDigit
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                          ),
-                        ),
-                        // HexLetter
-                        choice(
-                          "a",
-                          "b",
-                          "c",
-                          "d",
-                          "e",
-                          "f",
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E",
-                          "F",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // HexExponent
-                seq(
-                  // HexExponentStart
-                  choice(
-                    "p",
-                    "P",
-                    "p+",
-                    "P+",
-                    "p-",
-                    "P-",
-                  ),
-                  // DecimalDigitsNoSingleUS
-                  choice(
-                    seq(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
                           "1",
                           "2",
                           "3",
@@ -2928,131 +2110,22 @@ module.exports = grammar({
                           "7",
                           "8",
                           "9",
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
                         ),
-                      ),
-                      optional(
-                        // DecimalDigitsUS
-                        repeat1(
-                          // DecimalDigitUS
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            "_",
-                          ),
-                        ),
-                      ),
-                    ),
-                    seq(
-                      // DecimalDigitsUS
-                      repeat1(
-                        // DecimalDigitUS
-                        choice(
-                          // DecimalDigit
+                        repeat(
                           choice(
                             "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            optional(
-              // Suffix
-              choice(
-                seq(
-                  choice(
-                    // FloatSuffix
-                    choice(
-                      "f",
-                      "F",
-                    ),
-                    // RealSuffix
-                    "L",
-                  ),
-                  optional(
-                    // ImaginarySuffix
-                    "i",
-                  ),
-                ),
-                // ImaginarySuffix
-                "i",
-              ),
-            ),
-          ),
-          seq(
-            // Integer
-            choice(
-              // DecimalInteger
-              choice(
-                "0",
-                seq(
-                  // NonZeroDigit
-                  choice(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                  ),
-                  optional(
-                    // DecimalDigitsUS
-                    repeat1(
-                      // DecimalDigitUS
-                      choice(
-                        // DecimalDigit
-                        choice(
-                          "0",
-                          // NonZeroDigit
-                          choice(
                             "1",
                             "2",
                             "3",
@@ -3062,171 +2135,6 @@ module.exports = grammar({
                             "7",
                             "8",
                             "9",
-                          ),
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // BinaryInteger
-              seq(
-                // BinPrefix
-                choice(
-                  "0b",
-                  "0B",
-                ),
-                // BinaryDigitsNoSingleUS
-                seq(
-                  optional(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                  // BinaryDigit
-                  choice(
-                    "0",
-                    "1",
-                  ),
-                  optional(
-                    // BinaryDigitsUS
-                    repeat1(
-                      // BinaryDigitUS
-                      choice(
-                        // BinaryDigit
-                        choice(
-                          "0",
-                          "1",
-                        ),
-                        "_",
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // HexadecimalInteger
-              seq(
-                // HexPrefix
-                choice(
-                  "0x",
-                  "0X",
-                ),
-                // HexDigitsNoSingleUS
-                choice(
-                  seq(
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
-                        choice(
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6",
-                          "7",
-                          "8",
-                          "9",
-                        ),
-                      ),
-                      // HexLetter
-                      choice(
-                        "a",
-                        "b",
-                        "c",
-                        "d",
-                        "e",
-                        "f",
-                        "A",
-                        "B",
-                        "C",
-                        "D",
-                        "E",
-                        "F",
-                      ),
-                    ),
-                    optional(
-                      // HexDigitsUS
-                      repeat1(
-                        // HexDigitUS
-                        choice(
-                          // HexDigit
-                          choice(
-                            // DecimalDigit
-                            choice(
-                              "0",
-                              // NonZeroDigit
-                              choice(
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5",
-                                "6",
-                                "7",
-                                "8",
-                                "9",
-                              ),
-                            ),
-                            // HexLetter
-                            choice(
-                              "a",
-                              "b",
-                              "c",
-                              "d",
-                              "e",
-                              "f",
-                              "A",
-                              "B",
-                              "C",
-                              "D",
-                              "E",
-                              "F",
-                            ),
-                          ),
-                          "_",
-                        ),
-                      ),
-                    ),
-                  ),
-                  seq(
-                    // HexDigitsUS
-                    repeat1(
-                      // HexDigitUS
-                      choice(
-                        // HexDigit
-                        choice(
-                          // DecimalDigit
-                          choice(
-                            "0",
-                            // NonZeroDigit
-                            choice(
-                              "1",
-                              "2",
-                              "3",
-                              "4",
-                              "5",
-                              "6",
-                              "7",
-                              "8",
-                              "9",
-                            ),
-                          ),
-                          // HexLetter
-                          choice(
                             "a",
                             "b",
                             "c",
@@ -3239,18 +2147,40 @@ module.exports = grammar({
                             "D",
                             "E",
                             "F",
+                            "_",
                           ),
                         ),
-                        "_",
                       ),
-                    ),
-                    // HexDigit
-                    choice(
-                      // DecimalDigit
-                      choice(
-                        "0",
-                        // NonZeroDigit
+                      seq(
+                        repeat1(
+                          choice(
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                            "a",
+                            "b",
+                            "c",
+                            "d",
+                            "e",
+                            "f",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "E",
+                            "F",
+                            "_",
+                          ),
+                        ),
                         choice(
+                          "0",
                           "1",
                           "2",
                           "3",
@@ -3260,10 +2190,236 @@ module.exports = grammar({
                           "7",
                           "8",
                           "9",
+                          "a",
+                          "b",
+                          "c",
+                          "d",
+                          "e",
+                          "f",
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E",
+                          "F",
                         ),
                       ),
-                      // HexLetter
+                    ),
+                    choice(
+                      "p",
+                      "P",
+                      "p+",
+                      "P+",
+                      "p-",
+                      "P-",
+                    ),
+                  ),
+                ),
+                choice(
+                  seq(
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    repeat(
                       choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "_",
+                      ),
+                    ),
+                  ),
+                  seq(
+                    repeat1(
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "_",
+                      ),
+                    ),
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                  ),
+                ),
+              ),
+              seq(
+                ".",
+                choice(
+                  "0",
+                  seq(
+                    choice(
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                    ),
+                    repeat(
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "_",
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            optional(
+              choice(
+                "f",
+                "F",
+                "L",
+              ),
+            ),
+            optional(
+              "i",
+            ),
+          ),
+          seq(
+            choice(
+              "0",
+              seq(
+                choice(
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                ),
+                repeat(
+                  choice(
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "_",
+                  ),
+                ),
+              ),
+              seq(
+                choice(
+                  "0b",
+                  "0B",
+                ),
+                repeat(
+                  choice(
+                    "0",
+                    "1",
+                    "_",
+                  ),
+                ),
+                choice(
+                  "0",
+                  "1",
+                ),
+                repeat(
+                  choice(
+                    "0",
+                    "1",
+                    "_",
+                  ),
+                ),
+              ),
+              seq(
+                choice(
+                  "0x",
+                  "0X",
+                ),
+                choice(
+                  seq(
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                    ),
+                    repeat(
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
                         "a",
                         "b",
                         "c",
@@ -3276,31 +2432,77 @@ module.exports = grammar({
                         "D",
                         "E",
                         "F",
+                        "_",
                       ),
+                    ),
+                  ),
+                  seq(
+                    repeat1(
+                      choice(
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "a",
+                        "b",
+                        "c",
+                        "d",
+                        "e",
+                        "f",
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                        "_",
+                      ),
+                    ),
+                    choice(
+                      "0",
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                      "a",
+                      "b",
+                      "c",
+                      "d",
+                      "e",
+                      "f",
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
                     ),
                   ),
                 ),
               ),
             ),
             choice(
-              // FloatSuffix
-              choice(
-                "f",
-                "F",
-              ),
+              "f",
+              "F",
               seq(
                 optional(
                   choice(
-                    // FloatSuffix
-                    choice(
-                      "f",
-                      "F",
-                    ),
-                    // RealSuffix
+                    "f",
+                    "F",
                     "L",
                   ),
                 ),
-                // ImaginarySuffix
                 "i",
               ),
             ),
@@ -3450,12 +2652,8 @@ module.exports = grammar({
         // Filespec
         seq(
           "\"",
-          optional(
-            // Characters
-            repeat1(
-              // Character
-              /[\s\S]/,
-            ),
+          repeat(
+            /[\s\S]/,
           ),
           "\"",
         ),

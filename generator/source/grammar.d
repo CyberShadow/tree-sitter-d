@@ -132,6 +132,7 @@ struct Grammar
 		normalize();
 		optimize();
 		deRecurse();
+		inline();
 		extractBodies();
 		checkKinds();
 		scanUsed(roots);
@@ -620,6 +621,47 @@ struct Grammar
 			},
 			(ref _) {},
 		);
+	}
+
+	/// Inline definitions of token rules, which may not refer to other rules.
+	/// https://github.com/tree-sitter/tree-sitter/issues/449
+	void inline()
+	{
+		HashSet!string inDef;
+		void scanDef(string defName, ref Node targetNode)
+		{
+			void scanNode(ref Node node)
+			{
+				node.match!(
+					(ref RegExp       v) {},
+					(ref LiteralChars v) {},
+					(ref LiteralToken v) {},
+					(ref Reference    v) { scanDef(v.name, node); },
+					(ref Repeat1      v) { v.nodes.each!scanNode(); },
+					(ref SeqChoice    v) { v.nodes.joiner.each!scanNode(); },
+					(ref              _) { unexpected(_); },
+				);
+			}
+
+			if (defName in inDef)
+				return;
+			inDef.add(defName);
+			scope(success) inDef.remove(defName);
+			targetNode = defs[defName].node.dup;
+			scanNode(targetNode);
+		}
+
+		Node[string] inlined;
+
+		foreach (defName, ref def; defs)
+			if (def.kind == Def.Kind.chars)
+				scanDef(defName, inlined.require(defName, def.node));
+
+		foreach (defName, node; inlined)
+		{
+			optimizeNode(node);
+			defs[defName].node = node;
+		}
 	}
 
 	// Fold away unnecessary grammar nodes, simplify the node tree,
