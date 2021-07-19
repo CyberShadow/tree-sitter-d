@@ -783,6 +783,7 @@ struct Grammar
 	// Recursively expand all nested choices into a flat list of all possible combinations.
 	// This form is used for some transformations.
 	private static Node[][] flattenChoices(Node[] nodes)
+	out(result; result.length == numFlattenedChoices(nodes))
 	{
 		foreach (i, ref node; nodes)
 		{
@@ -802,6 +803,25 @@ struct Grammar
 				return result;
 		}
 		return [nodes];
+	}
+
+	// Calculates the would-be length of flattenChoices's return value.
+	private static ulong numFlattenedChoices(Node[] nodes)
+	{
+		ulong result = 1;
+		foreach (i, ref node; nodes)
+			node.match!(
+				(ref SeqChoice sc)
+				{
+					assert(sc.nodes.length > 1);
+					ulong choiceSum = 0;
+					foreach (choice; sc.nodes)
+						choiceSum += numFlattenedChoices(choice);
+					result *= choiceSum;
+				},
+				(ref _) {},
+			);
+		return result;
 	}
 
 	// Refactor some definitions into a descending part and an
