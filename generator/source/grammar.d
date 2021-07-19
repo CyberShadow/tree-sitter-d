@@ -336,6 +336,8 @@ struct Grammar
 			(ref SeqChoice sc)
 			{
 				auto choices = sc.nodes;
+				if (choices.map!numFlattenedChoices().sum > 15000)
+					return; // Too slow :(
 				choices = choices.map!flattenChoices.join;
 
 				// Find all choices which have a chance of participating in segmentation.
