@@ -74,6 +74,25 @@ struct Grammar
 				(ref v) => sink.formattedWrite!"%s"(v),
 			);
 		}
+
+		/// Create a deep copy.
+		Node dup()
+		{
+			return Node(
+				value.match!(
+					(ref RegExp       v) => NodeValue(v),
+					(ref LiteralChars v) => NodeValue(v),
+					(ref LiteralToken v) => NodeValue(v),
+					(ref Reference    v) => NodeValue(v),
+					(ref Choice       v) => NodeValue(Choice  (v.nodes.map!((ref n) => n.dup).array)),
+					(ref Seq          v) => NodeValue(Seq     (v.nodes.map!((ref n) => n.dup).array)),
+					(ref Repeat       v) => NodeValue(Repeat  (v.nodes.map!((ref n) => n.dup).array)),
+					(ref Repeat1      v) => NodeValue(Repeat1 (v.nodes.map!((ref n) => n.dup).array)),
+					(ref Optional     v) => NodeValue(Optional(v.nodes.map!((ref n) => n.dup).array)),
+					(ref SeqChoice    v) => NodeValue(SeqChoice(v.nodes.map!(choice => choice.map!((ref n) => n.dup).array).array)),
+				)
+			);
+		}
 	}
 
 	/// A grammar definition.
