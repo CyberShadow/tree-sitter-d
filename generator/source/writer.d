@@ -141,7 +141,7 @@ private:
 		void writeDef(ref string defName)
 		{
 			if (defName in visiting)
-				return single("/* recursion */");
+				return line("$." ~ convertRuleName(defName) ~ ", // recursion");
 			visiting.add(defName);
 			scope(success) visiting.remove(defName);
 

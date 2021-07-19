@@ -140,7 +140,7 @@ module.exports = grammar({
                   repeat(
                     choice(
                       /[\s\S]/,
-                      /* recursion */,
+                      $.nesting_block_comment, // recursion
                     ),
                   ),
                   "+/",
@@ -826,13 +826,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.paren_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "(",
                         optional(
-                          /* recursion */,
+                          $.paren_delimited_characters, // recursion
                         ),
                         ")",
                       ),
@@ -861,13 +861,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.paren_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "(",
                         optional(
-                          /* recursion */,
+                          $.paren_delimited_characters, // recursion
                         ),
                         ")",
                       ),
@@ -919,13 +919,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.bracket_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "[",
                         optional(
-                          /* recursion */,
+                          $.bracket_delimited_characters, // recursion
                         ),
                         "]",
                       ),
@@ -954,13 +954,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.bracket_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "[",
                         optional(
-                          /* recursion */,
+                          $.bracket_delimited_characters, // recursion
                         ),
                         "]",
                       ),
@@ -1012,13 +1012,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.brace_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "{",
                         optional(
-                          /* recursion */,
+                          $.brace_delimited_characters, // recursion
                         ),
                         "}",
                       ),
@@ -1047,13 +1047,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.brace_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "{",
                         optional(
-                          /* recursion */,
+                          $.brace_delimited_characters, // recursion
                         ),
                         "}",
                       ),
@@ -1105,13 +1105,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.angle_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "<",
                         optional(
-                          /* recursion */,
+                          $.angle_delimited_characters, // recursion
                         ),
                         ">",
                       ),
@@ -1140,13 +1140,13 @@ module.exports = grammar({
                           "\x1A",
                         ),
                         optional(
-                          /* recursion */,
+                          $.angle_delimited_characters, // recursion
                         ),
                       ),
                       seq(
                         "<",
                         optional(
-                          /* recursion */,
+                          $.angle_delimited_characters, // recursion
                         ),
                         ">",
                       ),
