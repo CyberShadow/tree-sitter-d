@@ -325,6 +325,28 @@ struct Grammar
 			(ref _) {},
 		);
 
+		// Collapse redundantly nested choices.
+		// This optimization is a subset of the flattenChoices-based segmentation below,
+		// and is useful for rules which are too complex to fully flatten
+		// (such as the inlined lexical rules).
+		node.match!(
+			(ref SeqChoice sc1)
+			{
+				foreach_reverse (i, choice; sc1.nodes)
+					if (choice.length == 1)
+					{
+						choice[0].match!(
+							(ref SeqChoice sc2)
+							{
+								sc1.nodes = sc1.nodes[0 .. i] ~ sc2.nodes ~ sc1.nodes[i + 1 .. $];
+							},
+							(ref _) {},
+						);
+					}
+			},
+			(ref _) {},
+		);
+
 		// Given a SeqChoice, try to segment all of its choices such that the set
 		// concatenation of the two sets containing each segment's halves is the exact set
 		// of the original choices.  This operation is more general than prefix/suffix

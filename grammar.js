@@ -4966,9 +4966,9 @@ module.exports = grammar({
       seq(
         "cast",
         "(",
-        choice(
-          $.type,
-          optional(
+        optional(
+          choice(
+            $.type,
             $.type_ctors,
           ),
         ),
@@ -6848,26 +6848,28 @@ module.exports = grammar({
     // https://dlang.org/spec/function.html#SpecifiedFunctionBody
     specified_function_body: $ =>
       seq(
-        choice(
-          seq(
-            optional(
-              seq(
-                optional(
-                  $.function_contracts,
+        optional(
+          choice(
+            seq(
+              optional(
+                seq(
+                  optional(
+                    $.function_contracts,
+                  ),
+                  $._in_out_statement,
                 ),
-                $._in_out_contract_expression,
               ),
-            ),
-            optional(
               "do",
             ),
-          ),
-          seq(
-            optional(
-              $.function_contracts,
+            seq(
+              optional(
+                $.function_contracts,
+              ),
+              $._in_out_contract_expression,
+              optional(
+                "do",
+              ),
             ),
-            $._in_out_statement,
-            "do",
           ),
         ),
         $.block_statement,
