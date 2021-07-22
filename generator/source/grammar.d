@@ -1148,11 +1148,11 @@ struct Grammar
 				(ref LiteralChars v) {},
 				(ref LiteralToken v) {},
 				(ref Reference    v) {},
-				(ref Choice       v) { unexpected(v); },
-				(ref Seq          v) { unexpected(v); },
-				(ref Repeat       v) { unexpected(v); },
+				(ref Choice       v) {}, // Already compiled via another path
+				(ref Seq          v) {}, // Already compiled via another path
+				(ref Repeat       v) {}, // Already compiled via another path
 				(ref Repeat1      v) { v.nodes       .each!compileNode(); },
-				(ref Optional     v) { unexpected(v); },
+				(ref Optional     v) {}, // Already compiled via another path
 				(ref SeqChoice    v) { v.nodes.joiner.each!compileNode(); },
 			);
 
@@ -1182,7 +1182,7 @@ struct Grammar
 					return node;
 				},
 				(ref Repeat1      v) => node,
-				(ref              _) { unexpected(_); return Node.init; },
+				(ref              _) => node, // Already compiled via another path
 			);
 		}
 
