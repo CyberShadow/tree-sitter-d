@@ -627,6 +627,7 @@ struct Grammar
 				defName.among(
 					"ParameterAttributes",
 					"AsmInstruction",
+					"QualifiedIdentifier",
 				);
 
 			if (shouldDeRecurse)

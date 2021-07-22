@@ -4280,10 +4280,22 @@ module.exports = grammar({
           ),
           $.template_instance,
         ),
-        optional(
+        repeat(
           seq(
             ".",
-            $.qualified_identifier,
+            choice(
+              seq(
+                $.identifier,
+                optional(
+                  seq(
+                    "[",
+                    $._maybe_assign_expression,
+                    "]",
+                  ),
+                ),
+              ),
+              $.template_instance,
+            ),
           ),
         ),
       ),
