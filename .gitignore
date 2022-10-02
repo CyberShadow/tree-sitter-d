@@ -2,9 +2,6 @@
 /node_modules/
 
 # tree-sitter generate
-!/src/
-/src/*
-!/src/scanner.cc
 /bindings/
 /Cargo.toml
 binding.gyp
