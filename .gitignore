@@ -2,12 +2,7 @@
 /node_modules/
 
 # tree-sitter generate
-!/src/
-/src/*
-!/src/scanner.cc
-/bindings/
-/Cargo.toml
-binding.gyp
+build/
 
 # tree-sitter build-wasm
 /tree-sitter-d.wasm
